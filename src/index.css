@@ -1,0 +1,69 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 210 24% 16%;
+    --card: 0 0% 100%;
+    --card-foreground: 210 24% 16%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 24% 16%;
+    --primary: 200 95% 35%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 200 95% 30%;
+    --secondary: 190 80% 45%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 210 20% 96%;
+    --muted-foreground: 210 12% 45%;
+    --accent: 185 75% 50%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 210 20% 90%;
+    --input: 210 20% 90%;
+    --ring: 200 95% 35%;
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    /* Add your dark mode styles here if you had any */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+  }
+}
+
+@layer utilities {
+  .gradient-primary {
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+  }
+  .gradient-hero {
+    background: linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted)));
+  }
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
+  }
+  .shadow-subtle {
+    box-shadow: 0 2px 8px -2px hsl(210 24% 16% / 0.08);
+  }
+  .shadow-medium {
+    box-shadow: 0 4px 16px -4px hsl(210 24% 16% / 0.12);
+  }
+  .shadow-strong {
+    box-shadow: 0 8px 32px -8px hsl(210 24% 16% / 0.16);
+  }
+  .transition-smooth {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
