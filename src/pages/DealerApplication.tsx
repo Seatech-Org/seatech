@@ -224,16 +224,17 @@ const DealerApplication = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans">
+    <div className="min-h-screen bg-slate-950 font-sans selection:bg-blue-500/30 selection:text-blue-100">
       <Navbar />
       
       {/* Hero Header */}
-      <div className="bg-slate-900 pt-32 pb-20 mb-12 relative overflow-hidden">
-         <div className="absolute inset-0 opacity-10 bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
+      <div className="bg-slate-950 pt-32 pb-20 mb-12 relative overflow-hidden">
+         <div className="absolute inset-0 opacity-30 bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
+         <div className="absolute inset-0 bg-gradient-to-b from-slate-900/50 to-slate-950 pointer-events-none"></div>
          <div className="container mx-auto px-4 text-center relative z-10">
-            <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-tight">Finalize Your Quote</h1>
-            <p className="text-slate-300 text-lg max-w-2xl mx-auto leading-relaxed">
-              Review your details below. We will generate a formal proforma invoice and contact you for shipping.
+            <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-tight">Partner Quote Request</h1>
+            <p className="text-slate-400 text-lg max-w-2xl mx-auto leading-relaxed">
+              Buy at wholesale prices, sell at retail profits. Review your selected items and submit your request below.
             </p>
          </div>
       </div>
@@ -247,60 +248,60 @@ const DealerApplication = () => {
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                 
                 {/* Organization Details */}
-                <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 transition-shadow hover:shadow-md">
-                  <div className="flex items-center gap-4 mb-6 border-b border-slate-100 pb-4">
-                     <div className="bg-blue-50 p-2 rounded-lg"><Building2 className="h-6 w-6 text-blue-600" /></div>
-                     <h2 className="text-xl font-bold text-slate-900">Billing Details</h2>
+                <div className="bg-slate-900 p-8 rounded-2xl shadow-lg border border-slate-800 transition-shadow hover:shadow-xl hover:border-slate-700">
+                  <div className="flex items-center gap-4 mb-6 border-b border-slate-800 pb-4">
+                     <div className="bg-blue-500/10 p-2 rounded-lg"><Building2 className="h-6 w-6 text-blue-400" /></div>
+                     <h2 className="text-xl font-bold text-white">Billing Details</h2>
                   </div>
                   
                   <div className="grid gap-6">
                     <FormField control={form.control} name="companyName" render={({ field }) => (
-                      <FormItem><FormLabel className="text-slate-700 font-semibold">Company / Organization Name *</FormLabel><FormControl><Input className="h-12" placeholder="e.g. Ministry of Textiles / Seatech Pvt Ltd" {...field} /></FormControl><FormMessage /></FormItem>
+                      <FormItem><FormLabel className="text-slate-300 font-semibold">Company / Organization Name *</FormLabel><FormControl><Input className="h-12 bg-slate-800 border-slate-700 text-white focus:border-blue-500" placeholder="e.g. Ministry of Textiles / Seatech Pvt Ltd" {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="address" render={({ field }) => (
-                      <FormItem><FormLabel className="text-slate-700 font-semibold">Billing Address *</FormLabel><FormControl><Textarea className="min-h-[80px]" placeholder="Enter complete billing address" {...field} /></FormControl><FormMessage /></FormItem>
+                      <FormItem><FormLabel className="text-slate-300 font-semibold">Billing Address *</FormLabel><FormControl><Textarea className="min-h-[80px] bg-slate-800 border-slate-700 text-white focus:border-blue-500" placeholder="Enter complete billing address" {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                        <FormField control={form.control} name="gstNumber" render={({ field }) => (
-                        <FormItem><FormLabel className="text-slate-700 font-semibold">GST Number (Optional)</FormLabel><FormControl><Input className="h-12 font-mono" placeholder="22AAAAA0000A1Z5" {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel className="text-slate-300 font-semibold">GST Number (Optional)</FormLabel><FormControl><Input className="h-12 font-mono bg-slate-800 border-slate-700 text-white focus:border-blue-500" placeholder="22AAAAA0000A1Z5" {...field} /></FormControl><FormMessage /></FormItem>
                       )} />
                     </div>
                   </div>
                 </div>
 
                 {/* Contact Person */}
-                <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 transition-shadow hover:shadow-md">
-                  <div className="flex items-center gap-4 mb-6 border-b border-slate-100 pb-4">
-                     <div className="bg-blue-50 p-2 rounded-lg"><User className="h-6 w-6 text-blue-600" /></div>
-                     <h2 className="text-xl font-bold text-slate-900">Contact Person</h2>
+                <div className="bg-slate-900 p-8 rounded-2xl shadow-lg border border-slate-800 transition-shadow hover:shadow-xl hover:border-slate-700">
+                  <div className="flex items-center gap-4 mb-6 border-b border-slate-800 pb-4">
+                     <div className="bg-blue-500/10 p-2 rounded-lg"><User className="h-6 w-6 text-blue-400" /></div>
+                     <h2 className="text-xl font-bold text-white">Contact Person</h2>
                   </div>
                   
                   <div className="grid gap-6">
                       <FormField control={form.control} name="contactName" render={({ field }) => (
-                        <FormItem><FormLabel className="text-slate-700 font-semibold">Full Name *</FormLabel><FormControl><Input className="h-12" placeholder="Enter your name" {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel className="text-slate-300 font-semibold">Full Name *</FormLabel><FormControl><Input className="h-12 bg-slate-800 border-slate-700 text-white focus:border-blue-500" placeholder="Enter your name" {...field} /></FormControl><FormMessage /></FormItem>
                       )} />
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <FormField control={form.control} name="mobile" render={({ field }) => (
-                          <FormItem><FormLabel className="text-slate-700 font-semibold">Mobile Number *</FormLabel><FormControl><Input className="h-12" placeholder="10-digit mobile" {...field} /></FormControl><FormMessage /></FormItem>
+                          <FormItem><FormLabel className="text-slate-300 font-semibold">Mobile Number *</FormLabel><FormControl><Input className="h-12 bg-slate-800 border-slate-700 text-white focus:border-blue-500" placeholder="10-digit mobile" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                         <FormField control={form.control} name="email" render={({ field }) => (
-                          <FormItem><FormLabel className="text-slate-700 font-semibold">Official Email *</FormLabel><FormControl><Input className="h-12" type="email" placeholder="name@organization.com" {...field} /></FormControl><FormMessage /></FormItem>
+                          <FormItem><FormLabel className="text-slate-300 font-semibold">Official Email *</FormLabel><FormControl><Input className="h-12 bg-slate-800 border-slate-700 text-white focus:border-blue-500" type="email" placeholder="name@organization.com" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                       </div>
                   </div>
                 </div>
                 
                 {/* Additional Remarks */}
-                <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 transition-shadow hover:shadow-md">
-                   <div className="flex items-center gap-4 mb-6 border-b border-slate-100 pb-4">
-                     <div className="bg-blue-50 p-2 rounded-lg"><FileText className="h-6 w-6 text-blue-600" /></div>
-                     <h2 className="text-xl font-bold text-slate-900">Additional Instructions</h2>
+                <div className="bg-slate-900 p-8 rounded-2xl shadow-lg border border-slate-800 transition-shadow hover:shadow-xl hover:border-slate-700">
+                   <div className="flex items-center gap-4 mb-6 border-b border-slate-800 pb-4">
+                     <div className="bg-blue-500/10 p-2 rounded-lg"><FileText className="h-6 w-6 text-blue-400" /></div>
+                     <h2 className="text-xl font-bold text-white">Additional Instructions</h2>
                   </div>
                   <FormField control={form.control} name="additionalRemarks" render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-slate-700 font-semibold">Remarks</FormLabel>
+                      <FormLabel className="text-slate-300 font-semibold">Remarks</FormLabel>
                       <FormControl>
-                        <Textarea className="min-h-[100px]" placeholder="Specific delivery instructions, customization requests, etc." {...field} />
+                        <Textarea className="min-h-[100px] bg-slate-800 border-slate-700 text-white focus:border-blue-500" placeholder="Specific delivery instructions, customization requests, etc." {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -310,7 +311,7 @@ const DealerApplication = () => {
                 <div className="pt-4">
                   <Button 
                       type="submit" 
-                      className="w-full h-14 text-lg bg-slate-900 hover:bg-blue-700 text-white shadow-xl shadow-slate-200 rounded-xl font-bold transition-all hover:-translate-y-1" 
+                      className="w-full h-14 text-lg bg-blue-600 hover:bg-blue-500 text-white shadow-xl shadow-blue-900/20 rounded-xl font-bold transition-all hover:-translate-y-1 border border-blue-500" 
                       disabled={isSubmitting}
                   >
                       {isSubmitting ? (
@@ -326,35 +327,35 @@ const DealerApplication = () => {
 
           {/* RIGHT COLUMN: The Summary (4 cols) */}
           <div className="md:col-span-4">
-            <div className="bg-white p-6 rounded-2xl shadow-lg border border-slate-200 sticky top-32">
-              <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                <Receipt className="h-5 w-5 text-blue-600" /> Quote Summary
+            <div className="bg-slate-900 p-6 rounded-2xl shadow-lg border border-slate-800 sticky top-32">
+              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                <Receipt className="h-5 w-5 text-blue-400" /> Quote Summary
               </h3>
               
-              <div className="bg-slate-50 rounded-lg p-4 mb-6 border border-slate-100 max-h-[400px] overflow-y-auto">
+              <div className="bg-slate-800 rounded-lg p-4 mb-6 border border-slate-700 max-h-[400px] overflow-y-auto">
                 {quoteListDisplay ? (
-                  <pre className="whitespace-pre-wrap font-sans text-sm text-slate-600 leading-relaxed">
+                  <pre className="whitespace-pre-wrap font-sans text-sm text-slate-300 leading-relaxed">
                     {quoteListDisplay}
                   </pre>
                 ) : (
-                  <p className="text-sm text-slate-400 italic">No items added to quote yet.</p>
+                  <p className="text-sm text-slate-500 italic">No items added to quote yet.</p>
                 )}
               </div>
 
-              <div className="space-y-3 border-t border-slate-100 pt-4">
+              <div className="space-y-3 border-t border-slate-800 pt-4">
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-500">Total Items</span>
-                  <span className="font-bold text-slate-900">{cartItems.reduce((acc, item) => acc + item.quantity, 0)}</span>
+                  <span className="text-slate-400">Total Items</span>
+                  <span className="font-bold text-white">{cartItems.reduce((acc, item) => acc + item.quantity, 0)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-500">Est. Response</span>
-                  <span className="font-bold text-emerald-600">24 Hours</span>
+                  <span className="text-slate-400">Est. Response</span>
+                  <span className="font-bold text-emerald-400">24 Hours</span>
                 </div>
               </div>
 
               <Button 
                 variant="outline" 
-                className="w-full mt-6 text-red-500 border-red-200 hover:bg-red-50 hover:border-red-300"
+                className="w-full mt-6 text-red-400 border-red-900/50 bg-red-950/10 hover:bg-red-900/30 hover:text-red-300 hover:border-red-800"
                 onClick={clearQuoteList}
               >
                 <Trash2 className="w-4 h-4 mr-2" /> Clear List

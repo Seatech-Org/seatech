@@ -1,26 +1,25 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
-import { Award, Hammer, Users, Building, PenTool, Truck, CheckCircle2 } from "lucide-react";
+import { Award, Hammer, Users, Building, PenTool, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 
 // Note: Replace these with actual images from your assets if available, or keep placeholders.
-import workshopImg from "../assets/heropage/Modern Institutional Lobby Space.jpg"; // Placeholder
 import showroomImg from "../assets/heropage/Modern Executive Conference Room.jpg"; // Placeholder
 
 const AboutUs = () => {
   return (
-    <div className="min-h-screen bg-slate-50 font-sans selection:bg-blue-100 selection:text-blue-900">
+    <div className="min-h-screen bg-slate-950 font-sans selection:bg-blue-500/30 selection:text-blue-100">
       <Navbar />
 
       {/* --- HERO SECTION --- */}
-      <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 bg-slate-900 overflow-hidden">
-        <div className="absolute inset-0 opacity-20 bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
+      <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 bg-slate-950 overflow-hidden">
+        <div className="absolute inset-0 opacity-30 bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
         {/* Abstract Background Shapes */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-3xl -mr-32 -mt-32"></div>
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-indigo-600/20 rounded-full blur-3xl -ml-20 -mb-20"></div>
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-3xl -mr-32 -mt-32"></div>
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-indigo-600/10 rounded-full blur-3xl -ml-20 -mb-20"></div>
 
         <div className="container mx-auto px-4 relative z-10 text-center">
           <motion.div
@@ -37,7 +36,7 @@ const AboutUs = () => {
                 For Institutions
               </span>
             </h1>
-            <p className="text-lg md:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-lg md:text-xl text-slate-400 max-w-3xl mx-auto leading-relaxed">
               Seatech Associates Pvt. Ltd. is a premier OEM verified partner, bridging the gap between precision manufacturing and government infrastructure needs.
             </p>
           </motion.div>
@@ -56,23 +55,23 @@ const AboutUs = () => {
               transition={{ duration: 0.8 }}
               className="relative"
             >
-              <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-slate-200">
-                <img src={showroomImg} alt="Seatech Showroom" className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent"></div>
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-slate-800">
+                <img src={showroomImg} alt="Seatech Showroom" className="w-full h-full object-cover opacity-80" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 to-transparent"></div>
                 <div className="absolute bottom-8 left-8 text-white">
                   <p className="font-bold text-2xl">GeM Verified OEM</p>
                   <p className="text-slate-300">Trusted Government Supplier</p>
                 </div>
               </div>
               {/* Floating Badge */}
-              <div className="absolute -top-6 -right-6 bg-white p-6 rounded-2xl shadow-xl border border-slate-100 hidden md:block">
+              <div className="absolute -top-6 -right-6 bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700 hidden md:block">
                 <div className="flex items-center gap-3">
-                  <div className="bg-blue-100 p-3 rounded-full text-blue-600">
+                  <div className="bg-blue-500/20 p-3 rounded-full text-blue-400">
                     <Award className="h-8 w-8" />
                   </div>
                   <div>
-                    <p className="text-3xl font-bold text-slate-900">25+</p>
-                    <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">Product Categories</p>
+                    <p className="text-3xl font-bold text-white">25+</p>
+                    <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Product Categories</p>
                   </div>
                 </div>
               </div>
@@ -84,13 +83,13 @@ const AboutUs = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">Who We Are</h2>
-              <div className="space-y-6 text-lg text-slate-600 leading-relaxed">
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">Who We Are</h2>
+              <div className="space-y-6 text-lg text-slate-400 leading-relaxed">
                 <p>
                   Seatech Associates Private Ltd. stands at the forefront of the furniture manufacturing industry. We specialize in dealing with government institutes, local buyers, and large-scale retailers, providing robust and elegant solutions for every space.
                 </p>
                 <p>
-                  As an <strong className="text-slate-900">OEM Verified Seller on GeM</strong> (Government e-Marketplace), we adhere to the highest standards of quality and compliance. Our portfolio spans from executive office suites to large-scale auditorium seating, ensuring that every piece we deliver meets the rigorous demands of institutional use.
+                  As an <strong className="text-white">OEM Verified Seller on GeM</strong> (Government e-Marketplace), we adhere to the highest standards of quality and compliance. Our portfolio spans from executive office suites to large-scale auditorium seating, ensuring that every piece we deliver meets the rigorous demands of institutional use.
                 </p>
                 <p>
                   We don't just supply; we create. Our in-house factory is equipped with advanced machinery, allowing us to maintain strict quality control over every table, chair, and almirah that bears our name.
@@ -105,16 +104,16 @@ const AboutUs = () => {
                   "Educational Bodies"
                 ].map((item, i) => (
                   <div key={i} className="flex items-center gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-blue-600 flex-shrink-0" />
-                    <span className="font-medium text-slate-800">{item}</span>
+                    <CheckCircle2 className="h-5 w-5 text-blue-500 flex-shrink-0" />
+                    <span className="font-medium text-slate-300">{item}</span>
                   </div>
                 ))}
               </div>
 
               <div className="mt-10">
                 <Link to="/products">
-                  <Button size="lg" className="bg-slate-900 hover:bg-blue-700 text-white rounded-full px-8 h-14 text-lg font-bold shadow-lg">
-                    Explore Our Catalogue
+                  <Button size="lg" className="bg-blue-600 hover:bg-blue-500 text-white rounded-full px-8 h-14 text-lg font-bold shadow-lg shadow-blue-900/20">
+                    Explore Our Category
                   </Button>
                 </Link>
               </div>
@@ -125,20 +124,20 @@ const AboutUs = () => {
       </section>
 
       {/* --- INFRASTRUCTURE & CAPABILITY --- */}
-      <section className="bg-slate-900 py-24 text-white relative overflow-hidden">
+      <section className="bg-slate-900 py-24 text-white relative overflow-hidden border-y border-slate-800">
         {/* Decorative Grid */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:40px_40px] opacity-20"></div>
         
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold mb-6">Our Infrastructure</h2>
+            <h2 className="text-3xl md:text-5xl font-bold mb-6 text-white">Our Infrastructure</h2>
             <p className="text-xl text-slate-400">
               Precision engineering meets skilled craftsmanship. Our manufacturing capabilities allow us to deliver bulk orders with consistent quality.
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            <Card className="bg-white/5 border-white/10 backdrop-blur-sm hover:bg-white/10 transition-colors duration-300">
+            <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm hover:bg-slate-800 transition-colors duration-300">
               <CardContent className="p-8 text-center">
                 <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-900/50">
                   <Hammer className="h-8 w-8 text-white" />
@@ -150,7 +149,7 @@ const AboutUs = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-white/5 border-white/10 backdrop-blur-sm hover:bg-white/10 transition-colors duration-300">
+            <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm hover:bg-slate-800 transition-colors duration-300">
               <CardContent className="p-8 text-center">
                 <div className="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-indigo-900/50">
                   <Building className="h-8 w-8 text-white" />
@@ -162,7 +161,7 @@ const AboutUs = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-white/5 border-white/10 backdrop-blur-sm hover:bg-white/10 transition-colors duration-300">
+            <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm hover:bg-slate-800 transition-colors duration-300">
               <CardContent className="p-8 text-center">
                 <div className="w-16 h-16 bg-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-900/50">
                   <Users className="h-8 w-8 text-white" />
@@ -178,24 +177,24 @@ const AboutUs = () => {
       </section>
 
       {/* --- PRODUCT RANGE BANNER --- */}
-      <section className="py-24 bg-blue-50">
+      <section className="py-24 bg-slate-950">
         <div className="container mx-auto px-4">
-          <div className="bg-white rounded-[3rem] p-10 md:p-16 shadow-xl border border-slate-100 flex flex-col md:flex-row items-center justify-between gap-10">
+          <div className="bg-slate-900 rounded-[3rem] p-10 md:p-16 shadow-2xl border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-10">
             <div className="max-w-2xl">
-              <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Comprehensive Product Range</h2>
-              <p className="text-lg text-slate-600 mb-8">
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Comprehensive Product Range</h2>
+              <p className="text-lg text-slate-400 mb-8">
                 From simple classroom stools to complex composite office tables. We deal in <strong>17 to 25 distinct categories</strong> of wooden and metal furniture.
               </p>
               <div className="flex flex-wrap gap-3">
                 {["Office Tables", "Auditorium Chairs", "Almirahs", "Bunk Beds", "Workstations", "Executive Desks"].map((tag, i) => (
-                  <span key={i} className="px-4 py-2 bg-slate-100 text-slate-700 font-semibold rounded-lg text-sm border border-slate-200">
+                  <span key={i} className="px-4 py-2 bg-slate-800 text-slate-300 font-semibold rounded-lg text-sm border border-slate-700">
                     {tag}
                   </span>
                 ))}
               </div>
             </div>
             <div className="flex-shrink-0">
-               <div className="w-48 h-48 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-2xl shadow-blue-200 relative group">
+               <div className="w-48 h-48 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center shadow-2xl shadow-blue-900/50 relative group">
                   <PenTool className="h-20 w-20 text-white" />
                   <div className="absolute inset-0 border-4 border-white/20 rounded-full scale-110 group-hover:scale-125 transition-transform duration-500"></div>
                </div>
@@ -207,18 +206,18 @@ const AboutUs = () => {
       {/* --- CALL TO ACTION --- */}
       <section className="py-24 text-center">
         <div className="container mx-auto px-4 max-w-4xl">
-          <h2 className="text-3xl md:text-5xl font-bold text-slate-900 mb-6">Ready to upgrade your infrastructure?</h2>
-          <p className="text-xl text-slate-500 mb-10">
+          <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Ready to upgrade your infrastructure?</h2>
+          <p className="text-xl text-slate-400 mb-10">
             Join the network of government institutions and large enterprises trusting Seatech for their furniture needs.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Link to="/contact">
-              <Button size="lg" className="w-full sm:w-auto h-14 px-8 text-lg font-bold bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200 rounded-full">
+              <Button size="lg" className="w-full sm:w-auto h-14 px-8 text-lg font-bold bg-blue-600 hover:bg-blue-500 shadow-lg shadow-blue-900/50 rounded-full">
                 Get in Touch
               </Button>
             </Link>
             <Link to="/dealer-application">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 px-8 text-lg font-bold border-slate-300 hover:bg-slate-50 text-slate-700 rounded-full">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 px-8 text-lg font-bold border-slate-700 hover:bg-slate-800 text-slate-300 rounded-full bg-transparent">
                 Become a Partner
               </Button>
             </Link>

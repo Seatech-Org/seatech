@@ -7,269 +7,331 @@ import { Button } from "@/components/ui/button";
 import { 
   Search, 
   Armchair, 
-  BedDouble, 
-  Coffee, 
-  User, 
-  GraduationCap, 
-  Layout, 
-  Monitor, 
-  BookOpen, 
-  School, 
-  Square, 
-  ThermometerSun, 
   Briefcase, 
-  Crown, 
   Bed, 
-  AlignJustify, 
-  Archive, 
-  Fan, 
-  Users, 
   Grid, 
-  ConciergeBell, 
-  RefreshCw, 
-  Lock, 
-  Library, 
-  FileText, 
-  TreePine, 
-  Layers, 
-  PenTool,
   Sofa,
-  BoxSelect,
   ArrowLeft,
-  FolderOpen
+  FolderOpen,
+  Filter,
+  Monitor,
+  Archive,
+  Box
 } from "lucide-react";
-import { products } from "@/data/products";
-import { Link } from "react-router-dom";
-import { Badge } from "@/components/ui/badge";
+import { useProducts } from "@/services/product-service";
+import { products as localProducts } from "@/data/products";
 import { motion, AnimatePresence } from "framer-motion";
+import { ProductCard } from "@/components/ProductCard";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Helmet } from "react-helmet-async";
 
-const CATEGORIES = [
-  { name: "Auditorium Chair (V2)", icon: Armchair },
-  { name: "Bunk Beds as per IS 17636", icon: BedDouble },
-  { name: "Cafeteria Chair", icon: Coffee },
-  { name: "Chair for General Purpose", icon: User },
-  { name: "Classroom Stools", icon: GraduationCap },
-  { name: "Composite Office Tables confirming to IS 8126 (V2)", icon: Layout },
-  { name: "Computer Table (V2)", icon: Monitor },
-  { name: "Computer Table (V3)", icon: Monitor },
-  { name: "Desk and Bench Set for ClassroomTraining Area", icon: BookOpen },
-  { name: "Desk and Chair Set for Classroom Training Area", icon: School },
-  { name: "Desk Only for ClassroomTraining Area", icon: Square },
-  { name: "Electric Water Heater - Geyser (V2)", icon: ThermometerSun },
-  { name: "Executive Table (V4)", icon: Briefcase },
-  { name: "High-end Office Furniture Set (V2)", icon: Crown },
-  { name: "Metal Bed", icon: Bed },
-  { name: "Metal Shelving Racks (Adjustable Type)", icon: AlignJustify },
-  { name: "Metal Storage Cabinet", icon: Archive },
-  { name: "MIST FAN", icon: Fan },
-  { name: "Modular Table Meeting Table Centre Table (V2)", icon: Users },
-  { name: "Modular Work Stations (V3)", icon: Grid },
-  { name: "Reception Table", icon: ConciergeBell },
-  { name: "Revolving Chair (V5)", icon: RefreshCw },
-  { name: "Sofas & Couches Handcrafted", icon: Sofa },
-  { name: "Steel Almirah Cabinets conforming to IS 3312 (V4)", icon: Lock },
-  { name: "Steel Bookcases confirming to IS 7761 (V2)", icon: Library },
-  { name: "Steel Filing Cabinets for General Office Purpose", icon: FileText },
-  { name: "Wooden Almirah Wardrobe (V2)", icon: TreePine },
-  { name: "Wooden Shelf Case Rack Credenza Modular Storage (V2)", icon: Layers },
-  { name: "Writing Pad Chair", icon: PenTool },
+const TOP_LEVEL_CATEGORIES = [
+  { name: "Furniture", icon: Sofa, desc: "Premium infrastructure and seating solutions." }
 ];
+
+const FURNITURE_CATEGORIES = [
+  { name: "Domestic Furniture", icon: Bed, desc: "Beds, wardrobes, and home essentials." },
+  { name: "Office Furniture", icon: Briefcase, desc: "Workstations, desks, and executive seating." },
+  { name: "Plastic Molded Furniture", icon: Armchair, desc: "Durable multipurpose molded chairs." },
+];
+
+const getCategoryIcon = (name: string) => {
+  const lower = name.toLowerCase();
+  if (lower.includes("chair")) return Armchair;
+  if (lower.includes("bed")) return Bed;
+  if (lower.includes("table") || lower.includes("desk")) return Monitor;
+  if (lower.includes("sofa")) return Sofa;
+  if (lower.includes("cabinet") || lower.includes("almirah") || lower.includes("storage") || lower.includes("rack") || lower.includes("case") || lower.includes("shelf") || lower.includes("bookcase")) return Archive;
+  if (lower.includes("work station") || lower.includes("modular")) return Grid;
+  if (lower.includes("stool")) return Box;
+  return FolderOpen;
+};
+
+const OFFICE_SUBCATEGORIES = Array.from(new Set(localProducts.map(p => p.category))).map(name => ({
+  name,
+  icon: getCategoryIcon(name),
+  desc: `${name} solutions.`
+}));
 
 const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const categoryParam = searchParams.get("category");
-  const searchParam = searchParams.get("search"); // Get search param
+  const searchParam = searchParams.get("search"); 
   
-  // "All" means show Category Grid. Specific Name means show Product Grid.
   const [activeCategory, setActiveCategory] = useState(categoryParam || "All");
-  const [searchQuery, setSearchQuery] = useState(searchParam || ""); // Initialize with URL param
+  const [searchQuery, setSearchQuery] = useState(searchParam || "");
+
+  const { data: products = [], isLoading, error } = useProducts({ 
+    category: activeCategory, 
+    search: searchQuery 
+  });
 
   useEffect(() => {
-    // Sync state with URL params
-    if (categoryParam) {
-      setActiveCategory(categoryParam);
-    } else {
-      setActiveCategory("All");
-    }
+    if (categoryParam) setActiveCategory(categoryParam);
+    else setActiveCategory("All");
 
-    if (searchParam) {
-      setSearchQuery(searchParam);
-    } else {
-      setSearchQuery("");
-    }
+    if (searchParam) setSearchQuery(searchParam);
+    else setSearchQuery("");
   }, [categoryParam, searchParam]);
-
-  // Filter Logic
-  const filteredProducts = products.filter((product) => {
-    // 1. Search Filter (Global)
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          product.model.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          product.id.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    // 2. Category Filter
-    // If searching globally (activeCategory is All), ignore category check (matches everything).
-    // If inside a category, enforce category check.
-    const matchesCategory = activeCategory === "All" || product.category === activeCategory;
-
-    return matchesCategory && matchesSearch;
-  });
 
   const handleCategoryClick = (catName: string) => {
     setActiveCategory(catName);
-    setSearchQuery(""); // Clear search when picking a category
+    setSearchQuery("");
     setSearchParams({ category: catName });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleBackToCategories = () => {
-    setActiveCategory("All");
-    setSearchParams({});
+    if (activeCategory === "Furniture") {
+      setActiveCategory("All");
+      setSearchParams({});
+    } else if (FURNITURE_CATEGORIES.find(c => c.name === activeCategory)) {
+      setActiveCategory("Furniture");
+      setSearchParams({ category: "Furniture" });
+    } else if (OFFICE_SUBCATEGORIES.find(c => c.name === activeCategory)) {
+      setActiveCategory("Office Furniture");
+      setSearchParams({ category: "Office Furniture" });
+    } else {
+      setActiveCategory("All");
+      setSearchParams({});
+    }
     setSearchQuery("");
   };
 
-  // View Logic: Show Product Grid if (Category Selected) OR (Search Active)
-  const isProductView = activeCategory !== "All" || searchQuery.length > 0;
+  const isProductView = !["All", "Furniture", "Office Furniture"].includes(activeCategory) || searchQuery.length > 0;
+  const filteredProducts = products; 
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans selection:bg-blue-100 selection:text-blue-900">
+    <div className="min-h-screen bg-slate-950 font-sans selection:bg-blue-500/30 selection:text-blue-100">
+      <Helmet>
+        <title>{searchQuery ? `Search results for "${searchQuery}"` : activeCategory === "All" ? "Our Collections" : activeCategory} | Seatech</title>
+        <meta name="description" content={`Browse our ${activeCategory === "All" ? "entire collection" : activeCategory} of premium furniture and infrastructure solutions.`} />
+      </Helmet>
       <Navbar />
 
       {/* --- HEADER --- */}
-      <div className="bg-slate-900 text-white pt-32 pb-12 px-4 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
-        <div className="container mx-auto relative z-10 text-center">
-          <h1 className="text-3xl md:text-5xl font-bold mb-4">
-            {searchQuery ? `Results for "${searchQuery}"` : (activeCategory === "All" ? "Our Collections" : activeCategory)}
-          </h1>
-          <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-            {!isProductView
-              ? "Select a category to view approved products." 
-              : `Found ${filteredProducts.length} items.`}
-          </p>
+      <section className="relative pt-32 pb-16 bg-slate-950 overflow-hidden border-b border-slate-800">
+        <div className="absolute inset-0 bg-slate-950">
+           <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/20 via-slate-950/80 to-slate-950 opacity-80"></div>
         </div>
-      </div>
+        
+        <div className="container mx-auto px-4 relative z-10 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 tracking-tight">
+              {searchQuery ? (
+                <span>Results for <span className="text-blue-600">"{searchQuery}"</span></span>
+              ) : (
+                activeCategory === "All" ? "Product Category" : activeCategory
+              )}
+            </h1>
+            <p className="text-slate-400 text-lg max-w-2xl mx-auto leading-relaxed">
+              {!isProductView
+                ? "Explore our comprehensive range of high-performance furniture and specialized infrastructure solutions." 
+                : `Showing ${filteredProducts.length} results in ${activeCategory}.`}
+            </p>
+          </motion.div>
+        </div>
+      </section>
 
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-8">
         
         <AnimatePresence mode="wait">
-          {/* --- VIEW 1: CATEGORY GRID (Visible when no category selected AND no search) --- */}
+          {/* --- VIEW 1: CATEGORY SELECTION (TOP OR FURNITURE) --- */}
           {!isProductView ? (
             <motion.div
               key="category-grid"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.4 }}
             >
-              <div className="flex items-center gap-2 mb-8">
-                <BoxSelect className="h-6 w-6 text-blue-600" />
-                <h2 className="text-2xl font-bold text-slate-900">Browse Categories</h2>
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+                <div className="flex items-center gap-3">
+                  {(activeCategory === "Furniture" || activeCategory === "Office Furniture") && (
+                    <Button 
+                      variant="ghost" 
+                      onClick={handleBackToCategories}
+                      className="mr-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 h-11 px-4 font-bold flex-shrink-0"
+                    >
+                      <ArrowLeft className="h-4 w-4 mr-2" /> Back
+                    </Button>
+                  )}
+                  <div className="h-12 w-12 rounded-2xl bg-blue-50 flex items-center justify-center border border-blue-100">
+                    <Grid className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-white tracking-tight">
+                       {activeCategory === "All" ? "Main Categories" : activeCategory === "Furniture" ? "Furniture Sub-Categories" : "Office Furniture Collections"}
+                    </h2>
+                    <p className="text-slate-400 text-sm font-medium">Select a category to explore</p>
+                  </div>
+                </div>
+
+                <div className="relative w-full md:max-w-md group">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+                  <Input 
+                    placeholder="Quick search products..." 
+                    className="pl-11 h-14 rounded-2xl border-slate-800 bg-slate-900 focus:bg-slate-950 focus:border-blue-500 text-white placeholder:text-slate-400 transition-all text-base shadow-sm"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && setSearchParams({ search: searchQuery })}
+                  />
+                </div>
               </div>
               
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                {CATEGORIES.map((cat) => {
+              <div className={`grid ${activeCategory === "Office Furniture" ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4" : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8"}`}>
+                {(activeCategory === "All" ? TOP_LEVEL_CATEGORIES : activeCategory === "Furniture" ? FURNITURE_CATEGORIES : OFFICE_SUBCATEGORIES).map((cat, i) => {
                   const Icon = cat.icon;
+                  const isSmall = activeCategory === "Office Furniture";
                   return (
-                    <button
+                    <motion.button
                       key={cat.name}
                       onClick={() => handleCategoryClick(cat.name)}
-                      className="flex flex-col items-center justify-center p-6 rounded-2xl border border-slate-200 bg-white text-slate-600 hover:border-blue-500 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group min-h-[140px]"
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: isSmall ? i * 0.02 : i * 0.1 }}
+                      className={`flex flex-col items-center justify-center ${isSmall ? 'p-4 min-h-[160px] rounded-2xl' : 'p-10 min-h-[250px] rounded-[2rem]'} bg-slate-900 border border-slate-800 shadow-xl hover:shadow-2xl hover:border-blue-300 hover:-translate-y-2 transition-all duration-300 group text-center`}
                     >
-                      <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mb-4 group-hover:bg-blue-50 transition-colors">
-                        <Icon className="h-6 w-6 text-slate-500 group-hover:text-blue-600 transition-colors" />
+                      <div className={`${isSmall ? 'w-12 h-12 rounded-xl mb-4' : 'w-20 h-20 rounded-3xl mb-6'} bg-slate-950 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white group-hover:rotate-6 transition-all duration-300 text-slate-400 border border-white/10 shadow-sm`}>
+                        <Icon className={`${isSmall ? 'h-6 w-6' : 'h-10 w-10'} transition-transform duration-300 group-hover:scale-110`} />
                       </div>
-                      <span className="text-xs font-bold text-center leading-tight line-clamp-3 group-hover:text-slate-900">
+                      <h3 className={`${isSmall ? 'text-xs' : 'text-xl'} font-bold text-white ${isSmall ? 'mb-1' : 'mb-2'} group-hover:text-blue-400 transition-colors line-clamp-2`}>
                         {cat.name}
-                      </span>
-                    </button>
+                      </h3>
+                      {!isSmall && (
+                        <p className="text-sm text-slate-400 font-medium">
+                          {cat.desc}
+                        </p>
+                      )}
+                    </motion.button>
                   );
                 })}
               </div>
             </motion.div>
           ) : (
-            /* --- VIEW 2: PRODUCT LIST (Visible when category selected OR search active) --- */
+            /* --- VIEW 2: PRODUCT LIST --- */
             <motion.div
               key="product-grid"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              transition={{ duration: 0.3 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4 }}
             >
-              {/* Back Button & Search */}
-              <div className="flex flex-col md:flex-row gap-4 mb-8 items-start md:items-center justify-between">
-                <Button 
-                  variant="outline" 
-                  onClick={handleBackToCategories}
-                  className="rounded-full border-slate-300 hover:bg-slate-100 hover:text-slate-900 pl-2 pr-4"
-                >
-                  <ArrowLeft className="h-4 w-4 mr-2" /> 
-                  {searchQuery ? "Clear Search" : "Back to Categories"}
-                </Button>
+              {/* Refined Navigation Bar */}
+              <div className="sticky top-20 md:top-24 z-30 mb-12">
+                <div className="bg-slate-900/90 backdrop-blur-2xl border border-slate-800 shadow-lg rounded-[2rem] p-3 flex flex-col md:flex-row gap-4 items-center">
+                  
+                  <div className="flex items-center gap-2 p-1 bg-slate-950 rounded-2xl w-full md:w-auto">
+                    <Button 
+                      variant="ghost" 
+                      onClick={handleBackToCategories}
+                      className="rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/50 h-11 px-4 font-bold flex-shrink-0"
+                    >
+                      <ArrowLeft className="h-4 w-4 mr-2" /> 
+                      Back
+                    </Button>
+                    <div className="h-6 w-px bg-slate-800/50 mx-1 hidden md:block"></div>
+                    <div className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-blue-700 bg-blue-50 rounded-xl whitespace-nowrap overflow-hidden text-ellipsis border border-blue-100">
+                      {activeCategory !== "All" ? activeCategory : "Search Results"}
+                    </div>
+                  </div>
 
-                <div className="relative w-full md:max-w-md">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                  <Input 
-                    placeholder="Refine search..." 
-                    className="pl-10 rounded-full border-slate-200 bg-white"
-                    value={searchQuery}
-                    onChange={(e) => {
-                      setSearchQuery(e.target.value);
-                      // Optionally update URL as they type, or just let local state handle filtering
-                    }}
-                  />
+                  {/* Quick Category Switcher (Horizontal Scroll) */}
+                  <div className="flex-1 flex items-center gap-3 overflow-x-auto no-scrollbar py-1 px-2 mask-linear-gradient-horizontal">
+                     {(OFFICE_SUBCATEGORIES.some(c => c.name === activeCategory) ? OFFICE_SUBCATEGORIES : FURNITURE_CATEGORIES).map((cat) => (
+                       <button
+                         key={cat.name}
+                         onClick={() => handleCategoryClick(cat.name)}
+                         className={`whitespace-nowrap px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
+                           activeCategory === cat.name 
+                             ? "bg-blue-600 border-blue-500 text-white shadow-md shadow-blue-200" 
+                             : "bg-slate-900 border-slate-800 text-slate-400 hover:text-white hover:bg-slate-950"
+                         }`}
+                       >
+                         {cat.name}
+                       </button>
+                     ))}
+                  </div>
+
+                  <div className="relative w-full md:w-72 group">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+                    <Input 
+                      placeholder="Search products..." 
+                      className="pl-11 h-11 rounded-xl border-slate-800 bg-slate-900 focus:bg-slate-950 focus:border-blue-500 text-white placeholder:text-slate-400 transition-all text-sm shadow-sm"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
                 </div>
               </div>
 
-              {/* Product Grid */}
-              {filteredProducts.length > 0 ? (
+              {/* Loading & Error States */}
+              {isLoading ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                  {filteredProducts.map((product) => (
-                    <Link key={product.id} to={`/products/${product.id}`} className="group block h-full">
-                      <div className="bg-white rounded-3xl overflow-hidden hover:shadow-xl hover:shadow-blue-900/5 transition-all duration-300 border border-slate-100 flex flex-col h-full hover:-translate-y-1">
-                        
-                        <div className="aspect-[4/3] bg-slate-50 relative p-6 flex items-center justify-center overflow-hidden">
-                          <div className="absolute inset-0 bg-blue-600/0 group-hover:bg-blue-600/5 transition-colors duration-300"></div>
-                          <img 
-                            src={product.images[0].main} 
-                            alt={product.name} 
-                            className="w-full h-full object-contain mix-blend-multiply transition-transform duration-500 group-hover:scale-110" 
-                          />
-                          {product.discount > 0 && (
-                            <Badge className="absolute top-4 left-4 bg-white text-slate-900 shadow-sm border-0 font-bold">
-                              -{product.discount}%
-                            </Badge>
-                          )}
-                        </div>
-
-                        <div className="p-6 flex flex-col flex-grow">
-                          <h3 className="font-bold text-slate-900 text-lg mb-2 leading-snug line-clamp-2 group-hover:text-blue-600 transition-colors">
-                            {product.name}
-                          </h3>
-                          <div className="mt-auto pt-4 flex items-center justify-between border-t border-slate-50">
-                            <div>
-                              <p className="text-xs text-slate-400 font-medium">GeM ID</p>
-                              <p className="text-sm font-mono font-bold text-slate-700">{product.id}</p>
-                            </div>
-                            <Button size="sm" variant="ghost" className="rounded-full hover:bg-blue-50 hover:text-blue-600">
-                              View
-                            </Button>
-                          </div>
-                        </div>
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <div key={i} className="bg-slate-900 rounded-[1.5rem] overflow-hidden border border-slate-800 flex flex-col h-full shadow-sm">
+                      <div className="aspect-[4/3] bg-slate-950 p-8 relative">
+                         <Skeleton className="w-full h-full rounded-xl bg-slate-800/50" />
                       </div>
-                    </Link>
+                      <div className="p-6 flex flex-col flex-grow border-t border-white/10">
+                         <Skeleton className="h-3 w-20 mb-2 bg-slate-800/50" />
+                         <Skeleton className="h-6 w-full mb-4 bg-slate-800/50" />
+                         <div className="mt-auto pt-4 flex items-center justify-between border-t border-white/10">
+                            <div className="space-y-1">
+                               <Skeleton className="h-2 w-10 bg-slate-800/50" />
+                               <Skeleton className="h-4 w-16 bg-slate-800/50" />
+                            </div>
+                            <Skeleton className="h-8 w-24 rounded-full bg-slate-800/50" />
+                         </div>
+                      </div>
+                    </div>
                   ))}
                 </div>
-              ) : (
-                <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-300">
-                  <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <FolderOpen className="h-10 w-10 text-slate-300" />
+              ) : error ? (
+                <div className="text-center py-20 px-4">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-50 text-red-500 mb-6 border border-red-100">
+                    <Filter className="h-8 w-8" />
                   </div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-2">No Results Found</h3>
-                  <p className="text-slate-500">Try adjusting your search terms or browse categories.</p>
-                  <Button variant="link" onClick={handleBackToCategories} className="mt-4 text-blue-600">
-                    Clear Filters
-                  </Button>
+                  <h3 className="text-xl font-bold text-white mb-2">Unable to load products</h3>
+                  <p className="text-slate-400 max-w-md mx-auto mb-6">{(error as Error).message}</p>
+                  <Button onClick={() => window.location.reload()} variant="outline" className="border-slate-800 text-slate-300 hover:bg-slate-950">Try Again</Button>
                 </div>
+              ) : (
+                /* Product Grid */
+                filteredProducts.length > 0 ? (
+                  <motion.div 
+                     layout
+                     className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 pb-20"
+                  >
+                    {filteredProducts.map((product) => (
+                      <ProductCard key={product.id} product={product} />
+                    ))}
+                  </motion.div>
+                ) : (
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="text-center py-32 bg-slate-900 rounded-[3rem] border border-dashed border-slate-900 mb-20 shadow-sm"
+                  >
+                    <div className="w-24 h-24 bg-slate-950 rounded-full flex items-center justify-center mx-auto mb-6 border border-white/10">
+                      <FolderOpen className="h-10 w-10 text-slate-400" />
+                    </div>
+                    <h3 className="text-3xl font-bold text-white mb-3">No matches found</h3>
+                    <p className="text-slate-400 mb-10 max-w-md mx-auto text-lg leading-relaxed">
+                      We couldn't find anything for "{searchQuery}" in this category. Try broader terms or reset filters.
+                    </p>
+                    <Button 
+                      onClick={handleBackToCategories} 
+                      className="rounded-full px-10 h-14 bg-blue-600 text-white hover:bg-blue-700 font-bold text-lg shadow-md shadow-blue-200"
+                    >
+                      Clear All Filters
+                    </Button>
+                  </motion.div>
+                )
               )}
             </motion.div>
           )}

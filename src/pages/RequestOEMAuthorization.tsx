@@ -174,7 +174,7 @@ const RequestOEMAuthorization = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="min-h-screen bg-slate-950 flex flex-col font-sans selection:bg-blue-500/30 selection:text-blue-100">
       <Navbar />
       <AuthDialog 
         isOpen={isAuthDialogOpen} 
@@ -182,10 +182,10 @@ const RequestOEMAuthorization = () => {
         message="Please login to request OEM Authorization."
       />
       <div className="flex-grow container mx-auto px-4 py-32 max-w-5xl">
-        <Card className="border-0 shadow-2xl bg-white/50 backdrop-blur-xl">
-          <CardHeader className="text-center pb-8 border-b border-slate-100">
-            <CardTitle className="text-3xl font-bold text-slate-800">Request OEM Authorization</CardTitle>
-            <CardDescription className="text-lg text-slate-500 mt-2">
+        <Card className="border-0 shadow-2xl bg-slate-900/60 backdrop-blur-xl border-white/5">
+          <CardHeader className="text-center pb-8 border-b border-slate-800">
+            <CardTitle className="text-3xl font-bold text-white">Request OEM Authorization</CardTitle>
+            <CardDescription className="text-lg text-slate-400 mt-2">
               Submit your details for L1 Purchase or Bidding Authorization
             </CardDescription>
           </CardHeader>
@@ -194,14 +194,14 @@ const RequestOEMAuthorization = () => {
               
               {/* Request Type Toggle */}
               <div className="flex justify-center mb-8">
-                <div className="bg-slate-100 p-1.5 rounded-xl flex gap-1">
+                <div className="bg-slate-800 p-1.5 rounded-xl flex gap-1 border border-slate-700">
                   <button
                     type="button"
                     onClick={() => setRequestType("L1")}
                     className={`px-8 py-3 rounded-lg text-sm font-bold transition-all ${
                       requestType === "L1" 
-                        ? "bg-white text-blue-600 shadow-md" 
-                        : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
+                        ? "bg-slate-600 text-white shadow-md" 
+                        : "text-slate-400 hover:text-slate-200 hover:bg-slate-700"
                     }`}
                   >
                     For L1 Purchase
@@ -211,8 +211,8 @@ const RequestOEMAuthorization = () => {
                     onClick={() => setRequestType("Bidding")}
                     className={`px-8 py-3 rounded-lg text-sm font-bold transition-all ${
                       requestType === "Bidding" 
-                        ? "bg-white text-blue-600 shadow-md" 
-                        : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
+                        ? "bg-slate-600 text-white shadow-md" 
+                        : "text-slate-400 hover:text-slate-200 hover:bg-slate-700"
                     }`}
                   >
                     For Bidding
@@ -223,29 +223,29 @@ const RequestOEMAuthorization = () => {
               {/* Common Fields */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="dealerName">Firm / Dealer Name</Label>
+                  <Label htmlFor="dealerName" className="text-slate-300">Firm / Dealer Name</Label>
                   <Input 
                     id="dealerName" 
                     value={dealerName} 
                     onChange={(e) => setDealerName(e.target.value)} 
                     required 
                     placeholder="Enter firm name"
-                    className="h-12 bg-white/50 border-slate-200 focus:border-blue-400 focus:ring-blue-100"
+                    className="h-12 bg-slate-800 border-slate-700 text-white focus:border-blue-500 focus:ring-blue-900"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="directorName">Director / Proprietor Name</Label>
+                  <Label htmlFor="directorName" className="text-slate-300">Director / Proprietor Name</Label>
                   <Input 
                     id="directorName" 
                     value={directorName} 
                     onChange={(e) => setDirectorName(e.target.value)} 
                     required 
                     placeholder="Enter director name"
-                    className="h-12 bg-white/50 border-slate-200 focus:border-blue-400 focus:ring-blue-100"
+                    className="h-12 bg-slate-800 border-slate-700 text-white focus:border-blue-500 focus:ring-blue-900"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
+                  <Label htmlFor="email" className="text-slate-300">Email Address</Label>
                   <Input 
                     id="email" 
                     type="email" 
@@ -253,11 +253,11 @@ const RequestOEMAuthorization = () => {
                     onChange={(e) => setEmail(e.target.value)} 
                     required 
                     placeholder="dealer@example.com"
-                    className="h-12 bg-white/50 border-slate-200 focus:border-blue-400 focus:ring-blue-100"
+                    className="h-12 bg-slate-800 border-slate-700 text-white focus:border-blue-500 focus:ring-blue-900"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="mobile">Mobile Number</Label>
+                  <Label htmlFor="mobile" className="text-slate-300">Mobile Number</Label>
                   <Input 
                     id="mobile" 
                     type="tel" 
@@ -265,86 +265,86 @@ const RequestOEMAuthorization = () => {
                     onChange={(e) => setMobile(e.target.value)} 
                     required 
                     placeholder="+91 98765 43210"
-                    className="h-12 bg-white/50 border-slate-200 focus:border-blue-400 focus:ring-blue-100"
+                    className="h-12 bg-slate-800 border-slate-700 text-white focus:border-blue-500 focus:ring-blue-900"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="gst">GST Number</Label>
+                  <Label htmlFor="gst" className="text-slate-300">GST Number</Label>
                   <Input 
                     id="gst" 
                     value={gst} 
                     onChange={(e) => setGst(e.target.value)} 
                     required 
                     placeholder="22AAAAA0000A1Z5"
-                    className="h-12 bg-white/50 border-slate-200 focus:border-blue-400 focus:ring-blue-100"
+                    className="h-12 bg-slate-800 border-slate-700 text-white focus:border-blue-500 focus:ring-blue-900"
                   />
                 </div>
                 <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="address">Complete Address</Label>
+                  <Label htmlFor="address" className="text-slate-300">Complete Address</Label>
                   <Textarea 
                     id="address" 
                     value={address} 
                     onChange={(e) => setAddress(e.target.value)} 
                     required 
                     placeholder="Enter full registered address"
-                    className="min-h-[100px] bg-white/50 border-slate-200 focus:border-blue-400 focus:ring-blue-100 resize-none"
+                    className="min-h-[100px] bg-slate-800 border-slate-700 text-white focus:border-blue-500 focus:ring-blue-900 resize-none"
                   />
                 </div>
               </div>
 
               {/* Specific Fields */}
-              <div className="space-y-6 pt-6 border-t border-slate-100">
+              <div className="space-y-6 pt-6 border-t border-slate-800">
                 {requestType === "L1" ? (
                   <div className="grid grid-cols-1 gap-6">
                     <div className="space-y-2">
-                      <Label htmlFor="turnover">Dealer Turnover (Current Financial Year)</Label>
+                      <Label htmlFor="turnover" className="text-slate-300">Dealer Turnover (Current Financial Year)</Label>
                       <Input 
                         id="turnover" 
                         value={turnover} 
                         onChange={(e) => setTurnover(e.target.value)} 
                         required 
                         placeholder="e.g. 50 Lakhs"
-                        className="h-12 bg-white/50"
+                        className="h-12 bg-slate-800 border-slate-700 text-white"
                       />
                     </div>
                   </div>
                 ) : (
                   <div className="space-y-6">
                     <div className="space-y-2">
-                      <Label htmlFor="biddingNumber">Bidding Number / Tender ID</Label>
+                      <Label htmlFor="biddingNumber" className="text-slate-300">Bidding Number / Tender ID</Label>
                       <Input 
                         id="biddingNumber" 
                         value={biddingNumber} 
                         onChange={(e) => setBiddingNumber(e.target.value)} 
                         required 
                         placeholder="Enter bidding number"
-                        className="h-12 bg-white/50"
+                        className="h-12 bg-slate-800 border-slate-700 text-white"
                       />
                     </div>
                     
                     <div className="space-y-4">
-                       <Label className="text-base font-semibold text-slate-700 block mb-2">Dealer Turnover (Last 3 Years)</Label>
-                       <div className="bg-slate-50/50 p-6 rounded-2xl border border-slate-200 space-y-4">
+                       <Label className="text-base font-semibold text-slate-300 block mb-2">Dealer Turnover (Last 3 Years)</Label>
+                       <div className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700 space-y-4">
                           {turnoverYears.map((data, index) => (
                              <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
                                 <div className="space-y-2">
-                                   <Label htmlFor={`year-${index}`} className="text-xs text-slate-500 uppercase tracking-wider font-bold">Financial Year {index + 1}</Label>
+                                   <Label htmlFor={`year-${index}`} className="text-xs text-slate-400 uppercase tracking-wider font-bold">Financial Year {index + 1}</Label>
                                    <Input 
                                       id={`year-${index}`}
                                       value={data.year}
                                       onChange={(e) => handleTurnoverChange(index, "year", e.target.value)}
                                       placeholder="e.g. 2023-2024"
-                                      className="bg-white"
+                                      className="bg-slate-900 border-slate-600 text-white"
                                    />
                                 </div>
                                 <div className="space-y-2">
-                                   <Label htmlFor={`amount-${index}`} className="text-xs text-slate-500 uppercase tracking-wider font-bold">Turnover Amount</Label>
+                                   <Label htmlFor={`amount-${index}`} className="text-xs text-slate-400 uppercase tracking-wider font-bold">Turnover Amount</Label>
                                    <Input 
                                       id={`amount-${index}`}
                                       value={data.amount}
                                       onChange={(e) => handleTurnoverChange(index, "amount", e.target.value)}
                                       placeholder="e.g. 15000000 (Numeric preferred)"
-                                      className="bg-white"
+                                      className="bg-slate-900 border-slate-600 text-white"
                                    />
                                 </div>
                              </div>
@@ -356,19 +356,19 @@ const RequestOEMAuthorization = () => {
               </div>
 
               {/* Product Selection Section */}
-              <div className="space-y-4 pt-6 border-t border-slate-100">
-                <Label className="text-lg font-semibold text-slate-700">Required Products</Label>
+              <div className="space-y-4 pt-6 border-t border-slate-800">
+                <Label className="text-lg font-semibold text-white">Required Products</Label>
                 
-                <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 space-y-4">
+                <div className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700 space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
                     <div className="space-y-2 md:col-span-1">
-                      <Label htmlFor="category">Select Category</Label>
+                      <Label htmlFor="category" className="text-slate-300">Select Category</Label>
                       <div className="relative">
                         <select
                           id="category"
                           value={selectedCategory}
                           onChange={(e) => setSelectedCategory(e.target.value)}
-                          className="flex h-12 w-full items-center justify-between rounded-md border border-input bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="flex h-12 w-full items-center justify-between rounded-md border border-slate-600 bg-slate-900 px-3 py-2 text-sm text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           <option value="" disabled>Select a category</option>
                           {categories.map((cat) => (
@@ -378,7 +378,7 @@ const RequestOEMAuthorization = () => {
                       </div>
                     </div>
                     <div className="space-y-2 md:col-span-1">
-                      <Label htmlFor="quantity">Quantity</Label>
+                      <Label htmlFor="quantity" className="text-slate-300">Quantity</Label>
                       <Input 
                         id="quantity" 
                         type="number" 
@@ -386,14 +386,14 @@ const RequestOEMAuthorization = () => {
                         value={quantity} 
                         onChange={(e) => setQuantity(e.target.value)} 
                         placeholder="Qty"
-                        className="h-12 bg-white"
+                        className="h-12 bg-slate-900 border-slate-600 text-white"
                       />
                     </div>
                     <div className="md:col-span-1">
                       <Button 
                         type="button" 
                         onClick={addItem} 
-                        className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white"
+                        className="w-full h-12 bg-blue-600 hover:bg-blue-500 text-white font-bold"
                       >
                         <Plus className="mr-2 h-4 w-4" /> Add Product
                       </Button>
@@ -403,20 +403,20 @@ const RequestOEMAuthorization = () => {
                   {/* List of Added Items */}
                   {requestedItems.length > 0 && (
                     <div className="mt-4 space-y-2">
-                      <Label className="text-sm text-slate-500">Added Items List:</Label>
-                      <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100 overflow-hidden">
+                      <Label className="text-sm text-slate-400">Added Items List:</Label>
+                      <div className="bg-slate-900 rounded-xl border border-slate-700 divide-y divide-slate-700 overflow-hidden">
                         {requestedItems.map((item, index) => (
-                          <div key={index} className="flex items-center justify-between p-3 px-4 hover:bg-slate-50 transition-colors">
+                          <div key={index} className="flex items-center justify-between p-3 px-4 hover:bg-slate-800 transition-colors">
                             <div className="flex flex-col">
-                              <span className="font-medium text-slate-800">{item.category}</span>
-                              <span className="text-xs text-slate-500">Qty: {item.quantity}</span>
+                              <span className="font-medium text-white">{item.category}</span>
+                              <span className="text-xs text-slate-400">Qty: {item.quantity}</span>
                             </div>
                             <Button 
                               type="button" 
                               variant="ghost" 
                               size="icon" 
                               onClick={() => removeItem(index)}
-                              className="text-red-500 hover:text-red-600 hover:bg-red-50 rounded-full h-8 w-8"
+                              className="text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-full h-8 w-8"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -432,7 +432,7 @@ const RequestOEMAuthorization = () => {
                 type="submit" 
                 size="lg" 
                 disabled={isSubmitting}
-                className="w-full h-14 text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-xl shadow-blue-200 mt-6"
+                className="w-full h-14 text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-xl shadow-blue-900/20 mt-6 border border-blue-500/50"
               >
                 {isSubmitting ? (
                     <span className="flex items-center gap-2"><Loader2 className="animate-spin" /> Processing Request...</span>
