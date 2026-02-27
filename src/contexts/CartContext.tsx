@@ -24,14 +24,13 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
 
-  // Sync with Auth State
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchCart(session.user.id);
       } else {
-        setCartItems([]); // Clear cart on logout or no user
+        setCartItems([]);
       }
     });
 
@@ -49,43 +48,64 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchCart = async (userId: string) => {
     setIsLoading(true);
+    console.log("Cart Context: Fetching cart for user", userId);
     try {
-      // 1. Get active quote
-      let { data: quote, error } = await supabase
+      // 1. Get the LATEST active draft quote
+      const { data: quote, error } = await (supabase as any)
         .from('quotes')
         .select('id')
         .eq('user_id', userId)
-        .eq('status', 'draft') // Assuming 'draft' is the active status
+        .eq('status', 'draft')
+        .order('created_at', { ascending: false })
+        .limit(1)
         .maybeSingle();
 
       if (error) throw error;
+      console.log("Cart Context: Active quote ID:", quote?.id);
 
       if (quote) {
         // 2. Get quote items
-        const { data: items, error: itemsError } = await supabase
+        const { data: items, error: itemsError } = await (supabase as any)
           .from('quote_items')
           .select('*')
           .eq('quote_id', quote.id);
 
         if (itemsError) throw itemsError;
+        console.log("Cart Context: DB items found:", items?.length);
 
         // 3. Map back to full Product objects
-        const loadedItems: CartItem[] = (items || []).map(item => {
+        const loadedItems: CartItem[] = (items || []).map((item: any) => {
           const productDetails = products.find(p => p.id === item.product_id);
-          if (!productDetails) return null; // Skip if product not found in static data
+          if (!productDetails) {
+            return {
+              id: item.product_id,
+              name: item.product_name,
+              brand: "Unknown",
+              model: "N/A",
+              category: "General",
+              price: 0,
+              availability: 0,
+              minQty: 1,
+              images: [],
+              specifications: [],
+              discount: 0,
+              seller: { name: "Seatech", verified: true, rating: 5 },
+              countryOfOrigin: "India",
+              quantity: item.quantity || 1
+            } as CartItem;
+          }
           return {
             ...productDetails,
             quantity: item.quantity || 1
           };
-        }).filter((item): item is CartItem => item !== null);
+        });
 
         setCartItems(loadedItems);
       } else {
         setCartItems([]);
       }
     } catch (error) {
-      console.error("Error fetching cart:", error);
-      // Fallback or silent fail?
+      console.error("Cart Context: Error fetching cart:", error);
     } finally {
       setIsLoading(false);
     }
@@ -94,38 +114,25 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const getOrCreateQuoteId = async (): Promise<string | null> => {
     if (!user) return null;
 
-    // Check for existing draft
-    const { data: existingQuote } = await supabase
+    const { data: existingQuote } = await (supabase as any)
       .from('quotes')
       .select('id')
       .eq('user_id', user.id)
       .eq('status', 'draft')
+      .order('created_at', { ascending: false })
+      .limit(1)
       .maybeSingle();
 
     if (existingQuote) return existingQuote.id;
 
-    // SELF-HEAL: Ensure profile exists before creating quote (Fixes FK error 23503)
-    if (user) {
-        const { error: profileError } = await (supabase as any)
-            .from('profiles')
-            .upsert({ id: user.id, email: user.email }, { onConflict: 'id' });
-        
-        if (profileError) {
-             console.error("Failed to sync profile during quote creation:", profileError);
-             // We continue anyway, hoping it might work or the error is unrelated
-        }
-    }
-
-    // Create new draft
-    const { data: newQuote, error } = await supabase
+    const { data: newQuote, error } = await (supabase as any)
       .from('quotes')
       .insert({ user_id: user.id, status: 'draft', total_items: 0 })
       .select('id')
       .single();
 
     if (error) {
-      console.error("Error creating quote:", error);
-      toast.error("Failed to initialize quote cart.");
+      console.error("Cart Context: Error creating quote:", error);
       return null;
     }
     return newQuote.id;
@@ -141,13 +148,11 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       const quoteId = await getOrCreateQuoteId();
       if (!quoteId) return;
 
-      // Check if item exists in quote
       const existingItem = cartItems.find(item => item.id === product.id);
 
       if (existingItem) {
-        // Update quantity
         const newQty = existingItem.quantity + quantity;
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from('quote_items')
           .update({ quantity: newQty })
           .eq('quote_id', quoteId)
@@ -155,8 +160,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
         if (error) throw error;
       } else {
-        // Insert new item
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from('quote_items')
           .insert({
             quote_id: quoteId,
@@ -168,34 +172,49 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         if (error) throw error;
       }
 
-      // Refresh Local State
       await fetchCart(user.id);
+      toast.success(`${product.name} added to quote`);
       
     } catch (error) {
-      console.error("Error adding to cart:", error);
+      console.error("Cart Context: Error adding to cart:", error);
       toast.error("Failed to update quote.");
     }
   };
 
   const removeFromCart = async (productId: string) => {
     if (!user) return;
+    console.log("Cart Context: Removing product ID", productId);
     try {
-      const quoteId = await getOrCreateQuoteId();
-      if (!quoteId) return;
+      // Find ALL possible draft quotes for this user to be safe
+      const { data: quotes } = await (supabase as any)
+        .from('quotes')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('status', 'draft');
 
-      const { error } = await supabase
+      if (!quotes || quotes.length === 0) {
+        console.log("Cart Context: No draft quotes found to delete from.");
+        return;
+      }
+
+      const quoteIds = quotes.map((q: any) => q.id);
+      console.log("Cart Context: Executing delete on quote IDs:", quoteIds);
+
+      // Perform a bulk delete across any draft quotes the user might have
+      const { error } = await (supabase as any)
         .from('quote_items')
         .delete()
-        .eq('quote_id', quoteId)
+        .in('quote_id', quoteIds)
         .eq('product_id', productId);
 
       if (error) throw error;
       
-      // Optimistic update
+      // Update local state immediately
       setCartItems(prev => prev.filter(i => i.id !== productId));
+      toast.success("Item removed from quote");
       
     } catch (error) {
-      console.error("Error removing from cart:", error);
+      console.error("Cart Context: Error removing from cart:", error);
       toast.error("Failed to remove item.");
     }
   };
@@ -208,46 +227,54 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }
 
     try {
-      const quoteId = await getOrCreateQuoteId();
-      if (!quoteId) return;
+      const { data: quote } = await (supabase as any)
+        .from('quotes')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('status', 'draft')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
 
-      const { error } = await supabase
+      if (!quote) return;
+
+      const { error } = await (supabase as any)
         .from('quote_items')
         .update({ quantity: quantity })
-        .eq('quote_id', quoteId)
+        .eq('quote_id', quote.id)
         .eq('product_id', productId);
 
       if (error) throw error;
 
-      // Optimistic update
-      setCartItems(prev => prev.map(i => i.id === productId ? { ...i, quantity } : i));
+      await fetchCart(user.id);
 
     } catch (error) {
-      console.error("Error updating quantity:", error);
+      console.error("Cart Context: Error updating quantity:", error);
     }
   };
 
   const clearCart = async () => {
      if (!user) return;
-     // Maybe verify if we want to delete the quote or just the items? 
-     // For now, let's just delete items or set status to cancelled? 
-     // Usually 'Clear Cart' means remove items.
-     
-     // Actually, let's just create a NEW quote or delete all items?
-     // Deleting items is safer.
      try {
-       const quoteId = await getOrCreateQuoteId();
-       if (!quoteId) return;
+       const { data: quotes } = await (supabase as any)
+         .from('quotes')
+         .select('id')
+         .eq('user_id', user.id)
+         .eq('status', 'draft');
 
-       const { error } = await supabase
+       if (!quotes || quotes.length === 0) return;
+       const quoteIds = quotes.map((q: any) => q.id);
+
+       const { error } = await (supabase as any)
          .from('quote_items')
          .delete()
-         .eq('quote_id', quoteId);
+         .in('quote_id', quoteIds);
 
        if (error) throw error;
        setCartItems([]);
+       toast.success("Cart cleared");
      } catch (error) {
-       console.error("Error clearing cart:", error);
+       console.error("Cart Context: Error clearing cart:", error);
      }
   };
 

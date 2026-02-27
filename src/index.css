@@ -4,31 +4,69 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 210 24% 16%;
-    --card: 0 0% 100%;
-    --card-foreground: 210 24% 16%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 210 24% 16%;
-    --primary: 200 95% 35%;
-    --primary-foreground: 0 0% 100%;
-    --primary-hover: 200 95% 30%;
-    --secondary: 190 80% 45%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 210 20% 96%;
-    --muted-foreground: 210 12% 45%;
-    --accent: 185 75% 50%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 210 20% 90%;
-    --input: 210 20% 90%;
-    --ring: 200 95% 35%;
-    --radius: 0.75rem;
+    /* Base - Deep Navy Background (Dark Only) */
+    --background: 222 47% 11%; /* Slate-950 */
+    --foreground: 210 40% 98%; /* Slate-50 */
+    
+    /* Cards - Slightly lighter than background */
+    --card: 217 33% 17%; /* Slate-900 */
+    --card-foreground: 210 40% 98%;
+    
+    /* Popovers */
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+    
+    /* Primary - Royal Blue */
+    --primary: 221 83% 53%;
+    --primary-foreground: 210 40% 98%;
+    --primary-hover: 221 83% 45%;
+    
+    /* Secondary - Slate-800 for buttons/inputs */
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+    
+    /* Muted - For subtle text */
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+    
+    /* Accent - Slate-800 highlight */
+    --accent: 217 33% 17%;
+    --accent-foreground: 210 40% 98%;
+    
+    /* Destructive */
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    /* Borders - Dark Slate */
+    --border: 217 33% 17%; /* Slate-800/900 mix */
+    --input: 217 33% 17%;
+    --ring: 224 76% 48%;
+    
+    --radius: 1rem;
   }
 
+  /* No separate .dark class needed since we want dark only, 
+     but keeping it mapped to same values just in case system preference triggers it */
   .dark {
-    /* Add your dark mode styles here if you had any */
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+    --card: 217 33% 17%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 221 83% 53%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 217 33% 17%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 224 76% 48%;
   }
 }
 
@@ -37,33 +75,40 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-background text-foreground font-sans antialiased selection:bg-blue-500/30 selection:text-blue-100;
   }
   h1, h2, h3, h4, h5, h6 {
     @apply font-semibold tracking-tight;
   }
+  
+  /* Smooth Scroll */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Custom Scrollbar for Webkit */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-700 rounded-full hover:bg-slate-600 transition-colors;
+  }
 }
 
 @layer utilities {
-  .gradient-primary {
-    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+  .mask-linear-gradient {
+    mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
   }
-  .gradient-hero {
-    background: linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted)));
+  
+  /* Glass card updated for dark theme */
+  .glass-card {
+    @apply bg-slate-900/60 backdrop-blur-xl border border-white/10 shadow-xl shadow-black/20;
   }
-  .gradient-text {
-    @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
-  }
-  .shadow-subtle {
-    box-shadow: 0 2px 8px -2px hsl(210 24% 16% / 0.08);
-  }
-  .shadow-medium {
-    box-shadow: 0 4px 16px -4px hsl(210 24% 16% / 0.12);
-  }
-  .shadow-strong {
-    box-shadow: 0 8px 32px -8px hsl(210 24% 16% / 0.16);
-  }
-  .transition-smooth {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  .text-balance {
+    text-wrap: balance;
   }
 }

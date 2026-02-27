@@ -67,7 +67,7 @@ const Dashboard = () => {
       setUserEmail(user.email || "");
 
       // 1. Fetch Profile
-      const { data: profileData } = await supabase
+      const { data: profileData } = await (supabase as any)
         .from('profiles')
         .select('*')
         .eq('id', user.id)
@@ -84,7 +84,7 @@ const Dashboard = () => {
       }
 
       // 2. Fetch Quotes (Orders)
-      const { data: quotesData } = await supabase
+      const { data: quotesData } = await (supabase as any)
         .from('quotes')
         .select('*')
         .eq('user_id', user.id)
@@ -96,7 +96,7 @@ const Dashboard = () => {
       }
 
       // 3. Fetch Dealer Applications
-      const { data: appsData } = await supabase
+      const { data: appsData } = await (supabase as any)
         .from('dealer_applications')
         .select('*')
         .eq('email', user.email) 
@@ -164,18 +164,18 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans">
+    <div className="min-h-screen bg-slate-950 font-sans selection:bg-blue-500/30 selection:text-blue-100">
       <Navbar />
       
-      <div className="bg-slate-900 pt-32 pb-12 relative overflow-hidden">
-         <div className="absolute inset-0 opacity-10 bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
+      <div className="bg-slate-950 pt-32 pb-12 relative overflow-hidden">
+         <div className="absolute inset-0 opacity-30 bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
          <div className="container mx-auto px-4 relative z-10">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div>
                 <h1 className="text-3xl font-bold text-white mb-2">My Dashboard</h1>
                 <p className="text-slate-400">Manage your profile and track your requests</p>
               </div>
-              <Button onClick={handleSignOut} variant="outline" className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white">
+              <Button onClick={handleSignOut} variant="outline" className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white bg-slate-900/50">
                 <LogOut className="mr-2 h-4 w-4" /> Sign Out
               </Button>
             </div>
@@ -184,42 +184,42 @@ const Dashboard = () => {
 
       <div className="container mx-auto px-4 py-8 -mt-8 relative z-20">
         <Tabs defaultValue="overview" className="space-y-8">
-          <TabsList className="bg-white p-1 rounded-xl shadow-sm border border-slate-200">
-            <TabsTrigger value="overview" className="rounded-lg data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700">Overview</TabsTrigger>
-            <TabsTrigger value="orders" className="rounded-lg data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700">Quote History</TabsTrigger>
-            <TabsTrigger value="profile" className="rounded-lg data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700">Profile Settings</TabsTrigger>
+          <TabsList className="bg-slate-900 p-1 rounded-xl shadow-lg border border-slate-800">
+            <TabsTrigger value="overview" className="rounded-lg data-[state=active]:bg-slate-800 data-[state=active]:text-white text-slate-400 hover:text-slate-200">Overview</TabsTrigger>
+            <TabsTrigger value="orders" className="rounded-lg data-[state=active]:bg-slate-800 data-[state=active]:text-white text-slate-400 hover:text-slate-200">Quote History</TabsTrigger>
+            <TabsTrigger value="profile" className="rounded-lg data-[state=active]:bg-slate-800 data-[state=active]:text-white text-slate-400 hover:text-slate-200">Profile Settings</TabsTrigger>
           </TabsList>
 
           {/* --- OVERVIEW TAB --- */}
           <TabsContent value="overview" className="space-y-6">
             <div className="grid md:grid-cols-3 gap-6">
               {/* Profile Card */}
-              <Card className="border-none shadow-md bg-white">
+              <Card className="border-slate-800 shadow-xl bg-slate-900">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg text-slate-700 flex items-center gap-2">
+                  <CardTitle className="text-lg text-slate-200 flex items-center gap-2">
                     <User className="h-5 w-5 text-blue-500" /> User Profile
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
                     <div>
-                      <p className="text-xs font-bold text-slate-400 uppercase">Full Name</p>
-                      <p className="font-medium text-slate-900">{profile?.contact_person || "Not set"}</p>
+                      <p className="text-xs font-bold text-slate-500 uppercase">Full Name</p>
+                      <p className="font-medium text-white">{profile?.contact_person || "Not set"}</p>
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-slate-400 uppercase">Email</p>
-                      <p className="font-medium text-slate-900">{userEmail}</p>
+                      <p className="text-xs font-bold text-slate-500 uppercase">Email</p>
+                      <p className="font-medium text-white">{userEmail}</p>
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-slate-400 uppercase">Mobile</p>
-                      <p className="font-medium text-slate-900">{profile?.phone || "Not set"}</p>
+                      <p className="text-xs font-bold text-slate-500 uppercase">Mobile</p>
+                      <p className="font-medium text-white">{profile?.phone || "Not set"}</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
               {/* Stats Card */}
-              <Card className="border-none shadow-md bg-gradient-to-br from-blue-600 to-indigo-700 text-white">
+              <Card className="border-none shadow-xl bg-gradient-to-br from-blue-600 to-indigo-800 text-white">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg flex items-center gap-2 text-blue-100">
                     <ShoppingBag className="h-5 w-5" /> Active Orders
@@ -232,9 +232,9 @@ const Dashboard = () => {
               </Card>
 
               {/* Application Status Card */}
-              <Card className="border-none shadow-md bg-white">
+              <Card className="border-slate-800 shadow-xl bg-slate-900">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg text-slate-700 flex items-center gap-2">
+                  <CardTitle className="text-lg text-slate-200 flex items-center gap-2">
                     <FileText className="h-5 w-5 text-emerald-500" /> Application Status
                   </CardTitle>
                 </CardHeader>
@@ -242,10 +242,10 @@ const Dashboard = () => {
                   {applications.length > 0 ? (
                     <div className="space-y-4">
                       {applications.slice(0, 2).map(app => (
-                        <div key={app.id} className="flex items-center justify-between border-b border-slate-50 last:border-0 pb-2 last:pb-0">
+                        <div key={app.id} className="flex items-center justify-between border-b border-slate-800 last:border-0 pb-2 last:pb-0">
                           <div>
-                            <p className="font-medium text-sm text-slate-900">OEM Request</p>
-                            <p className="text-xs text-slate-400">{new Date(app.created_at).toLocaleDateString()}</p>
+                            <p className="font-medium text-sm text-white">OEM Request</p>
+                            <p className="text-xs text-slate-500">{new Date(app.created_at).toLocaleDateString()}</p>
                           </div>
                           <Badge className={getStatusColor(app.status)}>{app.status}</Badge>
                         </div>
@@ -253,8 +253,8 @@ const Dashboard = () => {
                     </div>
                   ) : (
                     <div className="text-center py-4">
-                      <p className="text-slate-400 text-sm mb-3">No active applications</p>
-                      <Button variant="secondary" size="sm" onClick={() => navigate('/request-oem')}>Apply Now</Button>
+                      <p className="text-slate-500 text-sm mb-3">No active applications</p>
+                      <Button variant="secondary" size="sm" onClick={() => navigate('/request-oem')} className="bg-slate-800 text-white hover:bg-slate-700">Apply Now</Button>
                     </div>
                   )}
                 </CardContent>
@@ -264,23 +264,23 @@ const Dashboard = () => {
 
           {/* --- ORDERS TAB --- */}
           <TabsContent value="orders">
-            <Card className="border-none shadow-md">
+            <Card className="border-slate-800 shadow-xl bg-slate-900">
               <CardHeader>
-                <CardTitle>Quote Request History</CardTitle>
-                <CardDescription>Track the status of your bulk pricing requests.</CardDescription>
+                <CardTitle className="text-white">Quote Request History</CardTitle>
+                <CardDescription className="text-slate-400">Track the status of your bulk pricing requests.</CardDescription>
               </CardHeader>
               <CardContent>
                 {quotes.length > 0 ? (
                   <div className="space-y-4">
                     {quotes.map(quote => (
-                      <div key={quote.id} className="flex flex-col md:flex-row md:items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100 hover:border-blue-200 transition-colors gap-4">
+                      <div key={quote.id} className="flex flex-col md:flex-row md:items-center justify-between p-4 bg-slate-800/50 rounded-xl border border-slate-700/50 hover:border-blue-500/30 transition-colors gap-4">
                         <div className="flex items-center gap-4">
-                          <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
+                          <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400 font-bold border border-blue-500/20">
                             #{quote.total_items}
                           </div>
                           <div>
-                            <p className="font-bold text-slate-900">Quote #{quote.id.slice(0,8)}</p>
-                            <p className="text-xs text-slate-500 flex items-center gap-2">
+                            <p className="font-bold text-white">Quote #{quote.id.slice(0,8)}</p>
+                            <p className="text-xs text-slate-400 flex items-center gap-2">
                               <Clock className="h-3 w-3" /> {new Date(quote.created_at).toLocaleDateString()}
                             </p>
                           </div>
@@ -289,17 +289,17 @@ const Dashboard = () => {
                           <Badge className={`${getStatusColor(quote.status || 'pending')} px-3 py-1`}>
                             {quote.status || 'Pending'}
                           </Badge>
-                          <Button variant="ghost" size="sm" disabled>View Details</Button>
+                          <Button variant="ghost" size="sm" disabled className="text-slate-500">View Details</Button>
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : (
                   <div className="text-center py-12">
-                    <ShoppingBag className="h-12 w-12 text-slate-300 mx-auto mb-3" />
-                    <h3 className="text-lg font-medium text-slate-900">No quotes found</h3>
+                    <ShoppingBag className="h-12 w-12 text-slate-700 mx-auto mb-3" />
+                    <h3 className="text-lg font-medium text-white">No quotes found</h3>
                     <p className="text-slate-500 mb-6">Start adding items to your cart to request a quote.</p>
-                    <Button onClick={() => navigate('/products')}>Browse Products</Button>
+                    <Button onClick={() => navigate('/products')} className="bg-blue-600 hover:bg-blue-500">Browse Products</Button>
                   </div>
                 )}
               </CardContent>
@@ -308,14 +308,14 @@ const Dashboard = () => {
 
           {/* --- PROFILE TAB (USER ONLY) --- */}
           <TabsContent value="profile">
-            <Card className="border-none shadow-md bg-white">
+            <Card className="border-slate-800 shadow-xl bg-slate-900">
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
-                  <CardTitle>User Profile</CardTitle>
-                  <CardDescription>Manage your personal contact details.</CardDescription>
+                  <CardTitle className="text-white">User Profile</CardTitle>
+                  <CardDescription className="text-slate-400">Manage your personal contact details.</CardDescription>
                 </div>
                 {!isEditing && (
-                  <Button variant="outline" onClick={() => setIsEditing(true)}>
+                  <Button variant="outline" onClick={() => setIsEditing(true)} className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white">
                     <Pencil className="w-4 h-4 mr-2" /> Edit Profile
                   </Button>
                 )}
@@ -324,44 +324,44 @@ const Dashboard = () => {
                 <div className="max-w-2xl">
                   <div className="space-y-6">
                     <div className="space-y-2">
-                      <Label htmlFor="contact_person">Full Name</Label>
+                      <Label htmlFor="contact_person" className="text-slate-300">Full Name</Label>
                       <Input 
                         id="contact_person" 
                         disabled={!isEditing}
                         value={editForm.contact_person}
                         onChange={(e) => setEditForm({...editForm, contact_person: e.target.value})}
-                        className={!isEditing ? "bg-slate-50 border-slate-100" : ""}
+                        className={!isEditing ? "bg-slate-800/50 border-slate-800 text-slate-300" : "bg-slate-800 border-slate-700 text-white"}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="phone">Mobile Number</Label>
+                      <Label htmlFor="phone" className="text-slate-300">Mobile Number</Label>
                       <Input 
                         id="phone" 
                         disabled={!isEditing}
                         value={editForm.phone}
                         onChange={(e) => setEditForm({...editForm, phone: e.target.value})}
-                        className={!isEditing ? "bg-slate-50 border-slate-100" : ""}
+                        className={!isEditing ? "bg-slate-800/50 border-slate-800 text-slate-300" : "bg-slate-800 border-slate-700 text-white"}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="email">Email Address</Label>
+                      <Label htmlFor="email" className="text-slate-300">Email Address</Label>
                       <Input 
                         id="email" 
                         disabled={true} 
                         value={editForm.email}
-                        className="bg-slate-100 text-slate-500 border-slate-200 cursor-not-allowed"
+                        className="bg-slate-800/30 text-slate-500 border-slate-800 cursor-not-allowed"
                       />
                     </div>
                   </div>
                 </div>
               </CardContent>
               {isEditing && (
-                <CardFooter className="bg-slate-50 border-t border-slate-100 flex justify-end gap-3 p-6">
+                <CardFooter className="bg-slate-900 border-t border-slate-800 flex justify-end gap-3 p-6">
                   <Button variant="ghost" onClick={() => {
                     setIsEditing(false);
                     if (profile) setEditForm(profile); // Reset form
-                  }}>Cancel</Button>
-                  <Button onClick={handleSaveProfile} disabled={isSaving} className="bg-blue-600 hover:bg-blue-700 text-white">
+                  }} className="text-slate-400 hover:text-white hover:bg-slate-800">Cancel</Button>
+                  <Button onClick={handleSaveProfile} disabled={isSaving} className="bg-blue-600 hover:bg-blue-500 text-white">
                     {isSaving ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : <Save className="w-4 h-4 mr-2" />}
                     Save Changes
                   </Button>

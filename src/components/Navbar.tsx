@@ -1,11 +1,10 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Search, Menu, ShoppingCart, User, LogOut, FileText, X, ChevronRight, LayoutDashboard } from "lucide-react";
+import { Search, Menu, ShoppingCart, User, LogOut, FileText, X, ChevronRight, LayoutDashboard, Lock } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import logoSrc from "../assets/logo.png";
 import { useCart } from "../contexts/CartContext";
-import { Badge } from "@/components/ui/badge";
 import { supabase } from "../integrations/supabase/client";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -20,18 +19,39 @@ const Navbar = () => {
   
   // --- Auth State ---
   const [user, setUser] = useState<any>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
 
+    const checkUserRole = async (userId: string) => {
+      console.log("Checking role for user:", userId);
+      const { data, error } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .eq("role", "admin")
+        .maybeSingle();
+      
+      if (error) console.error("Error checking role:", error);
+      console.log("Role data received:", data);
+      setIsAdmin(!!data);
+    };
+
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      if (currentUser) checkUserRole(currentUser.id);
+      else setIsAdmin(false);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      if (currentUser) checkUserRole(currentUser.id);
+      else setIsAdmin(false);
     });
 
     return () => {
@@ -43,17 +63,17 @@ const Navbar = () => {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setIsProfileOpen(false);
+    setIsAdmin(false);
     toast.success("Signed out successfully");
     navigate("/");
   };
 
   const navLinks = [
     { name: "Home", path: "/" },
-    { name: "Catalogue", path: "/products" },
+    { name: "Category", path: "/products" },
     { name: "Certifications", path: "/certifications" },
     { name: "About Us", path: "/about" },
     { name: "Clients", path: "/clients" },
-    { name: "Dealers", path: "/dealer-application" },
     { name: "Contact", path: "/contact" },
   ];
 
@@ -79,9 +99,6 @@ const Navbar = () => {
     ? "bg-white/10 hover:bg-white/20 border-white/20 text-white shadow-sm backdrop-blur-sm"
     : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200 shadow-sm";
 
-  // Mobile Menu Button Color
-  const mobileMenuColor = useLightSkin ? "text-white hover:bg-white/10" : "text-slate-800 hover:bg-slate-100";
-
   return (
     <>
       <motion.nav    
@@ -90,12 +107,12 @@ const Navbar = () => {
         transition={{ type: "spring", stiffness: 100, damping: 20 }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ${
           scrolled 
-            ? "h-20 bg-white/70 backdrop-blur-2xl shadow-[0_4px_30px_rgba(0,0,0,0.03)] supports-[backdrop-filter]:bg-white/60" 
+            ? "h-20 bg-transparent" 
             : "h-28 bg-transparent"
         }`}
       >
-        {/* Subtle Gradient Border on Scroll */}
-        <div className={`absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-slate-200/50 to-transparent transition-opacity duration-500 ${scrolled ? "opacity-100" : "opacity-0"}`} />
+        {/* Subtle Gradient Border on Scroll - REMOVED for full transparency */}
+        {/* <div className={`absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-slate-200/50 to-transparent transition-opacity duration-500 ${scrolled ? "opacity-100" : "opacity-0"}`} /> */}
 
         <div className="container mx-auto px-4 h-full">
           <div className="flex items-center justify-between h-full">
@@ -218,6 +235,14 @@ const Navbar = () => {
                               <p className="text-sm font-bold text-slate-900 truncate">{user.email}</p>
                             </div>
                             <div className="p-2 space-y-0.5">
+                              {isAdmin && (
+                                <Link to="/admin" onClick={() => setIsProfileOpen(false)}>
+                                  <Button variant="ghost" className="w-full justify-between text-blue-600 hover:text-blue-700 hover:bg-blue-50/80 rounded-2xl h-11 px-4 font-bold transition-all group">
+                                    <span className="flex items-center gap-3"><Lock className="h-4 w-4 text-blue-500 group-hover:text-blue-600" /> Admin Panel</span>
+                                    <ChevronRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0 text-blue-400" />
+                                  </Button>
+                                </Link>
+                              )}
                               <Link to="/dashboard" onClick={() => setIsProfileOpen(false)}>
                                 <Button variant="ghost" className="w-full justify-between text-slate-600 hover:text-blue-700 hover:bg-blue-50/80 rounded-2xl h-11 px-4 font-medium transition-all group">
                                   <span className="flex items-center gap-3"><LayoutDashboard className="h-4 w-4 text-slate-400 group-hover:text-blue-500" /> Dashboard</span>
@@ -274,11 +299,11 @@ const Navbar = () => {
               {/* --- MOBILE MENU BUTTON --- */}
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className={`lg:hidden rounded-full w-10 h-10 ml-auto transition-colors ${mobileMenuColor}`}>
+                  <Button variant="ghost" size="icon" className="lg:hidden rounded-full w-10 h-10 ml-auto transition-colors text-white hover:bg-white/10">
                     <Menu className="h-6 w-6" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="right" className="w-full sm:w-[400px] bg-white/80 backdrop-blur-3xl border-l border-white/50 p-0 shadow-2xl flex flex-col h-full z-[100]">
+                <SheetContent side="right" className="w-full sm:w-[400px] bg-slate-900/95 backdrop-blur-3xl border-l border-white/10 p-0 shadow-2xl flex flex-col h-full z-[100]">
                   
                   {/* Mobile Menu Header */}
                   <div className="p-6 flex items-center justify-between">
@@ -364,9 +389,24 @@ const Navbar = () => {
                                    <p className="text-sm font-bold text-slate-900 truncate">{user.email}</p>
                                 </div>
                              </div>
-                             <Button className="w-full bg-slate-900 text-white hover:bg-blue-700 rounded-xl h-12 font-bold shadow-lg shadow-slate-200">
-                                Dashboard
-                             </Button>
+                             <div className="flex flex-col gap-2">
+                               {isAdmin && (
+                                 <Link to="/admin">
+                                   <SheetClose asChild>
+                                      <Button className="w-full bg-blue-600 text-white hover:bg-blue-700 rounded-xl h-12 font-bold shadow-lg shadow-blue-200">
+                                         Admin Panel
+                                      </Button>
+                                   </SheetClose>
+                                 </Link>
+                               )}
+                               <Link to="/dashboard">
+                                 <SheetClose asChild>
+                                    <Button className="w-full bg-slate-900 text-white hover:bg-slate-800 rounded-xl h-12 font-bold shadow-lg shadow-slate-200">
+                                       Dashboard
+                                    </Button>
+                                 </SheetClose>
+                               </Link>
+                             </div>
                           </div>
                         </SheetClose>
                       </Link>
@@ -455,26 +495,5 @@ const Navbar = () => {
     </>
   );
 };
-
-// Helper for ArrowRight in Mobile Menu
-function ArrowRight(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M5 12h14" />
-      <path d="m12 5 7 7-7 7" />
-    </svg>
-  )
-}
 
 export default Navbar;
