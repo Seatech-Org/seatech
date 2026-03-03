@@ -86,14 +86,14 @@ export const ProductCard = ({ product }: ProductCardProps) => {
         <div className="flex flex-col h-full">
           
           {/* Image Container */}
-          <div className="aspect-[4/3] bg-white relative p-8 flex items-center justify-center overflow-hidden">
+          <div className="aspect-[4/3] bg-white relative p-4 flex items-center justify-center overflow-hidden">
             <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/5 transition-colors duration-500"></div>
             
             {product.images && product.images.length > 0 ? (
               <motion.img 
                 src={product.images[0].main} 
                 alt={product.name} 
-                className="w-full h-full object-contain mix-blend-multiply relative z-10"
+                className="w-full h-full object-contain relative z-10"
                 whileHover={{ scale: 1.1 }}
                 transition={{ duration: 0.5 }}
               />

@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CartProvider } from "./contexts/CartContext";
 import { Loader2 } from "lucide-react";
+import logoSrc from "./assets/logo.png";
 import { HelmetProvider } from "react-helmet-async";
 
 // --- LAZY LOADED PAGES ---
@@ -29,12 +30,12 @@ const queryClient = new QueryClient();
 
 // Cinematic Loading Fallback
 const PageLoader = () => (
-  <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center">
-    <div className="relative">
-      <div className="absolute inset-0 bg-blue-500/20 blur-3xl rounded-full animate-pulse"></div>
-      <Loader2 className="h-12 w-12 text-blue-500 animate-spin relative z-10" />
+  <div className="min-h-screen bg-background flex flex-col items-center justify-center">
+    <div className="relative flex items-center justify-center">
+      <div className="absolute inset-0 bg-primary/20 blur-[40px] rounded-full animate-pulse scale-150"></div>
+      <img src={logoSrc} alt="Loading Seatech..." className="h-14 w-auto relative z-10 animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite]" />
     </div>
-    <p className="mt-4 text-slate-500 font-medium tracking-widest uppercase text-xs animate-pulse">Loading Seatech...</p>
+    <p className="mt-8 text-muted-foreground font-medium tracking-widest uppercase text-xs animate-pulse">Loading Seatech...</p>
   </div>
 );
 

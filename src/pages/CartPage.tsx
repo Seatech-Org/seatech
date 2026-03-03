@@ -75,12 +75,12 @@ const CartPage = () => {
                     >
                       <Card className="border-slate-800/50 shadow-xl overflow-hidden bg-slate-900/50 backdrop-blur-xl group hover:border-blue-500/30 transition-all duration-500 rounded-[2rem]">
                         <CardContent className="p-6 md:p-8 flex flex-col md:flex-row items-center gap-8">
-                          <div className="w-32 h-32 bg-white rounded-3xl p-4 flex-shrink-0 flex items-center justify-center shadow-inner group-hover:scale-105 transition-transform duration-500">
+                          <div className="w-32 h-32 bg-secondary rounded-[10px] p-4 flex-shrink-0 flex items-center justify-center shadow-inner group-hover:scale-105 transition-transform duration-500 border border-white/[0.08]">
                              <Link to={`/products/${item.id}`}>
                               <img
                                 src={item.images?.[0]?.thumbnail || item.images?.[0]?.main}
                                 alt={item.name}
-                                className="w-full h-full object-contain mix-blend-multiply"
+                                className="w-full h-full object-contain"
                               />
                             </Link>
                           </div>
