@@ -22,6 +22,7 @@ import AuthDialog from "@/components/AuthDialog";
 import { ProductCard } from "@/components/ProductCard";
 import { Helmet } from "react-helmet-async";
 import { useProducts } from "@/services/product-service";
+import logoSrc from "../assets/logo.png";
 
 // --- CONFIG: SPECS TO HIDE ---
 const IGNORED_SPECS = [
@@ -73,10 +74,13 @@ const ProductDetailPage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col font-sans">
+      <div className="min-h-screen bg-background flex flex-col font-sans">
         <Navbar />
         <div className="flex-grow flex items-center justify-center">
-           <Loader2 className="h-12 w-12 text-blue-500 animate-spin" />
+          <div className="relative flex items-center justify-center">
+            <div className="absolute inset-0 bg-primary/20 blur-[40px] rounded-full animate-pulse scale-150"></div>
+            <img src={logoSrc} alt="Loading..." className="h-14 w-auto relative z-10 animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite]" />
+          </div>
         </div>
         <Footer />
       </div>
@@ -143,7 +147,7 @@ const ProductDetailPage = () => {
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="aspect-[4/3] bg-white rounded-[2.5rem] p-12 flex items-center justify-center relative overflow-hidden border border-white/10 group shadow-2xl"
+                className="aspect-[4/3] bg-white rounded-[2.5rem] p-8 flex items-center justify-center relative overflow-hidden border border-white/[0.08] group shadow-elevation"
                 onMouseEnter={() => setIsImageHovered(true)}
                 onMouseLeave={() => setIsImageHovered(false)}
               >
@@ -171,7 +175,7 @@ const ProductDetailPage = () => {
                     animate={{ opacity: 1, scale: isImageHovered ? 1.05 : 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.4, ease: "easeOut" }}
-                    className="w-full h-full object-contain mix-blend-multiply relative z-10"
+                    className="w-full h-full object-contain relative z-10"
                     loading="lazy"
                     decoding="async"
                   />
@@ -188,7 +192,7 @@ const ProductDetailPage = () => {
                       onClick={() => setSelectedImage(image.main)}
                       onMouseEnter={() => setSelectedImage(image.main)}
                       className={cn(
-                        "relative w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden transition-all duration-300 bg-white p-2 cursor-pointer flex items-center justify-center border",
+                        "relative w-20 h-20 flex-shrink-0 rounded-[10px] overflow-hidden transition-all duration-300 bg-white p-2 cursor-pointer flex items-center justify-center border border-white/[0.08]",
                         isSelected 
                           ? "border-blue-500 shadow-md ring-1 ring-blue-500/50" 
                           : "border-slate-700 hover:border-slate-500 opacity-70 hover:opacity-100"
@@ -197,7 +201,7 @@ const ProductDetailPage = () => {
                       <img 
                         src={image.thumbnail} 
                         alt={`View ${index + 1}`}
-                        className="w-full h-full object-contain mix-blend-multiply"
+                        className="w-full h-full object-contain"
                         loading="lazy"
                         decoding="async"
                       />
