@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Mail, Phone, MapPin, Facebook, Twitter, Linkedin, Instagram, ExternalLink } from "lucide-react";
+import { Mail, Phone, MapPin, Facebook, Twitter, Linkedin, Instagram } from "lucide-react";
 import logoSrc from "../assets/logo.png";
 
 const Footer = () => {
@@ -7,7 +7,7 @@ const Footer = () => {
     <footer className="bg-background text-muted-foreground border-t border-white/[0.08]">
       <div className="container mx-auto px-4 py-20">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
-          
+
           {/* Brand Column */}
           <div className="space-y-6">
             <img src={logoSrc} alt="Seatech" className="h-10 w-auto" />
@@ -30,11 +30,6 @@ const Footer = () => {
               <li><Link to="/government-procurement" className="hover:text-primary transition-colors">Government Procurement</Link></li>
               <li><Link to="/dealer-application" className="hover:text-primary transition-colors">Become a Partner</Link></li>
               <li><Link to="/request-oem" className="hover:text-primary transition-colors">OEM Authorization</Link></li>
-              <li>
-                <a href="https://gem.gov.in" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-primary transition-colors">
-                  GeM Portal <ExternalLink className="h-3 w-3" />
-                </a>
-              </li>
             </ul>
           </div>
 
@@ -69,7 +64,7 @@ const Footer = () => {
                 <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                   <MapPin className="h-4 w-4 text-primary" />
                 </div>
-                <span className="leading-relaxed">Plot No. 45, Industrial Area,<br/>Phase 2, New Delhi - 110020</span>
+                <span className="leading-relaxed">Plot No. 45, Industrial Area,<br />Phase 2, New Delhi - 110020</span>
               </li>
             </ul>
           </div>
@@ -78,8 +73,8 @@ const Footer = () => {
         <div className="mt-20 pt-8 border-t border-white/[0.08] flex flex-col md:flex-row justify-between items-center gap-6 text-sm">
           <p>© {new Date().getFullYear()} Seatech Government Solutions. All rights reserved.</p>
           <div className="flex gap-8">
-             <a href="#" className="hover:text-foreground transition-colors">Privacy Policy</a>
-             <a href="#" className="hover:text-foreground transition-colors">Terms of Service</a>
+            <a href="#" className="hover:text-foreground transition-colors">Privacy Policy</a>
+            <a href="#" className="hover:text-foreground transition-colors">Terms of Service</a>
           </div>
         </div>
       </div>

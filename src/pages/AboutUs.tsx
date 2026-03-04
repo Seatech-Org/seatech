@@ -37,7 +37,7 @@ const AboutUs = () => {
               </span>
             </h1>
             <p className="text-lg md:text-xl text-slate-400 max-w-3xl mx-auto leading-relaxed">
-              Seatech Associates Pvt. Ltd. is a premier OEM verified partner, bridging the gap between precision manufacturing and government infrastructure needs.
+              Seatech Associates PL is a premier OEM verified partner, bridging the gap between precision manufacturing and government infrastructure needs.
             </p>
           </motion.div>
         </div>
@@ -47,8 +47,8 @@ const AboutUs = () => {
       <section className="py-20 lg:py-32">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
-            
-            <motion.div 
+
+            <motion.div
               initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
@@ -77,7 +77,7 @@ const AboutUs = () => {
               </div>
             </motion.div>
 
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, x: 50 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
@@ -86,16 +86,16 @@ const AboutUs = () => {
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">Who We Are</h2>
               <div className="space-y-6 text-lg text-slate-400 leading-relaxed">
                 <p>
-                  Seatech Associates Private Ltd. stands at the forefront of the furniture manufacturing industry. We specialize in dealing with government institutes, local buyers, and large-scale retailers, providing robust and elegant solutions for every space.
+                  Seatech Associates PL stands at the forefront of the furniture manufacturing industry. We specialize in dealing with government institutes, local buyers, and large-scale retailers, providing robust and elegant solutions for every space.
                 </p>
                 <p>
                   As an <strong className="text-white">OEM Verified Seller on GeM</strong> (Government e-Marketplace), we adhere to the highest standards of quality and compliance. Our portfolio spans from executive office suites to large-scale auditorium seating, ensuring that every piece we deliver meets the rigorous demands of institutional use.
                 </p>
                 <p>
-                  We don't just supply; we create. Our in-house factory is equipped with advanced machinery, allowing us to maintain strict quality control over every table, chair, and almirah that bears our name.
+                  We don't just supply; we create. Our in-house factory is equipped with advanced machinery, allowing us to maintain strict quality control over every furniture that bears our name.
                 </p>
               </div>
-              
+
               <div className="mt-8 grid grid-cols-2 gap-4">
                 {[
                   "Government Institutes",
@@ -127,7 +127,7 @@ const AboutUs = () => {
       <section className="bg-slate-900 py-24 text-white relative overflow-hidden border-y border-slate-800">
         {/* Decorative Grid */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:40px_40px] opacity-20"></div>
-        
+
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <h2 className="text-3xl md:text-5xl font-bold mb-6 text-white">Our Infrastructure</h2>
@@ -144,7 +144,7 @@ const AboutUs = () => {
                 </div>
                 <h3 className="text-xl font-bold mb-3 text-white">Advanced Machinery</h3>
                 <p className="text-slate-400">
-                  Our factory houses 5-6 heavy-duty industrial machines dedicated to cutting, shaping, and finishing wood and metal with micrometer precision.
+                  Our factory houses heavy-duty industrial machines dedicated to cutting, shaping, and finishing wood and metal with precision.
                 </p>
               </CardContent>
             </Card>
@@ -183,21 +183,14 @@ const AboutUs = () => {
             <div className="max-w-2xl">
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Comprehensive Product Range</h2>
               <p className="text-lg text-slate-400 mb-8">
-                From simple classroom stools to complex composite office tables. We deal in <strong>17 to 25 distinct categories</strong> of wooden and metal furniture.
+                From simple classroom stools to complex composite office tables. We deal in <strong> distinct categories</strong> of wooden and metal furniture.
               </p>
-              <div className="flex flex-wrap gap-3">
-                {["Office Tables", "Auditorium Chairs", "Almirahs", "Bunk Beds", "Workstations", "Executive Desks"].map((tag, i) => (
-                  <span key={i} className="px-4 py-2 bg-slate-800 text-slate-300 font-semibold rounded-lg text-sm border border-slate-700">
-                    {tag}
-                  </span>
-                ))}
-              </div>
             </div>
             <div className="flex-shrink-0">
-               <div className="w-48 h-48 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center shadow-2xl shadow-blue-900/50 relative group">
-                  <PenTool className="h-20 w-20 text-white" />
-                  <div className="absolute inset-0 border-4 border-white/20 rounded-full scale-110 group-hover:scale-125 transition-transform duration-500"></div>
-               </div>
+              <div className="w-48 h-48 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center shadow-2xl shadow-blue-900/50 relative group">
+                <PenTool className="h-20 w-20 text-white" />
+                <div className="absolute inset-0 border-4 border-white/20 rounded-full scale-110 group-hover:scale-125 transition-transform duration-500"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -216,7 +209,7 @@ const AboutUs = () => {
                 Get in Touch
               </Button>
             </Link>
-            <Link to="/dealer-application">
+            <Link to="/become-partner">
               <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 px-8 text-lg font-bold border-slate-700 hover:bg-slate-800 text-slate-300 rounded-full bg-transparent">
                 Become a Partner
               </Button>

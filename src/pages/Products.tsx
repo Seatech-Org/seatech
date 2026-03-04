@@ -4,12 +4,12 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { 
-  Search, 
-  Armchair, 
-  Briefcase, 
-  Bed, 
-  Grid, 
+import {
+  Search,
+  Armchair,
+  Briefcase,
+  Bed,
+  Grid,
   Sofa,
   ArrowLeft,
   FolderOpen,
@@ -56,14 +56,14 @@ const OFFICE_SUBCATEGORIES = Array.from(new Set(localProducts.map(p => p.categor
 const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const categoryParam = searchParams.get("category");
-  const searchParam = searchParams.get("search"); 
-  
+  const searchParam = searchParams.get("search");
+
   const [activeCategory, setActiveCategory] = useState(categoryParam || "All");
   const [searchQuery, setSearchQuery] = useState(searchParam || "");
 
-  const { data: products = [], isLoading, error } = useProducts({ 
-    category: activeCategory, 
-    search: searchQuery 
+  const { data: products = [], isLoading, error } = useProducts({
+    category: activeCategory,
+    search: searchQuery
   });
 
   useEffect(() => {
@@ -99,10 +99,10 @@ const Products = () => {
   };
 
   const isProductView = !["All", "Furniture", "Office Furniture"].includes(activeCategory) || searchQuery.length > 0;
-  const filteredProducts = products; 
+  const filteredProducts = products;
 
   return (
-    <div className="min-h-screen bg-slate-950 font-sans selection:bg-blue-500/30 selection:text-blue-100">
+    <div className="min-h-screen bg-background font-sans text-foreground selection:bg-primary/30 selection:text-primary-foreground">
       <Helmet>
         <title>{searchQuery ? `Search results for "${searchQuery}"` : activeCategory === "All" ? "Our Collections" : activeCategory} | Seatech</title>
         <meta name="description" content={`Browse our ${activeCategory === "All" ? "entire collection" : activeCategory} of premium furniture and infrastructure solutions.`} />
@@ -110,35 +110,35 @@ const Products = () => {
       <Navbar />
 
       {/* --- HEADER --- */}
-      <section className="relative pt-32 pb-16 bg-slate-950 overflow-hidden border-b border-slate-800">
-        <div className="absolute inset-0 bg-slate-950">
-           <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/20 via-slate-950/80 to-slate-950 opacity-80"></div>
+      <section className="relative pt-32 pb-16 bg-background overflow-hidden border-b border-white/[0.08]">
+        <div className="absolute inset-0 bg-background">
+          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-background/80 to-background opacity-80"></div>
         </div>
-        
+
         <div className="container mx-auto px-4 relative z-10 text-center">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.8, type: "spring", stiffness: 50 }}
           >
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 tracking-tight">
+            <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6 tracking-tight drop-shadow-md">
               {searchQuery ? (
-                <span>Results for <span className="text-blue-600">"{searchQuery}"</span></span>
+                <span>Results for <span className="text-primary">"{searchQuery}"</span></span>
               ) : (
                 activeCategory === "All" ? "Product Category" : activeCategory
               )}
             </h1>
-            <p className="text-slate-400 text-lg max-w-2xl mx-auto leading-relaxed">
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto leading-relaxed">
               {!isProductView
-                ? "Explore our comprehensive range of high-performance furniture and specialized infrastructure solutions." 
+                ? "Explore our comprehensive range of high-performance furniture and specialized infrastructure solutions."
                 : `Showing ${filteredProducts.length} results in ${activeCategory}.`}
             </p>
           </motion.div>
         </div>
       </section>
 
-      <div className="container mx-auto px-4 py-8">
-        
+      <div className="container mx-auto px-4 py-12 md:py-16">
+
         <AnimatePresence mode="wait">
           {/* --- VIEW 1: CATEGORY SELECTION (TOP OR FURNITURE) --- */}
           {!isProductView ? (
@@ -152,37 +152,37 @@ const Products = () => {
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
                 <div className="flex items-center gap-3">
                   {(activeCategory === "Furniture" || activeCategory === "Office Furniture") && (
-                    <Button 
-                      variant="ghost" 
+                    <Button
+                      variant="ghost"
                       onClick={handleBackToCategories}
-                      className="mr-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 h-11 px-4 font-bold flex-shrink-0"
+                      className="mr-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary h-11 px-4 font-bold flex-shrink-0"
                     >
                       <ArrowLeft className="h-4 w-4 mr-2" /> Back
                     </Button>
                   )}
-                  <div className="h-12 w-12 rounded-2xl bg-blue-50 flex items-center justify-center border border-blue-100">
-                    <Grid className="h-6 w-6 text-blue-600" />
+                  <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20">
+                    <Grid className="h-6 w-6 text-primary" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold text-white tracking-tight">
-                       {activeCategory === "All" ? "Main Categories" : activeCategory === "Furniture" ? "Furniture Sub-Categories" : "Office Furniture Collections"}
+                    <h2 className="text-2xl font-bold text-foreground tracking-tight">
+                      {activeCategory === "All" ? "Main Categories" : activeCategory === "Furniture" ? "Furniture Sub-Categories" : "Office Furniture Collections"}
                     </h2>
-                    <p className="text-slate-400 text-sm font-medium">Select a category to explore</p>
+                    <p className="text-muted-foreground text-sm font-medium">Select a category to explore</p>
                   </div>
                 </div>
 
-                <div className="relative w-full md:max-w-md group">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
-                  <Input 
-                    placeholder="Quick search products..." 
-                    className="pl-11 h-14 rounded-2xl border-slate-800 bg-slate-900 focus:bg-slate-950 focus:border-blue-500 text-white placeholder:text-slate-400 transition-all text-base shadow-sm"
+                <div className="relative w-full md:max-w-md group mt-4 md:mt-0">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                  <Input
+                    placeholder="Quick search products..."
+                    className="pl-11 h-14 rounded-2xl border-white/[0.08] bg-secondary focus:bg-background focus:border-primary text-foreground placeholder:text-muted-foreground transition-all text-base shadow-lg"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && setSearchParams({ search: searchQuery })}
                   />
                 </div>
               </div>
-              
+
               <div className={`grid ${activeCategory === "Office Furniture" ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4" : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8"}`}>
                 {(activeCategory === "All" ? TOP_LEVEL_CATEGORIES : activeCategory === "Furniture" ? FURNITURE_CATEGORIES : OFFICE_SUBCATEGORIES).map((cat, i) => {
                   const Icon = cat.icon;
@@ -191,19 +191,19 @@ const Products = () => {
                     <motion.button
                       key={cat.name}
                       onClick={() => handleCategoryClick(cat.name)}
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: isSmall ? i * 0.02 : i * 0.1 }}
-                      className={`flex flex-col items-center justify-center ${isSmall ? 'p-4 min-h-[160px] rounded-2xl' : 'p-10 min-h-[250px] rounded-[2rem]'} bg-slate-900 border border-slate-800 shadow-xl hover:shadow-2xl hover:border-blue-300 hover:-translate-y-2 transition-all duration-300 group text-center`}
+                      initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      transition={{ delay: isSmall ? i * 0.05 : i * 0.1, duration: 0.5, type: "spring" }}
+                      className={`flex flex-col items-center justify-center ${isSmall ? 'p-4 min-h-[160px] rounded-2xl' : 'p-10 min-h-[250px] rounded-[2rem]'} bg-card border border-white/[0.08] shadow-elevation hover:border-primary/50 hover:-translate-y-2 transition-all duration-300 group text-center`}
                     >
-                      <div className={`${isSmall ? 'w-12 h-12 rounded-xl mb-4' : 'w-20 h-20 rounded-3xl mb-6'} bg-slate-950 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white group-hover:rotate-6 transition-all duration-300 text-slate-400 border border-white/10 shadow-sm`}>
+                      <div className={`${isSmall ? 'w-12 h-12 rounded-xl mb-4' : 'w-20 h-20 rounded-3xl mb-6'} bg-secondary flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground group-hover:rotate-6 transition-all duration-300 text-muted-foreground border border-white/[0.08] shadow-sm`}>
                         <Icon className={`${isSmall ? 'h-6 w-6' : 'h-10 w-10'} transition-transform duration-300 group-hover:scale-110`} />
                       </div>
-                      <h3 className={`${isSmall ? 'text-xs' : 'text-xl'} font-bold text-white ${isSmall ? 'mb-1' : 'mb-2'} group-hover:text-blue-400 transition-colors line-clamp-2`}>
+                      <h3 className={`${isSmall ? 'text-xs' : 'text-xl'} font-bold text-foreground ${isSmall ? 'mb-1' : 'mb-2'} group-hover:text-primary transition-colors line-clamp-2`}>
                         {cat.name}
                       </h3>
                       {!isSmall && (
-                        <p className="text-sm text-slate-400 font-medium">
+                        <p className="text-sm text-muted-foreground font-medium">
                           {cat.desc}
                         </p>
                       )}
@@ -222,46 +222,45 @@ const Products = () => {
               transition={{ duration: 0.4 }}
             >
               {/* Refined Navigation Bar */}
-              <div className="sticky top-20 md:top-24 z-30 mb-12">
-                <div className="bg-slate-900/90 backdrop-blur-2xl border border-slate-800 shadow-lg rounded-[2rem] p-3 flex flex-col md:flex-row gap-4 items-center">
-                  
-                  <div className="flex items-center gap-2 p-1 bg-slate-950 rounded-2xl w-full md:w-auto">
-                    <Button 
-                      variant="ghost" 
+              <div className="sticky top-20 md:top-24 z-30 mb-8 md:mb-12">
+                <div className="bg-secondary/90 backdrop-blur-2xl border border-white/[0.08] shadow-elevation rounded-[2rem] p-3 flex flex-col md:flex-row gap-4 items-center">
+
+                  <div className="flex items-center gap-2 p-1 bg-background rounded-2xl w-full md:w-auto">
+                    <Button
+                      variant="ghost"
                       onClick={handleBackToCategories}
-                      className="rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/50 h-11 px-4 font-bold flex-shrink-0"
+                      className="rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary h-11 px-4 font-bold flex-shrink-0"
                     >
-                      <ArrowLeft className="h-4 w-4 mr-2" /> 
+                      <ArrowLeft className="h-4 w-4 mr-2" />
                       Back
                     </Button>
-                    <div className="h-6 w-px bg-slate-800/50 mx-1 hidden md:block"></div>
-                    <div className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-blue-700 bg-blue-50 rounded-xl whitespace-nowrap overflow-hidden text-ellipsis border border-blue-100">
+                    <div className="h-6 w-px bg-white/[0.08] mx-1 hidden md:block"></div>
+                    <div className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-primary bg-primary/10 rounded-xl whitespace-nowrap overflow-hidden text-ellipsis border border-primary/20">
                       {activeCategory !== "All" ? activeCategory : "Search Results"}
                     </div>
                   </div>
 
                   {/* Quick Category Switcher (Horizontal Scroll) */}
                   <div className="flex-1 flex items-center gap-3 overflow-x-auto no-scrollbar py-1 px-2 mask-linear-gradient-horizontal">
-                     {(OFFICE_SUBCATEGORIES.some(c => c.name === activeCategory) ? OFFICE_SUBCATEGORIES : FURNITURE_CATEGORIES).map((cat) => (
-                       <button
-                         key={cat.name}
-                         onClick={() => handleCategoryClick(cat.name)}
-                         className={`whitespace-nowrap px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
-                           activeCategory === cat.name 
-                             ? "bg-blue-600 border-blue-500 text-white shadow-md shadow-blue-200" 
-                             : "bg-slate-900 border-slate-800 text-slate-400 hover:text-white hover:bg-slate-950"
-                         }`}
-                       >
-                         {cat.name}
-                       </button>
-                     ))}
+                    {(OFFICE_SUBCATEGORIES.some(c => c.name === activeCategory) ? OFFICE_SUBCATEGORIES : FURNITURE_CATEGORIES).map((cat) => (
+                      <button
+                        key={cat.name}
+                        onClick={() => handleCategoryClick(cat.name)}
+                        className={`whitespace-nowrap px-4 py-2 rounded-xl text-xs font-bold transition-all border ${activeCategory === cat.name
+                          ? "bg-primary border-primary text-primary-foreground shadow-lg shadow-primary/20"
+                          : "bg-secondary border-white/[0.08] text-muted-foreground hover:text-foreground hover:bg-background"
+                          }`}
+                      >
+                        {cat.name}
+                      </button>
+                    ))}
                   </div>
 
                   <div className="relative w-full md:w-72 group">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
-                    <Input 
-                      placeholder="Search products..." 
-                      className="pl-11 h-11 rounded-xl border-slate-800 bg-slate-900 focus:bg-slate-950 focus:border-blue-500 text-white placeholder:text-slate-400 transition-all text-sm shadow-sm"
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                    <Input
+                      placeholder="Search products..."
+                      className="pl-11 h-11 rounded-xl border-white/[0.08] bg-secondary focus:bg-background focus:border-primary text-foreground placeholder:text-muted-foreground transition-all text-sm shadow-sm"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -271,62 +270,69 @@ const Products = () => {
 
               {/* Loading & Error States */}
               {isLoading ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
                   {Array.from({ length: 8 }).map((_, i) => (
-                    <div key={i} className="bg-slate-900 rounded-[1.5rem] overflow-hidden border border-slate-800 flex flex-col h-full shadow-sm">
-                      <div className="aspect-[4/3] bg-slate-950 p-8 relative">
-                         <Skeleton className="w-full h-full rounded-xl bg-slate-800/50" />
+                    <div key={i} className="bg-card rounded-[1.5rem] overflow-hidden border border-white/[0.08] flex flex-col h-full shadow-elevation">
+                      <div className="aspect-[4/3] bg-background p-8 relative">
+                        <Skeleton className="w-full h-full rounded-xl bg-secondary" />
                       </div>
-                      <div className="p-6 flex flex-col flex-grow border-t border-white/10">
-                         <Skeleton className="h-3 w-20 mb-2 bg-slate-800/50" />
-                         <Skeleton className="h-6 w-full mb-4 bg-slate-800/50" />
-                         <div className="mt-auto pt-4 flex items-center justify-between border-t border-white/10">
-                            <div className="space-y-1">
-                               <Skeleton className="h-2 w-10 bg-slate-800/50" />
-                               <Skeleton className="h-4 w-16 bg-slate-800/50" />
-                            </div>
-                            <Skeleton className="h-8 w-24 rounded-full bg-slate-800/50" />
-                         </div>
+                      <div className="p-6 flex flex-col flex-grow border-t border-white/[0.08]">
+                        <Skeleton className="h-3 w-20 mb-2 bg-secondary" />
+                        <Skeleton className="h-6 w-full mb-4 bg-secondary" />
+                        <div className="mt-auto pt-4 flex items-center justify-between border-t border-white/[0.08]">
+                          <div className="space-y-1">
+                            <Skeleton className="h-2 w-10 bg-secondary" />
+                            <Skeleton className="h-4 w-16 bg-secondary" />
+                          </div>
+                          <Skeleton className="h-8 w-24 rounded-full bg-secondary" />
+                        </div>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : error ? (
                 <div className="text-center py-20 px-4">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-50 text-red-500 mb-6 border border-red-100">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-destructive/10 text-destructive mb-6 border border-destructive/20">
                     <Filter className="h-8 w-8" />
                   </div>
-                  <h3 className="text-xl font-bold text-white mb-2">Unable to load products</h3>
-                  <p className="text-slate-400 max-w-md mx-auto mb-6">{(error as Error).message}</p>
-                  <Button onClick={() => window.location.reload()} variant="outline" className="border-slate-800 text-slate-300 hover:bg-slate-950">Try Again</Button>
+                  <h3 className="text-xl font-bold text-foreground mb-2">Unable to load products</h3>
+                  <p className="text-muted-foreground max-w-md mx-auto mb-6">{(error as Error).message}</p>
+                  <Button onClick={() => window.location.reload()} variant="outline" className="border-white/[0.08] text-foreground hover:bg-secondary">Try Again</Button>
                 </div>
               ) : (
                 /* Product Grid */
                 filteredProducts.length > 0 ? (
-                  <motion.div 
-                     layout
-                     className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 pb-20"
+                  <motion.div
+                    layout
+                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 pb-20"
                   >
-                    {filteredProducts.map((product) => (
-                      <ProductCard key={product.id} product={product} />
+                    {filteredProducts.map((product, i) => (
+                      <motion.div
+                        key={product.id}
+                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        transition={{ delay: i * 0.05, duration: 0.5 }}
+                      >
+                        <ProductCard product={product} />
+                      </motion.div>
                     ))}
                   </motion.div>
                 ) : (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="text-center py-32 bg-slate-900 rounded-[3rem] border border-dashed border-slate-900 mb-20 shadow-sm"
+                    className="text-center py-24 md:py-32 bg-secondary rounded-[3rem] border border-dashed border-white/[0.08] mb-20 shadow-elevation mx-4 md:mx-0"
                   >
-                    <div className="w-24 h-24 bg-slate-950 rounded-full flex items-center justify-center mx-auto mb-6 border border-white/10">
-                      <FolderOpen className="h-10 w-10 text-slate-400" />
+                    <div className="w-24 h-24 bg-background rounded-full flex items-center justify-center mx-auto mb-6 border border-white/[0.08]">
+                      <FolderOpen className="h-10 w-10 text-muted-foreground" />
                     </div>
-                    <h3 className="text-3xl font-bold text-white mb-3">No matches found</h3>
-                    <p className="text-slate-400 mb-10 max-w-md mx-auto text-lg leading-relaxed">
+                    <h3 className="text-3xl font-bold text-foreground mb-3">No matches found</h3>
+                    <p className="text-muted-foreground mb-10 max-w-md mx-auto text-lg leading-relaxed px-4">
                       We couldn't find anything for "{searchQuery}" in this category. Try broader terms or reset filters.
                     </p>
-                    <Button 
-                      onClick={handleBackToCategories} 
-                      className="rounded-full px-10 h-14 bg-blue-600 text-white hover:bg-blue-700 font-bold text-lg shadow-md shadow-blue-200"
+                    <Button
+                      onClick={handleBackToCategories}
+                      className="rounded-full px-10 h-14 bg-primary text-primary-foreground hover:-translate-y-1 font-bold text-lg shadow-elevation transition-all"
                     >
                       Clear All Filters
                     </Button>

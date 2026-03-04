@@ -55,7 +55,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -5 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className="group h-full relative rounded-[1.5rem] overflow-hidden border border-slate-800 bg-slate-900"
+      className="group h-full relative rounded-[1.5rem] overflow-hidden border border-white/[0.08] bg-card shadow-elevation hover:border-primary/50"
       onMouseMove={handleMouseMove}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -68,7 +68,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
           background: `radial-gradient(600px circle at ${position.x}px ${position.y}px, rgba(59, 130, 246, 0.15), transparent 40%)`,
         }}
       />
-      
+
       {/* Spotlight Border */}
       <div
         className="pointer-events-none absolute -inset-px rounded-[1.5rem] opacity-0 transition duration-300 z-10"
@@ -84,50 +84,50 @@ export const ProductCard = ({ product }: ProductCardProps) => {
 
       <Link to={`/products/${product.id}`} className="block h-full relative z-20">
         <div className="flex flex-col h-full">
-          
+
           {/* Image Container */}
           <div className="aspect-[4/3] bg-white relative p-4 flex items-center justify-center overflow-hidden">
-            <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/5 transition-colors duration-500"></div>
-            
+            <div className="absolute inset-0 bg-secondary/0 group-hover:bg-secondary/5 transition-colors duration-500"></div>
+
             {product.images && product.images.length > 0 ? (
-              <motion.img 
-                src={product.images[0].main} 
-                alt={product.name} 
+              <motion.img
+                src={product.images[0].main}
+                alt={product.name}
                 className="w-full h-full object-contain relative z-10"
                 whileHover={{ scale: 1.1 }}
                 transition={{ duration: 0.5 }}
               />
             ) : (
               <div className="flex flex-col items-center justify-center w-full h-full text-slate-300">
-                  <FolderOpen className="h-12 w-12 opacity-20 mb-2" />
-                  <span className="text-xs font-medium opacity-50">No Image</span>
+                <FolderOpen className="h-12 w-12 opacity-20 mb-2" />
+                <span className="text-xs font-medium opacity-50">No Image</span>
               </div>
             )}
 
             <div className="absolute bottom-4 right-4 translate-y-10 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 z-20">
-              <div className="h-10 w-10 bg-slate-900 rounded-full flex items-center justify-center shadow-lg text-white hover:bg-blue-600 transition-colors border border-slate-700">
+              <div className="h-10 w-10 bg-secondary rounded-full flex items-center justify-center shadow-elevation text-foreground hover:bg-primary hover:text-primary-foreground transition-colors border border-white/[0.08]">
                 <ArrowRight className="h-5 w-5" />
               </div>
             </div>
           </div>
 
           {/* Content */}
-          <div className="p-6 flex flex-col flex-grow bg-slate-900 border-t border-slate-800">
+          <div className="p-6 flex flex-col flex-grow bg-card border-t border-white/[0.08]">
             <div className="mb-4">
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 line-clamp-1">
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1 line-clamp-1">
                 {product.category}
               </p>
-              <h3 className="font-bold text-slate-200 text-lg leading-tight line-clamp-2 group-hover:text-blue-400 transition-colors">
+              <h3 className="font-bold text-foreground text-lg leading-tight line-clamp-2 group-hover:text-primary transition-colors">
                 {product.name}
               </h3>
             </div>
 
-            <div className="mt-auto pt-4 flex items-center justify-between border-t border-slate-800">
+            <div className="mt-auto pt-4 flex items-center justify-between border-t border-white/[0.08]">
               <div>
-                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">GeM ID</p>
-                <p className="text-sm font-mono font-bold text-slate-300">{product.id}</p>
+                <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">GeM ID</p>
+                <p className="text-sm font-mono font-bold text-foreground/80">{product.id}</p>
               </div>
-              <Button size="sm" variant="ghost" className="rounded-full text-slate-400 group-hover:text-blue-400 hover:bg-slate-800 transition-all font-medium text-xs">
+              <Button size="sm" variant="ghost" className="rounded-full text-muted-foreground group-hover:text-primary hover:bg-secondary transition-all font-medium text-xs">
                 View Details
               </Button>
             </div>

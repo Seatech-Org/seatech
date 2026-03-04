@@ -13,12 +13,16 @@ import { Mail, Phone, MapPin, Send, MessageCircle, ChevronDown, Headset, BadgeCh
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
+import { sendFormEmail } from "@/utils/email";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
+  companyName: z.string().optional(),
+  organization: z.string().min(2, "Organization is required"),
+  phone: z.string().regex(/^[0-9]{10}$/, "Enter a valid 10-digit mobile number"),
   email: z.string().email("Invalid email address"),
-  subject: z.string().min(5, "Subject must be at least 5 characters"),
-  message: z.string().min(10, "Message must be at least 10 characters"),
+  subject: z.string().min(3, "Please specify the interested category"),
+  message: z.string().min(10, "Please provide more detail about your requirement"),
 });
 
 const FAQ_ITEMS = [
@@ -43,44 +47,66 @@ const Contact = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
+      companyName: "",
+      organization: "",
+      phone: "",
       email: "",
       subject: "",
       message: "",
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
     console.log("Contact form submitted:", values);
-    toast.success("Inquiry Received", {
-      description: "Our nodal officer will contact you shortly.",
-    });
-    form.reset();
+
+    // Send email notification via Web3Forms
+    const emailResult = await sendFormEmail("Contact Us - General Inquiry", values);
+
+    if (emailResult.success) {
+      toast.success("Inquiry Received", {
+        description: "Our nodal officer will contact you shortly.",
+      });
+      form.reset();
+    } else {
+      toast.error("Error submitting form", {
+        description: emailResult.message
+      });
+    }
   };
 
   const contactInfo = [
     {
       icon: Mail,
       title: "Email Assistance",
-      content: "support@seatech.gov.in",
+      content: "support@seatech.info",
       subContent: "For technical queries & quotes",
-      link: "mailto:support@seatech.gov.in",
+      link: "mailto:support@seatech.info",
       color: "text-blue-400",
       bg: "bg-blue-400/10",
     },
     {
       icon: Phone,
       title: "Priority Helpline",
-      content: "+91 11-2345-6789",
+      content: "1800 8895 801",
       subContent: "Nodal Officer: 9 AM - 7 PM",
-      link: "tel:+911123456789",
+      link: "tel:1800 8895 801",
       color: "text-emerald-400",
       bg: "bg-emerald-400/10",
     },
     {
       icon: MapPin,
       title: "Corporate Office",
-      content: "Plot 45, Phase 2",
-      subContent: "New Delhi, IND 110020",
+      content: "529A/1517, Pant Nagar, Khurram Nagar",
+      subContent: "Lucknow, Uttar Pradesh, IND 226022",
+      link: null,
+      color: "text-orange-400",
+      bg: "bg-orange-400/10",
+    },
+    {
+      icon: MapPin,
+      title: "Factory",
+      content: "Plot No. 13B Gali N0. 12 , Bhakamau near M.S. Hospital",
+      subContent: "Kursi Road,Lucknow, Uttar Pradesh, IND 226016",
       link: null,
       color: "text-orange-400",
       bg: "bg-orange-400/10",
@@ -93,33 +119,33 @@ const Contact = () => {
         <title>Contact Seatech | Institutional & GeM Procurement Support</title>
         <meta name="description" content="Direct contact for government departments and corporate institutions. Get expert assistance with GeM tenders, bulk orders, and technical specifications." />
       </Helmet>
-      
+
       <Navbar />
 
       {/* Hero Header */}
       <section className="bg-slate-950 pt-32 pb-20 relative overflow-hidden text-center">
-         <div className="absolute inset-0 opacity-30 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/20 via-slate-950 to-slate-950"></div>
-         <div className="container mx-auto px-4 relative z-10">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold mb-8 tracking-widest uppercase">
-                <Headset className="w-4 h-4" />
-                <span>Dedicated Nodal Support</span>
-              </div>
-              <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-white mb-8 tracking-tighter leading-[0.9]">Expert Guidance <br/> <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400">At Every Step.</span></h1>
-              <p className="text-xl text-slate-400 max-w-3xl mx-auto leading-relaxed font-light">
-                Whether you need technical compliance for a GeM tender or a custom bulk quotation, our specialized procurement team is ready to assist.
-              </p>
-            </motion.div>
-         </div>
+        <div className="absolute inset-0 opacity-30 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/20 via-slate-950 to-slate-950"></div>
+        <div className="container mx-auto px-4 relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold mb-8 tracking-widest uppercase">
+              <Headset className="w-4 h-4" />
+              <span>Dedicated Nodal Support</span>
+            </div>
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-white mb-8 tracking-tighter leading-[0.9]">Expert Guidance <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400">At Every Step.</span></h1>
+            <p className="text-xl text-slate-400 max-w-3xl mx-auto leading-relaxed font-light">
+              Whether you need technical compliance for a GeM tender or a custom bulk quotation, our specialized procurement team is ready to assist.
+            </p>
+          </motion.div>
+        </div>
       </section>
 
       <div className="container mx-auto px-4 pb-32">
-        
-        {/* Contact Info Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-24">
+
+        {/* Contact Info Cards - 4 columns */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-24">
           {contactInfo.map((info, index) => (
             <motion.div
               key={index}
@@ -130,70 +156,81 @@ const Contact = () => {
               className="group relative"
             >
               <div className="absolute -inset-1 bg-gradient-to-r from-blue-600/20 to-indigo-600/20 rounded-[2.5rem] blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
-              <div className="relative bg-slate-900 border border-white/5 p-10 rounded-[2.5rem] hover:border-white/10 transition-all text-center h-full flex flex-col items-center">
-                <div className={`w-16 h-16 rounded-2xl ${info.bg} ${info.color} flex items-center justify-center mb-8 group-hover:scale-110 group-hover:-rotate-3 transition-transform ring-1 ring-white/5 shadow-2xl`}>
-                  <info.icon className="h-8 w-8" />
+              <div className="relative bg-slate-900 border border-white/5 p-6 rounded-[2rem] hover:border-white/10 transition-all text-center h-full flex flex-col items-center">
+                <div className={`w-12 h-12 rounded-xl ${info.bg} ${info.color} flex items-center justify-center mb-5 group-hover:scale-110 group-hover:-rotate-3 transition-transform ring-1 ring-white/5 shadow-xl`}>
+                  <info.icon className="h-6 w-6" />
                 </div>
-                <h3 className="text-xl font-bold text-white mb-3 uppercase tracking-tighter">{info.title}</h3>
+                <h3 className="text-sm font-bold text-white mb-2 uppercase tracking-tighter">{info.title}</h3>
                 {info.link ? (
-                  <a href={info.link} className="text-blue-400 font-bold hover:text-blue-300 transition-colors text-xl tracking-tight">
+                  <a href={info.link} className="text-blue-400 font-bold hover:text-blue-300 transition-colors text-sm tracking-tight">
                     {info.content}
                   </a>
                 ) : (
-                  <p className="text-slate-200 font-bold text-xl tracking-tight">{info.content}</p>
+                  <p className="text-slate-200 font-semibold text-sm tracking-tight">{info.content}</p>
                 )}
-                <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mt-4 opacity-60">{info.subContent}</p>
+                <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-2 opacity-60">{info.subContent}</p>
               </div>
             </motion.div>
           ))}
         </div>
 
         <div className="grid lg:grid-cols-12 gap-16 items-start">
-          
+
           {/* Contact Form */}
           <div className="lg:col-span-7">
             <div className="relative">
-               <div className="absolute -top-10 -left-10 w-40 h-40 bg-blue-600/10 rounded-full blur-3xl"></div>
-               <Card className="border-white/5 shadow-2xl bg-slate-900/40 backdrop-blur-2xl rounded-[3rem] overflow-hidden relative z-10">
+              <div className="absolute -top-10 -left-10 w-40 h-40 bg-blue-600/10 rounded-full blur-3xl"></div>
+              <Card className="border-white/5 shadow-2xl bg-slate-900/40 backdrop-blur-2xl rounded-[3rem] overflow-hidden relative z-10">
                 <div className="p-10 md:p-16">
                   <div className="mb-12">
-                    <h2 className="text-4xl font-bold text-white mb-4 tracking-tight">Project Inquiry</h2>
-                    <p className="text-slate-400 text-lg font-light">Describe your requirement and our technical team will prepare a formal proposal.</p>
+                    <h2 className="text-4xl font-bold text-white mb-4 tracking-tight">Got a Query?</h2>
+                    <p className="text-slate-400 text-lg font-light">Share your requirements and our team will get back to you promptly.</p>
                   </div>
-                  
+
                   <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                      {/* Row 1: Name + Company Name */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <FormField control={form.control} name="name" render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-slate-400 font-bold uppercase tracking-widest text-[10px] ml-1">Full Name</FormLabel>
-                            <FormControl><Input className="h-14 bg-slate-950/50 border-slate-800 text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 rounded-2xl transition-all" placeholder="Enter your name" {...field} /></FormControl>
+                            <FormLabel className="text-slate-400 font-bold uppercase tracking-widest text-[10px] ml-1">Full Name *</FormLabel>
+                            <FormControl><Input className="h-14 bg-slate-950/50 border-slate-800 text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 rounded-2xl transition-all" placeholder="Your full name" {...field} /></FormControl>
                             <FormMessage />
                           </FormItem>
                         )} />
-
-                        <FormField control={form.control} name="email" render={({ field }) => (
+                        <FormField control={form.control} name="companyName" render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-slate-400 font-bold uppercase tracking-widest text-[10px] ml-1">Work Email</FormLabel>
-                            <FormControl><Input className="h-14 bg-slate-950/50 border-slate-800 text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 rounded-2xl transition-all" type="email" placeholder="name@org.gov.in" {...field} /></FormControl>
+                            <FormLabel className="text-slate-400 font-bold uppercase tracking-widest text-[10px] ml-1">Company / Organization (Optional)</FormLabel>
+                            <FormControl><Input className="h-14 bg-slate-950/50 border-slate-800 text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 rounded-2xl transition-all" placeholder="e.g. Ministry of X / School" {...field} /></FormControl>
                             <FormMessage />
                           </FormItem>
                         )} />
                       </div>
 
-                      <FormField control={form.control} name="subject" render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-slate-400 font-bold uppercase tracking-widest text-[10px] ml-1">Interested Category</FormLabel>
-                          <FormControl><Input className="h-14 bg-slate-950/50 border-slate-800 text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 rounded-2xl transition-all" placeholder="e.g. Auditorium Seating, Office Workstations" {...field} /></FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )} />
+                      {/* Row 2: Phone + Email */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <FormField control={form.control} name="phone" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-slate-400 font-bold uppercase tracking-widest text-[10px] ml-1">Phone Number *</FormLabel>
+                            <FormControl><Input className="h-14 bg-slate-950/50 border-slate-800 text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 rounded-2xl transition-all" placeholder="10-digit mobile" {...field} /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+                        <FormField control={form.control} name="email" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-slate-400 font-bold uppercase tracking-widest text-[10px] ml-1">Email *</FormLabel>
+                            <FormControl><Input className="h-14 bg-slate-950/50 border-slate-800 text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 rounded-2xl transition-all" type="email" placeholder="name@example.com" {...field} /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+                      </div>
 
+                      {/* Row 5: Requirement Details */}
                       <FormField control={form.control} name="message" render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-slate-400 font-bold uppercase tracking-widest text-[10px] ml-1">Requirement Details</FormLabel>
+                          <FormLabel className="text-slate-400 font-bold uppercase tracking-widest text-[10px] ml-1">Requirement Details *</FormLabel>
                           <FormControl>
-                            <Textarea className="min-h-[200px] bg-slate-950/50 border-slate-800 text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 rounded-2xl resize-none py-5 transition-all" placeholder="Please specify quantity, location, and any specific compliance needs..." {...field} />
+                            <Textarea className="min-h-[140px] bg-slate-950/50 border-slate-800 text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 rounded-2xl resize-none py-5 transition-all" placeholder="Please describe your specific needs, compliance requirements, timeline, etc." {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -211,77 +248,77 @@ const Contact = () => {
 
           {/* Sidebar: FAQs & Trust */}
           <div className="lg:col-span-5 space-y-12">
-             
-             {/* GeM Badge */}
-             <div className="bg-gradient-to-br from-slate-900 to-slate-950 border border-white/5 rounded-[3rem] p-10 shadow-2xl">
-                <div className="flex items-center gap-4 mb-6">
-                   <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-400">
-                      <BadgeCheck className="h-7 w-7" />
-                   </div>
-                   <h3 className="text-2xl font-bold text-white tracking-tight">Verified OEM Support</h3>
-                </div>
-                <p className="text-slate-400 leading-relaxed font-light mb-8">
-                   We are a Class 1 Local Content Supplier. Our technical team is authorized to provide official OEM Authorization Letters (MAF) for GeM bidding.
-                </p>
-                <div className="flex flex-wrap gap-2">
-                   {["MAF Support", "L1 Pricing", "Technical Compliance"].map((tag, i) => (
-                     <span key={i} className="px-3 py-1 bg-slate-800 text-slate-300 text-[10px] font-bold uppercase rounded-lg border border-white/5">{tag}</span>
-                   ))}
-                </div>
-             </div>
 
-             {/* Interactive FAQ */}
-             <div className="bg-slate-900/50 border border-slate-800 rounded-[3rem] p-10 shadow-2xl">
-                <h3 className="text-2xl font-bold text-white mb-8 flex items-center gap-3">
-                   <MessageCircle className="text-blue-500" />
-                   Common Queries
-                </h3>
-                <div className="space-y-4">
-                   {FAQ_ITEMS.map((item, i) => (
-                     <div key={i} className="border-b border-white/5 last:border-0 pb-6">
-                        <button 
-                          onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                          className="w-full flex justify-between items-center text-left text-white font-bold hover:text-blue-400 transition-colors py-2 group"
+            {/* GeM Badge */}
+            <div className="bg-gradient-to-br from-slate-900 to-slate-950 border border-white/5 rounded-[3rem] p-10 shadow-2xl">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+                  <BadgeCheck className="h-7 w-7" />
+                </div>
+                <h3 className="text-2xl font-bold text-white tracking-tight">Verified OEM Support</h3>
+              </div>
+              <p className="text-slate-400 leading-relaxed font-light mb-8">
+                We are a Class 1 Local Content Supplier. Our technical team is authorized to provide official OEM Authorization Letters (MAF) for GeM bidding.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {["MAF Support", "L1 Pricing", "Technical Compliance"].map((tag, i) => (
+                  <span key={i} className="px-3 py-1 bg-slate-800 text-slate-300 text-[10px] font-bold uppercase rounded-lg border border-white/5">{tag}</span>
+                ))}
+              </div>
+            </div>
+
+            {/* Interactive FAQ */}
+            <div className="bg-slate-900/50 border border-slate-800 rounded-[3rem] p-10 shadow-2xl">
+              <h3 className="text-2xl font-bold text-white mb-8 flex items-center gap-3">
+                <MessageCircle className="text-blue-500" />
+                Common Queries
+              </h3>
+              <div className="space-y-4">
+                {FAQ_ITEMS.map((item, i) => (
+                  <div key={i} className="border-b border-white/5 last:border-0 pb-6">
+                    <button
+                      onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                      className="w-full flex justify-between items-center text-left text-white font-bold hover:text-blue-400 transition-colors py-2 group"
+                    >
+                      <span className="text-sm md:text-base leading-snug">{item.question}</span>
+                      <ChevronDown className={`h-5 w-5 flex-shrink-0 transition-transform duration-500 ${openFaq === i ? "rotate-180" : "group-hover:translate-y-1"}`} />
+                    </button>
+                    <AnimatePresence>
+                      {openFaq === i && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="overflow-hidden"
                         >
-                           <span className="text-sm md:text-base leading-snug">{item.question}</span>
-                           <ChevronDown className={`h-5 w-5 flex-shrink-0 transition-transform duration-500 ${openFaq === i ? "rotate-180" : "group-hover:translate-y-1"}`} />
-                        </button>
-                        <AnimatePresence>
-                           {openFaq === i && (
-                             <motion.div
-                               initial={{ height: 0, opacity: 0 }}
-                               animate={{ height: "auto", opacity: 1 }}
-                               exit={{ height: 0, opacity: 0 }}
-                               className="overflow-hidden"
-                             >
-                                <p className="text-slate-400 text-sm leading-relaxed pt-4 font-light">
-                                   {item.answer}
-                                </p>
-                             </motion.div>
-                           )}
-                        </AnimatePresence>
-                     </div>
-                   ))}
-                </div>
-             </div>
+                          <p className="text-slate-400 text-sm leading-relaxed pt-4 font-light">
+                            {item.answer}
+                          </p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-             {/* Minimal Map Overlay */}
-             <div className="relative rounded-[3rem] overflow-hidden shadow-2xl border border-white/5 group h-64">
-                <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d224345.83923192776!2d77.0688975472578!3d28.52758200617607!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390cfd5b347eb62d%3A0x37205b715389640!2sDelhi!5e0!3m2!1sen!2sin!4v1710000000000!5m2!1sen!2sin"
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0, opacity: 0.6, filter: "invert(95%) hue-rotate(180deg) brightness(95%) contrast(90%) grayscale(100%)" }} 
-                  allowFullScreen
-                  loading="lazy"
-                  title="Seatech Location"
-                />
-                <div className="absolute inset-0 bg-blue-600/5 group-hover:opacity-0 transition-opacity pointer-events-none"></div>
-                <div className="absolute bottom-6 left-6 right-6 p-5 bg-slate-900/90 backdrop-blur rounded-2xl border border-white/10">
-                   <p className="text-xs font-bold text-blue-400 uppercase mb-1">New Delhi, India</p>
-                   <p className="text-white text-xs font-medium truncate">Industrial Area, Phase 2, Okhla</p>
-                </div>
-             </div>
+            {/* Minimal Map Overlay */}
+            <div className="relative rounded-[3rem] overflow-hidden shadow-2xl border border-white/5 group h-64">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3558.5!2d80.9937346!3d26.9653843!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x399959005f45532b%3A0x4899faff1637e70d!2sSeatech+Associates+PL!5e0!3m2!1sen!2sin!4v1710000000000!5m2!1sen!2sin"
+                width="100%"
+                height="100%"
+                style={{ border: 0, opacity: 0.6, filter: "invert(95%) hue-rotate(180deg) brightness(95%) contrast(90%) grayscale(100%)" }}
+                allowFullScreen
+                loading="lazy"
+                title="Seatech Location"
+              />
+              <div className="absolute inset-0 bg-blue-600/5 group-hover:opacity-0 transition-opacity pointer-events-none"></div>
+              <div className="absolute bottom-6 left-6 right-6 p-5 bg-slate-900/90 backdrop-blur rounded-2xl border border-white/10">
+                <p className="text-xs font-bold text-blue-400 uppercase mb-1"> Lucknow, U.P., India</p>
+                <p className="text-white text-xs font-medium truncate">Gali No. 12 , Bhakamau , Kursi Road</p>
+              </div>
+            </div>
 
           </div>
 

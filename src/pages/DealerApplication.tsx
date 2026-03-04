@@ -12,18 +12,19 @@ import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
 import { Building2, User, FileText, Receipt, Trash2, CheckCircle, Loader2 } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
+import { sendFormEmail } from "@/utils/email";
 
 const formSchema = z.object({
   // Company Details
   companyName: z.string().trim().min(2, "Company name is required").max(100),
   address: z.string().trim().min(5, "Address is required").max(500),
   gstNumber: z.string().trim().regex(/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/, "Invalid GST number format").optional().or(z.literal('')),
-  
+
   // Contact Person
   contactName: z.string().trim().min(2, "Contact name is required").max(100),
   email: z.string().trim().email("Invalid email address").max(255),
   mobile: z.string().trim().regex(/^[0-9]{10}$/, "Mobile must be 10 digits"),
-  
+
   // Requirements
   additionalRemarks: z.string().trim().max(1000).optional(),
 });
@@ -31,7 +32,7 @@ const formSchema = z.object({
 const DealerApplication = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { cartItems, clearCart } = useCart();
-  
+
   // Display text for the UI summary
   const [quoteListDisplay, setQuoteListDisplay] = useState<string>("");
 
@@ -52,14 +53,14 @@ const DealerApplication = () => {
   useEffect(() => {
     const fetchUserProfile = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       if (user) {
         // FIX: Cast supabase to any to bypass strict type checking on the table
         const { data, error } = await (supabase as any)
           .from('profiles')
           .select('*')
           .eq('id', user.id)
-          .maybeSingle(); 
+          .maybeSingle();
 
         if (error) {
           console.error("Error fetching profile:", error);
@@ -74,12 +75,12 @@ const DealerApplication = () => {
             companyName: profile.company_name || "",
             address: profile.address || "",
             contactName: profile.contact_person || "",
-            email: user.email || "", 
+            email: user.email || "",
             mobile: profile.phone || "",
             gstNumber: profile.gst_number || "",
           });
         } else {
-             form.setValue('email', user.email || "");
+          form.setValue('email', user.email || "");
         }
       }
     };
@@ -91,7 +92,7 @@ const DealerApplication = () => {
     // Only use cartItems (fetched from DB by CartContext)
     // We ignore localStorage bin now as we want single source of truth
     let displayText = "";
-    
+
     if (cartItems.length > 0) {
       const cartText = cartItems.map(item => `• ${item.quantity} x ${item.name}`).join('\n');
       displayText += cartText;
@@ -99,8 +100,8 @@ const DealerApplication = () => {
       // Fallback only if cart is empty but bin exists (unlikely in new flow)
       const rawBin = localStorage.getItem('quoteBin');
       if (rawBin) {
-         const quoteBin: string[] = JSON.parse(rawBin);
-         displayText += quoteBin.join('\n');
+        const quoteBin: string[] = JSON.parse(rawBin);
+        displayText += quoteBin.join('\n');
       }
     }
 
@@ -129,7 +130,7 @@ const DealerApplication = () => {
         address: values.address,
         gst_number: values.gstNumber
       };
-      
+
       const { error: profileError } = await (supabase as any)
         .from('profiles')
         .upsert(profileData);
@@ -152,9 +153,9 @@ const DealerApplication = () => {
         const { error: updateError } = await (supabase as any)
           .from('quotes')
           .update({
-             status: 'pending',
-             total_items: cartItems.length,
-             additional_remarks: values.additionalRemarks
+            status: 'pending',
+            total_items: cartItems.length,
+            additional_remarks: values.additionalRemarks
           })
           .eq('id', quoteId);
 
@@ -164,39 +165,46 @@ const DealerApplication = () => {
         // Fallback: If no draft exists (maybe items were from localStorage/Bin?), create new Pending quote
         // This handles the legacy localStorage case if CartContext failed
         const quotePayload = {
-            user_id: userId,
-            status: 'pending',
-            total_items: cartItems.length || 1, // approximate
-            additional_remarks: values.additionalRemarks
+          user_id: userId,
+          status: 'pending',
+          total_items: cartItems.length || 1, // approximate
+          additional_remarks: values.additionalRemarks
         };
-        
+
         const { data: newQuote, error: insertError } = await (supabase as any)
-            .from('quotes')
-            .insert(quotePayload)
-            .select()
-            .single();
-            
+          .from('quotes')
+          .insert(quotePayload)
+          .select()
+          .single();
+
         if (insertError) throw insertError;
         quoteId = newQuote.id;
 
         // If we created a new quote, we might need to insert items if they aren't there?
         // If cartItems has items, we should insert them now.
         if (cartItems.length > 0) {
-             const dbItems = cartItems.map(item => ({
-                quote_id: quoteId,
-                product_id: item.id,
-                product_name: item.name,
-                quantity: item.quantity
-             }));
-             const { error: itemsError } = await (supabase as any)
-               .from('quote_items')
-               .insert(dbItems);
-             if (itemsError) throw itemsError;
+          const dbItems = cartItems.map(item => ({
+            quote_id: quoteId,
+            product_id: item.id,
+            product_name: item.name,
+            quantity: item.quantity
+          }));
+          const { error: itemsError } = await (supabase as any)
+            .from('quote_items')
+            .insert(dbItems);
+          if (itemsError) throw itemsError;
         }
       }
 
+      // Also send notification email
+      await sendFormEmail("Dealer Application / Quote Request", {
+        ...values,
+        quoteId,
+        itemsRequested: cartItems.map(item => `${item.quantity}x ${item.name}`).join(", ")
+      });
+
       toast.success("Quote Request Sent Successfully!", {
-        description: `Reference ID: ${quoteId.slice(0, 8)}. We will contact you shortly.`, 
+        description: `Reference ID: ${quoteId.slice(0, 8)}. We will contact you shortly.`,
         duration: 5000,
       });
 
@@ -215,7 +223,7 @@ const DealerApplication = () => {
       setIsSubmitting(false);
     }
   };
-  
+
   const clearQuoteList = () => {
     localStorage.removeItem('quoteBin');
     clearCart();
@@ -226,34 +234,34 @@ const DealerApplication = () => {
   return (
     <div className="min-h-screen bg-slate-950 font-sans selection:bg-blue-500/30 selection:text-blue-100">
       <Navbar />
-      
+
       {/* Hero Header */}
       <div className="bg-slate-950 pt-32 pb-20 mb-12 relative overflow-hidden">
-         <div className="absolute inset-0 opacity-30 bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
-         <div className="absolute inset-0 bg-gradient-to-b from-slate-900/50 to-slate-950 pointer-events-none"></div>
-         <div className="container mx-auto px-4 text-center relative z-10">
-            <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-tight">Partner Quote Request</h1>
-            <p className="text-slate-400 text-lg max-w-2xl mx-auto leading-relaxed">
-              Buy at wholesale prices, sell at retail profits. Review your selected items and submit your request below.
-            </p>
-         </div>
+        <div className="absolute inset-0 opacity-30 bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-900/50 to-slate-950 pointer-events-none"></div>
+        <div className="container mx-auto px-4 text-center relative z-10">
+          <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-tight">Partner Quote Request</h1>
+          <p className="text-slate-400 text-lg max-w-2xl mx-auto leading-relaxed">
+            Buy at wholesale prices, sell at retail profits. Review your selected items and submit your request below.
+          </p>
+        </div>
       </div>
 
       <div className="container mx-auto px-4 pb-24">
         <div className="max-w-6xl mx-auto grid md:grid-cols-12 gap-8">
-          
+
           {/* LEFT COLUMN: The Form (8 cols) */}
           <div className="md:col-span-8">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                
+
                 {/* Organization Details */}
                 <div className="bg-slate-900 p-8 rounded-2xl shadow-lg border border-slate-800 transition-shadow hover:shadow-xl hover:border-slate-700">
                   <div className="flex items-center gap-4 mb-6 border-b border-slate-800 pb-4">
-                     <div className="bg-blue-500/10 p-2 rounded-lg"><Building2 className="h-6 w-6 text-blue-400" /></div>
-                     <h2 className="text-xl font-bold text-white">Billing Details</h2>
+                    <div className="bg-blue-500/10 p-2 rounded-lg"><Building2 className="h-6 w-6 text-blue-400" /></div>
+                    <h2 className="text-xl font-bold text-white">Billing Details</h2>
                   </div>
-                  
+
                   <div className="grid gap-6">
                     <FormField control={form.control} name="companyName" render={({ field }) => (
                       <FormItem><FormLabel className="text-slate-300 font-semibold">Company / Organization Name *</FormLabel><FormControl><Input className="h-12 bg-slate-800 border-slate-700 text-white focus:border-blue-500" placeholder="e.g. Ministry of Textiles / Seatech Pvt Ltd" {...field} /></FormControl><FormMessage /></FormItem>
@@ -262,7 +270,7 @@ const DealerApplication = () => {
                       <FormItem><FormLabel className="text-slate-300 font-semibold">Billing Address *</FormLabel><FormControl><Textarea className="min-h-[80px] bg-slate-800 border-slate-700 text-white focus:border-blue-500" placeholder="Enter complete billing address" {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                       <FormField control={form.control} name="gstNumber" render={({ field }) => (
+                      <FormField control={form.control} name="gstNumber" render={({ field }) => (
                         <FormItem><FormLabel className="text-slate-300 font-semibold">GST Number (Optional)</FormLabel><FormControl><Input className="h-12 font-mono bg-slate-800 border-slate-700 text-white focus:border-blue-500" placeholder="22AAAAA0000A1Z5" {...field} /></FormControl><FormMessage /></FormItem>
                       )} />
                     </div>
@@ -272,30 +280,30 @@ const DealerApplication = () => {
                 {/* Contact Person */}
                 <div className="bg-slate-900 p-8 rounded-2xl shadow-lg border border-slate-800 transition-shadow hover:shadow-xl hover:border-slate-700">
                   <div className="flex items-center gap-4 mb-6 border-b border-slate-800 pb-4">
-                     <div className="bg-blue-500/10 p-2 rounded-lg"><User className="h-6 w-6 text-blue-400" /></div>
-                     <h2 className="text-xl font-bold text-white">Contact Person</h2>
+                    <div className="bg-blue-500/10 p-2 rounded-lg"><User className="h-6 w-6 text-blue-400" /></div>
+                    <h2 className="text-xl font-bold text-white">Contact Person</h2>
                   </div>
-                  
+
                   <div className="grid gap-6">
-                      <FormField control={form.control} name="contactName" render={({ field }) => (
-                        <FormItem><FormLabel className="text-slate-300 font-semibold">Full Name *</FormLabel><FormControl><Input className="h-12 bg-slate-800 border-slate-700 text-white focus:border-blue-500" placeholder="Enter your name" {...field} /></FormControl><FormMessage /></FormItem>
+                    <FormField control={form.control} name="contactName" render={({ field }) => (
+                      <FormItem><FormLabel className="text-slate-300 font-semibold">Full Name *</FormLabel><FormControl><Input className="h-12 bg-slate-800 border-slate-700 text-white focus:border-blue-500" placeholder="Enter your name" {...field} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <FormField control={form.control} name="mobile" render={({ field }) => (
+                        <FormItem><FormLabel className="text-slate-300 font-semibold">Mobile Number *</FormLabel><FormControl><Input className="h-12 bg-slate-800 border-slate-700 text-white focus:border-blue-500" placeholder="10-digit mobile" {...field} /></FormControl><FormMessage /></FormItem>
                       )} />
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <FormField control={form.control} name="mobile" render={({ field }) => (
-                          <FormItem><FormLabel className="text-slate-300 font-semibold">Mobile Number *</FormLabel><FormControl><Input className="h-12 bg-slate-800 border-slate-700 text-white focus:border-blue-500" placeholder="10-digit mobile" {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
-                        <FormField control={form.control} name="email" render={({ field }) => (
-                          <FormItem><FormLabel className="text-slate-300 font-semibold">Official Email *</FormLabel><FormControl><Input className="h-12 bg-slate-800 border-slate-700 text-white focus:border-blue-500" type="email" placeholder="name@organization.com" {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
-                      </div>
+                      <FormField control={form.control} name="email" render={({ field }) => (
+                        <FormItem><FormLabel className="text-slate-300 font-semibold">Official Email *</FormLabel><FormControl><Input className="h-12 bg-slate-800 border-slate-700 text-white focus:border-blue-500" type="email" placeholder="name@organization.com" {...field} /></FormControl><FormMessage /></FormItem>
+                      )} />
+                    </div>
                   </div>
                 </div>
-                
+
                 {/* Additional Remarks */}
                 <div className="bg-slate-900 p-8 rounded-2xl shadow-lg border border-slate-800 transition-shadow hover:shadow-xl hover:border-slate-700">
-                   <div className="flex items-center gap-4 mb-6 border-b border-slate-800 pb-4">
-                     <div className="bg-blue-500/10 p-2 rounded-lg"><FileText className="h-6 w-6 text-blue-400" /></div>
-                     <h2 className="text-xl font-bold text-white">Additional Instructions</h2>
+                  <div className="flex items-center gap-4 mb-6 border-b border-slate-800 pb-4">
+                    <div className="bg-blue-500/10 p-2 rounded-lg"><FileText className="h-6 w-6 text-blue-400" /></div>
+                    <h2 className="text-xl font-bold text-white">Additional Instructions</h2>
                   </div>
                   <FormField control={form.control} name="additionalRemarks" render={({ field }) => (
                     <FormItem>
@@ -309,16 +317,16 @@ const DealerApplication = () => {
                 </div>
 
                 <div className="pt-4">
-                  <Button 
-                      type="submit" 
-                      className="w-full h-14 text-lg bg-blue-600 hover:bg-blue-500 text-white shadow-xl shadow-blue-900/20 rounded-xl font-bold transition-all hover:-translate-y-1 border border-blue-500" 
-                      disabled={isSubmitting}
+                  <Button
+                    type="submit"
+                    className="w-full h-14 text-lg bg-blue-600 hover:bg-blue-500 text-white shadow-xl shadow-blue-900/20 rounded-xl font-bold transition-all hover:-translate-y-1 border border-blue-500"
+                    disabled={isSubmitting}
                   >
-                      {isSubmitting ? (
-                          <span className="flex items-center gap-2"><Loader2 className="animate-spin" /> Processing Request...</span>
-                      ) : (
-                          <span className="flex items-center gap-2"><CheckCircle className="w-5 h-5" /> Submit Quote Request</span>
-                      )}
+                    {isSubmitting ? (
+                      <span className="flex items-center gap-2"><Loader2 className="animate-spin" /> Processing Request...</span>
+                    ) : (
+                      <span className="flex items-center gap-2"><CheckCircle className="w-5 h-5" /> Submit Quote Request</span>
+                    )}
                   </Button>
                 </div>
               </form>
@@ -331,7 +339,7 @@ const DealerApplication = () => {
               <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                 <Receipt className="h-5 w-5 text-blue-400" /> Quote Summary
               </h3>
-              
+
               <div className="bg-slate-800 rounded-lg p-4 mb-6 border border-slate-700 max-h-[400px] overflow-y-auto">
                 {quoteListDisplay ? (
                   <pre className="whitespace-pre-wrap font-sans text-sm text-slate-300 leading-relaxed">
@@ -353,8 +361,8 @@ const DealerApplication = () => {
                 </div>
               </div>
 
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="w-full mt-6 text-red-400 border-red-900/50 bg-red-950/10 hover:bg-red-900/30 hover:text-red-300 hover:border-red-800"
                 onClick={clearQuoteList}
               >
