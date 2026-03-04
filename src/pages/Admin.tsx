@@ -53,20 +53,20 @@ interface Quote {
 
 const Admin = () => {
   const navigate = useNavigate();
-  
+
   const [applications, setApplications] = useState<DealerApplication[]>([]);
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
-  
+
   const [isLoadingApps, setIsLoadingApps] = useState(true);
   const [isLoadingQuotes, setIsLoadingQuotes] = useState(true);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
-  
+
   const [isAdmin, setIsAdmin] = useState(false);
   const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  
+
   const [productFormData, setProductFormData] = useState({
     id: "",
     name: "",
@@ -135,19 +135,19 @@ const Admin = () => {
         country_of_origin: "India"
       };
 
-      const { error: prodError } = await supabase
+      const { error: prodError } = await (supabase as any)
         .from('products')
         .upsert(productPayload);
 
       if (prodError) throw prodError;
 
-      const { error: invError } = await supabase
+      const { error: invError } = await (supabase as any)
         .from('inventory')
         .upsert({
           product_id: productFormData.id,
           quantity_available: productFormData.availability,
         });
-      
+
       if (invError) throw invError;
 
       toast.success(editingProduct ? "Product updated" : "Product added");
@@ -178,7 +178,7 @@ const Admin = () => {
       navigate("/");
       return;
     }
-    
+
     setIsAdmin(true);
     fetchApplications();
     fetchQuotes();
@@ -192,7 +192,7 @@ const Admin = () => {
         .from("dealer_applications")
         .select("*")
         .order("created_at", { ascending: false });
-        
+
       if (error) throw error;
       setApplications(data || []);
     } catch (error: any) {
@@ -262,7 +262,7 @@ const Admin = () => {
 
   const deleteProduct = async (id: string) => {
     if (!confirm("Are you sure you want to delete this product?")) return;
-    
+
     try {
       const { error } = await supabase.from("products").delete().eq("id", id);
       if (error) throw error;
@@ -297,8 +297,8 @@ const Admin = () => {
       <header className="border-b border-slate-800 bg-slate-900/95 backdrop-blur sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
-             <div className="bg-blue-600 p-2 rounded-lg"><User className="h-5 w-5 text-white" /></div>
-             <h1 className="text-xl font-bold text-white">Admin Dashboard</h1>
+            <div className="bg-blue-600 p-2 rounded-lg"><User className="h-5 w-5 text-white" /></div>
+            <h1 className="text-xl font-bold text-white">Admin Dashboard</h1>
           </div>
           <Button variant="outline" onClick={handleSignOut} className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white">
             <LogOut className="h-4 w-4 mr-2" /> Sign Out
@@ -310,13 +310,13 @@ const Admin = () => {
         <Tabs defaultValue="quotes" className="space-y-8">
           <TabsList className="bg-slate-900 border border-slate-800 p-1 rounded-xl h-14 flex overflow-x-auto no-scrollbar">
             <TabsTrigger value="quotes" className="h-12 px-6 rounded-lg data-[state=active]:bg-slate-800 data-[state=active]:text-white text-slate-400 text-base whitespace-nowrap">
-               <ShoppingBag className="h-4 w-4 mr-2" /> Quote Requests
+              <ShoppingBag className="h-4 w-4 mr-2" /> Quote Requests
             </TabsTrigger>
             <TabsTrigger value="products" className="h-12 px-6 rounded-lg data-[state=active]:bg-slate-800 data-[state=active]:text-white text-slate-400 text-base whitespace-nowrap">
-               <Box className="h-4 w-4 mr-2" /> Products
+              <Box className="h-4 w-4 mr-2" /> Products
             </TabsTrigger>
             <TabsTrigger value="applications" className="h-12 px-6 rounded-lg data-[state=active]:bg-slate-800 data-[state=active]:text-white text-slate-400 text-base whitespace-nowrap">
-               <FileText className="h-4 w-4 mr-2" /> Dealer Applications
+              <FileText className="h-4 w-4 mr-2" /> Dealer Applications
             </TabsTrigger>
           </TabsList>
 
@@ -349,13 +349,13 @@ const Admin = () => {
                       <TableBody>
                         {quotes.map((quote) => (
                           <TableRow key={quote.id} className="border-slate-800 hover:bg-slate-800/50 transition-colors">
-                            <TableCell className="font-mono text-blue-400">#{quote.id.slice(0,8)}</TableCell>
+                            <TableCell className="font-mono text-blue-400">#{quote.id.slice(0, 8)}</TableCell>
                             <TableCell className="font-medium text-white">
                               {quote.profiles?.contact_person || "Unknown User"}
                               <div className="text-xs text-slate-500">{quote.profiles?.email}</div>
                             </TableCell>
                             <TableCell className="text-slate-300">
-                               {quote.profiles?.company_name || "-"}
+                              {quote.profiles?.company_name || "-"}
                             </TableCell>
                             <TableCell className="text-white font-bold">{quote.total_items}</TableCell>
                             <TableCell className="text-slate-500 text-sm">
@@ -371,55 +371,55 @@ const Admin = () => {
                                 </DialogTrigger>
                                 <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
                                   <DialogHeader>
-                                    <DialogTitle className="text-xl">Quote Details #{selectedQuote?.id.slice(0,8)}</DialogTitle>
+                                    <DialogTitle className="text-xl">Quote Details #{selectedQuote?.id.slice(0, 8)}</DialogTitle>
                                   </DialogHeader>
                                   <div className="space-y-6 pt-4">
-                                     <div className="grid grid-cols-2 gap-4 bg-slate-800/50 p-4 rounded-xl border border-slate-800">
-                                        <div>
-                                           <p className="text-xs text-slate-500 uppercase font-bold">Customer</p>
-                                           <p className="text-white font-medium">{selectedQuote?.profiles?.contact_person}</p>
-                                           <p className="text-slate-400 text-sm">{selectedQuote?.profiles?.email}</p>
-                                           <p className="text-slate-400 text-sm">{selectedQuote?.profiles?.phone}</p>
-                                        </div>
-                                        <div>
-                                           <p className="text-xs text-slate-500 uppercase font-bold">Company</p>
-                                           <p className="text-white font-medium">{selectedQuote?.profiles?.company_name || "N/A"}</p>
-                                        </div>
-                                     </div>
+                                    <div className="grid grid-cols-2 gap-4 bg-slate-800/50 p-4 rounded-xl border border-slate-800">
+                                      <div>
+                                        <p className="text-xs text-slate-500 uppercase font-bold">Customer</p>
+                                        <p className="text-white font-medium">{selectedQuote?.profiles?.contact_person}</p>
+                                        <p className="text-slate-400 text-sm">{selectedQuote?.profiles?.email}</p>
+                                        <p className="text-slate-400 text-sm">{selectedQuote?.profiles?.phone}</p>
+                                      </div>
+                                      <div>
+                                        <p className="text-xs text-slate-500 uppercase font-bold">Company</p>
+                                        <p className="text-white font-medium">{selectedQuote?.profiles?.company_name || "N/A"}</p>
+                                      </div>
+                                    </div>
 
-                                     <div>
-                                        <h4 className="text-sm font-bold text-slate-400 uppercase mb-3">Requested Items</h4>
-                                        <div className="border border-slate-800 rounded-xl overflow-hidden">
-                                           <Table>
-                                              <TableHeader className="bg-slate-950">
-                                                 <TableRow className="border-slate-800 hover:bg-slate-950">
-                                                    <TableHead className="text-slate-400">Product Name</TableHead>
-                                                    <TableHead className="text-slate-400 text-right">Quantity</TableHead>
-                                                 </TableRow>
-                                              </TableHeader>
-                                              <TableBody>
-                                                 {selectedQuote?.quote_items.map((item, idx) => (
-                                                    <TableRow key={idx} className="border-slate-800 hover:bg-slate-800/50">
-                                                       <TableCell className="text-slate-200">{item.product_name}</TableCell>
-                                                       <TableCell className="text-right text-white font-bold">{item.quantity}</TableCell>
-                                                    </TableRow>
-                                                 ))}
-                                              </TableBody>
-                                           </Table>
-                                        </div>
-                                     </div>
-                                     
-                                     {selectedQuote?.additional_remarks && (
-                                        <div className="bg-slate-800/30 p-4 rounded-xl border border-slate-800">
-                                           <p className="text-xs text-slate-500 uppercase font-bold mb-1">Remarks</p>
-                                           <p className="text-slate-300 text-sm italic">"{selectedQuote.additional_remarks}"</p>
-                                        </div>
-                                     )}
+                                    <div>
+                                      <h4 className="text-sm font-bold text-slate-400 uppercase mb-3">Requested Items</h4>
+                                      <div className="border border-slate-800 rounded-xl overflow-hidden">
+                                        <Table>
+                                          <TableHeader className="bg-slate-950">
+                                            <TableRow className="border-slate-800 hover:bg-slate-950">
+                                              <TableHead className="text-slate-400">Product Name</TableHead>
+                                              <TableHead className="text-slate-400 text-right">Quantity</TableHead>
+                                            </TableRow>
+                                          </TableHeader>
+                                          <TableBody>
+                                            {selectedQuote?.quote_items.map((item, idx) => (
+                                              <TableRow key={idx} className="border-slate-800 hover:bg-slate-800/50">
+                                                <TableCell className="text-slate-200">{item.product_name}</TableCell>
+                                                <TableCell className="text-right text-white font-bold">{item.quantity}</TableCell>
+                                              </TableRow>
+                                            ))}
+                                          </TableBody>
+                                        </Table>
+                                      </div>
+                                    </div>
 
-                                     <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
-                                        <Button variant="outline" className="border-slate-700 text-slate-300 hover:bg-slate-800" onClick={() => document.getElementById('close-dialog')?.click()}>Close</Button>
-                                        <Button className="bg-green-600 hover:bg-green-500 text-white" onClick={() => updateQuoteStatus(selectedQuote!.id, 'processed')}>Mark Processed</Button>
-                                     </div>
+                                    {selectedQuote?.additional_remarks && (
+                                      <div className="bg-slate-800/30 p-4 rounded-xl border border-slate-800">
+                                        <p className="text-xs text-slate-500 uppercase font-bold mb-1">Remarks</p>
+                                        <p className="text-slate-300 text-sm italic">"{selectedQuote.additional_remarks}"</p>
+                                      </div>
+                                    )}
+
+                                    <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+                                      <Button variant="outline" className="border-slate-700 text-slate-300 hover:bg-slate-800" onClick={() => document.getElementById('close-dialog')?.click()}>Close</Button>
+                                      <Button className="bg-green-600 hover:bg-green-500 text-white" onClick={() => updateQuoteStatus(selectedQuote!.id, 'processed')}>Mark Processed</Button>
+                                    </div>
                                   </div>
                                 </DialogContent>
                               </Dialog>
@@ -456,35 +456,35 @@ const Admin = () => {
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <label className="text-sm font-bold text-slate-400">Product Name</label>
-                          <input required className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-white focus:border-blue-500 focus:outline-none" value={productFormData.name} onChange={(e) => setProductFormData({...productFormData, name: e.target.value})} />
+                          <input required className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-white focus:border-blue-500 focus:outline-none" value={productFormData.name} onChange={(e) => setProductFormData({ ...productFormData, name: e.target.value })} />
                         </div>
                         <div className="space-y-2">
                           <label className="text-sm font-bold text-slate-400">Brand</label>
-                          <input required className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-white focus:border-blue-500 focus:outline-none" value={productFormData.brand} onChange={(e) => setProductFormData({...productFormData, brand: e.target.value})} />
+                          <input required className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-white focus:border-blue-500 focus:outline-none" value={productFormData.brand} onChange={(e) => setProductFormData({ ...productFormData, brand: e.target.value })} />
                         </div>
                         <div className="space-y-2">
                           <label className="text-sm font-bold text-slate-400">Model</label>
-                          <input required className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-white focus:border-blue-500 focus:outline-none" value={productFormData.model} onChange={(e) => setProductFormData({...productFormData, model: e.target.value})} />
+                          <input required className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-white focus:border-blue-500 focus:outline-none" value={productFormData.model} onChange={(e) => setProductFormData({ ...productFormData, model: e.target.value })} />
                         </div>
                         <div className="space-y-2">
                           <label className="text-sm font-bold text-slate-400">Category</label>
-                          <input required className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-white focus:border-blue-500 focus:outline-none" value={productFormData.category} onChange={(e) => setProductFormData({...productFormData, category: e.target.value})} />
+                          <input required className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-white focus:border-blue-500 focus:outline-none" value={productFormData.category} onChange={(e) => setProductFormData({ ...productFormData, category: e.target.value })} />
                         </div>
                         <div className="space-y-2">
                           <label className="text-sm font-bold text-slate-400">Price (₹)</label>
-                          <input required type="number" className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-white focus:border-blue-500 focus:outline-none" value={productFormData.price} onChange={(e) => setProductFormData({...productFormData, price: parseInt(e.target.value)})} />
+                          <input required type="number" className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-white focus:border-blue-500 focus:outline-none" value={productFormData.price} onChange={(e) => setProductFormData({ ...productFormData, price: parseInt(e.target.value) })} />
                         </div>
                         <div className="space-y-2">
                           <label className="text-sm font-bold text-slate-400">Stock Availability</label>
-                          <input required type="number" className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-white focus:border-blue-500 focus:outline-none" value={productFormData.availability} onChange={(e) => setProductFormData({...productFormData, availability: parseInt(e.target.value)})} />
+                          <input required type="number" className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-white focus:border-blue-500 focus:outline-none" value={productFormData.availability} onChange={(e) => setProductFormData({ ...productFormData, availability: parseInt(e.target.value) })} />
                         </div>
                         <div className="space-y-2">
                           <label className="text-sm font-bold text-slate-400">Main Image URL</label>
-                          <input required className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-white focus:border-blue-500 focus:outline-none" value={productFormData.imageMain} onChange={(e) => setProductFormData({...productFormData, imageMain: e.target.value})} />
+                          <input required className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-white focus:border-blue-500 focus:outline-none" value={productFormData.imageMain} onChange={(e) => setProductFormData({ ...productFormData, imageMain: e.target.value })} />
                         </div>
                         <div className="space-y-2">
                           <label className="text-sm font-bold text-slate-400">Thumbnail URL</label>
-                          <input required className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-white focus:border-blue-500 focus:outline-none" value={productFormData.imageThumbnail} onChange={(e) => setProductFormData({...productFormData, imageThumbnail: e.target.value})} />
+                          <input required className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-white focus:border-blue-500 focus:outline-none" value={productFormData.imageThumbnail} onChange={(e) => setProductFormData({ ...productFormData, imageThumbnail: e.target.value })} />
                         </div>
                       </div>
                       <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
@@ -532,13 +532,13 @@ const Admin = () => {
                               <div className="text-xs text-slate-500">{product.brand} | {product.model}</div>
                             </TableCell>
                             <TableCell className="text-slate-300">
-                               {product.category}
+                              {product.category}
                             </TableCell>
                             <TableCell className="text-white font-mono">₹{product.price.toLocaleString()}</TableCell>
                             <TableCell>
-                               <Badge variant="outline" className={product.availability > 0 ? "border-green-500/50 text-green-400" : "border-red-500/50 text-red-400"}>
-                                 {product.availability}
-                               </Badge>
+                              <Badge variant="outline" className={product.availability > 0 ? "border-green-500/50 text-green-400" : "border-red-500/50 text-red-400"}>
+                                {product.availability}
+                              </Badge>
                             </TableCell>
                             <TableCell className="text-right">
                               <div className="flex gap-2 justify-end">

@@ -1,13 +1,11 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
-import { 
-  ShieldCheck, 
-  FileText, 
-  Gavel, 
-  CheckCircle2, 
-  Building2, 
-  ArrowRight,
+import {
+  ShieldCheck,
+  FileText,
+  Gavel,
+  CheckCircle2,
   ClipboardCheck,
   Truck,
   Award
@@ -54,7 +52,7 @@ const GovernmentProcurement = () => {
         <title>Government Procurement | Seatech</title>
         <meta name="description" content="Official procurement guide for government departments, PSUs, and educational institutions through GeM." />
       </Helmet>
-      
+
       <Navbar />
 
       <main className="pt-32 pb-20">
@@ -69,16 +67,16 @@ const GovernmentProcurement = () => {
               <Award className="w-4 h-4" />
               <span>GeM Registered OEM</span>
             </motion.div>
-            <motion.h1 
+            <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
               className="text-4xl md:text-6xl font-bold text-white mb-8 leading-tight tracking-tight"
             >
-              Government & Institutional <br/>
+              Government & Institutional <br />
               <span className="text-blue-500">Procurement Simplified.</span>
             </motion.h1>
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
@@ -145,12 +143,12 @@ const GovernmentProcurement = () => {
                 </div>
               </div>
               <div className="relative rounded-[2.5rem] overflow-hidden aspect-video bg-slate-800 border border-slate-700 flex items-center justify-center group">
-                 <ShieldCheck className="w-32 h-32 text-blue-500/20 group-hover:scale-110 transition-transform duration-700" />
-                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent"></div>
-                 <div className="absolute bottom-8 left-8">
-                    <p className="text-white font-bold text-xl mb-1">Trusted Quality</p>
-                    <p className="text-slate-400 text-sm">Certified infrastructure solutions since 2010.</p>
-                 </div>
+                <ShieldCheck className="w-32 h-32 text-blue-500/20 group-hover:scale-110 transition-transform duration-700" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent"></div>
+                <div className="absolute bottom-8 left-8">
+                  <p className="text-white font-bold text-xl mb-1">Trusted Quality</p>
+                  <p className="text-slate-400 text-sm">Certified infrastructure solutions .</p>
+                </div>
               </div>
             </div>
           </div>
@@ -161,21 +159,21 @@ const GovernmentProcurement = () => {
           <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-[3rem] p-12 md:p-20 relative overflow-hidden text-center shadow-2xl shadow-blue-900/20">
             <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -mr-48 -mt-48"></div>
             <div className="relative z-10">
-              <h2 className="text-3xl md:text-5xl font-bold text-white mb-8 tracking-tight">Need a customized proposal for <br/>your department?</h2>
+              <h2 className="text-3xl md:text-5xl font-bold text-white mb-8 tracking-tight">Need a customized proposal for <br />your department?</h2>
               <p className="text-blue-100 text-lg mb-10 max-w-2xl mx-auto opacity-90">
                 Our expert consultants can assist you in preparing technical specifications and budget estimates for your infrastructure projects.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                 <Link to="/contact">
-                    <Button size="lg" className="h-16 px-10 bg-white text-blue-600 hover:bg-blue-50 font-bold rounded-full text-lg shadow-xl">
-                       Talk to an Expert
-                    </Button>
-                 </Link>
-                 <Link to="/products">
-                    <Button variant="outline" size="lg" className="h-16 px-10 border-white/30 text-white hover:bg-white/10 rounded-full font-bold text-lg">
-                       View Products
-                    </Button>
-                 </Link>
+                <Link to="/contact">
+                  <Button size="lg" className="h-16 px-10 bg-white text-blue-600 hover:bg-blue-50 font-bold rounded-full text-lg shadow-xl">
+                    Talk to an Expert
+                  </Button>
+                </Link>
+                <Link to="/products">
+                  <Button variant="outline" size="lg" className="h-16 px-10 border-white/30 text-white hover:bg-white/10 rounded-full font-bold text-lg">
+                    View Products
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>

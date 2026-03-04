@@ -4,7 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CartProvider } from "./contexts/CartContext";
-import { Loader2 } from "lucide-react";
 import logoSrc from "./assets/logo.png";
 import { HelmetProvider } from "react-helmet-async";
 
@@ -24,7 +23,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const Clients = lazy(() => import("./pages/Clients"));
 const RequestOEMAuthorization = lazy(() => import("./pages/RequestOEMAuthorization"));
 const GovernmentProcurement = lazy(() => import("./pages/GovernmentProcurement"));
-const QuoteRequest = lazy(() => import("./pages/QuoteRequest"));
+const BecomeAPartner = lazy(() => import("./pages/BecomeAPartner"));
 
 const queryClient = new QueryClient();
 
@@ -52,7 +51,7 @@ const App = () => (
                 <Route path="/products" element={<Products />} />
                 <Route path="/products/:productId" element={<ProductDetailPage />} />
                 <Route path="/dealer-application" element={<DealerApplication />} />
-                <Route path="/quote-request" element={<QuoteRequest />} />
+                <Route path="/become-partner" element={<BecomeAPartner />} />
                 <Route path="/request-oem" element={<RequestOEMAuthorization />} />
                 <Route path="/government-procurement" element={<GovernmentProcurement />} />
                 <Route path="/contact" element={<Contact />} />

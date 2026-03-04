@@ -11,6 +11,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import AuthDialog from "@/components/AuthDialog";
+import { sendFormEmail } from "@/utils/email";
 
 // Get unique categories
 const categories = Array.from(new Set(products.map((p) => p.category)));
@@ -29,7 +30,7 @@ const RequestOEMAuthorization = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
   const [requestType, setRequestType] = useState<"L1" | "Bidding">("L1");
-  
+
   // Common Fields
   const [dealerName, setDealerName] = useState(""); // Firm Name
   const [directorName, setDirectorName] = useState(""); // New Field
@@ -37,7 +38,8 @@ const RequestOEMAuthorization = () => {
   const [email, setEmail] = useState("");
   const [mobile, setMobile] = useState("");
   const [gst, setGst] = useState("");
-  
+  const [gemUserId, setGemUserId] = useState("");
+
   // Item Addition Fields
   const [selectedCategory, setSelectedCategory] = useState("");
   const [quantity, setQuantity] = useState("");
@@ -46,7 +48,7 @@ const RequestOEMAuthorization = () => {
   // Specific Fields
   const [turnover, setTurnover] = useState(""); // For L1
   const [biddingNumber, setBiddingNumber] = useState(""); // For Bidding
-  
+
   // 3 Years Turnover State for Bidding
   const [turnoverYears, setTurnoverYears] = useState<TurnoverData[]>([
     { year: "", amount: "" },
@@ -95,46 +97,38 @@ const RequestOEMAuthorization = () => {
     }
 
     if (requestType === "Bidding") {
-       const isIncomplete = turnoverYears.some(t => !t.year || !t.amount);
-       if (isIncomplete) {
-         toast.error("Please fill in turnover details for all 3 years.");
-         return;
-       }
+      const isIncomplete = turnoverYears.some(t => !t.year || !t.amount);
+      if (isIncomplete) {
+        toast.error("Please fill in turnover details for all 3 years.");
+        return;
+      }
     }
 
     setIsSubmitting(true);
 
     try {
-      // Map to 'dealer_applications' table schema
       const itemsString = requestedItems.map(i => `${i.category}: ${i.quantity}`).join('; ');
-      
+
+      let finalRemarks = "";
+      if (requestType === "Bidding") {
+        finalRemarks = `Bidding #: ${biddingNumber} | Turnover: Y1-${turnoverYears[0].amount}, Y2-${turnoverYears[1].amount}, Y3-${turnoverYears[2].amount}`;
+      } else {
+        finalRemarks = `L1 Purchase | Turnover: ${turnover}`;
+      }
+
       const payload: any = {
         dealer_name: dealerName,
-        director_name: directorName, // Required by DB
+        director_name: directorName,
         address: address,
         email: email,
         mobile: mobile,
-        director_email: email, // Reusing email for now
-        director_mobile: mobile, // Reusing mobile for now
+        director_email: email,
+        director_mobile: mobile,
         gst_number: gst,
         product_requirements: itemsString,
         status: 'pending',
-        remarks: requestType === "Bidding" ? `Bidding #: ${biddingNumber}` : `Turnover: ${turnover}`
+        remarks: finalRemarks
       };
-
-      if (requestType === "Bidding") {
-        // Try to parse turnover if possible, but schema expects numbers for years.
-        // If the input is text (e.g. "1.5 Cr"), we can't strict parse easily. 
-        // We'll leave them null or try to extract numbers.
-        // For now, let's put the turnover details in 'remarks' or try to parse.
-        // Schema: turnover_year1: number
-        // Let's try to parse:
-        payload.turnover_year1 = parseFloat(turnoverYears[0].amount.replace(/[^0-9.]/g, '')) || null;
-        payload.turnover_year2 = parseFloat(turnoverYears[1].amount.replace(/[^0-9.]/g, '')) || null;
-        payload.turnover_year3 = parseFloat(turnoverYears[2].amount.replace(/[^0-9.]/g, '')) || null;
-      } else {
-         payload.turnover_year1 = parseFloat(turnover.replace(/[^0-9.]/g, '')) || null;
-      }
 
       // Insert into Supabase
       const { error } = await (supabase as any)
@@ -143,10 +137,25 @@ const RequestOEMAuthorization = () => {
 
       if (error) throw error;
 
+      // Also send notification email
+      await sendFormEmail(`OEM Authorization Request (${requestType})`, {
+        dealerName,
+        directorName,
+        email,
+        mobile,
+        gst,
+        gemUserId,
+        address,
+        requestedItems,
+        turnover,
+        biddingNumber,
+        turnoverYears,
+      });
+
       toast.success("OEM Authorization Request Submitted!", {
         description: "Our team will review your details and contact you shortly."
       });
-      
+
       // Reset Form
       setDealerName("");
       setDirectorName("");
@@ -154,6 +163,7 @@ const RequestOEMAuthorization = () => {
       setEmail("");
       setMobile("");
       setGst("");
+      setGemUserId("");
       setRequestedItems([]);
       setTurnover("");
       setBiddingNumber("");
@@ -176,9 +186,9 @@ const RequestOEMAuthorization = () => {
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col font-sans selection:bg-blue-500/30 selection:text-blue-100">
       <Navbar />
-      <AuthDialog 
-        isOpen={isAuthDialogOpen} 
-        onOpenChange={setIsAuthDialogOpen} 
+      <AuthDialog
+        isOpen={isAuthDialogOpen}
+        onOpenChange={setIsAuthDialogOpen}
         message="Please login to request OEM Authorization."
       />
       <div className="flex-grow container mx-auto px-4 py-32 max-w-5xl">
@@ -191,29 +201,27 @@ const RequestOEMAuthorization = () => {
           </CardHeader>
           <CardContent className="pt-8">
             <form onSubmit={handleSubmit} className="space-y-8">
-              
+
               {/* Request Type Toggle */}
               <div className="flex justify-center mb-8">
                 <div className="bg-slate-800 p-1.5 rounded-xl flex gap-1 border border-slate-700">
                   <button
                     type="button"
                     onClick={() => setRequestType("L1")}
-                    className={`px-8 py-3 rounded-lg text-sm font-bold transition-all ${
-                      requestType === "L1" 
-                        ? "bg-slate-600 text-white shadow-md" 
-                        : "text-slate-400 hover:text-slate-200 hover:bg-slate-700"
-                    }`}
+                    className={`px-8 py-3 rounded-lg text-sm font-bold transition-all ${requestType === "L1"
+                      ? "bg-slate-600 text-white shadow-md"
+                      : "text-slate-400 hover:text-slate-200 hover:bg-slate-700"
+                      }`}
                   >
                     For L1 Purchase
                   </button>
                   <button
                     type="button"
                     onClick={() => setRequestType("Bidding")}
-                    className={`px-8 py-3 rounded-lg text-sm font-bold transition-all ${
-                      requestType === "Bidding" 
-                        ? "bg-slate-600 text-white shadow-md" 
-                        : "text-slate-400 hover:text-slate-200 hover:bg-slate-700"
-                    }`}
+                    className={`px-8 py-3 rounded-lg text-sm font-bold transition-all ${requestType === "Bidding"
+                      ? "bg-slate-600 text-white shadow-md"
+                      : "text-slate-400 hover:text-slate-200 hover:bg-slate-700"
+                      }`}
                   >
                     For Bidding
                   </button>
@@ -224,68 +232,78 @@ const RequestOEMAuthorization = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="dealerName" className="text-slate-300">Firm / Dealer Name</Label>
-                  <Input 
-                    id="dealerName" 
-                    value={dealerName} 
-                    onChange={(e) => setDealerName(e.target.value)} 
-                    required 
+                  <Input
+                    id="dealerName"
+                    value={dealerName}
+                    onChange={(e) => setDealerName(e.target.value)}
+                    required
                     placeholder="Enter firm name"
                     className="h-12 bg-slate-800 border-slate-700 text-white focus:border-blue-500 focus:ring-blue-900"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="directorName" className="text-slate-300">Director / Proprietor Name</Label>
-                  <Input 
-                    id="directorName" 
-                    value={directorName} 
-                    onChange={(e) => setDirectorName(e.target.value)} 
-                    required 
+                  <Input
+                    id="directorName"
+                    value={directorName}
+                    onChange={(e) => setDirectorName(e.target.value)}
+                    required
                     placeholder="Enter director name"
                     className="h-12 bg-slate-800 border-slate-700 text-white focus:border-blue-500 focus:ring-blue-900"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-slate-300">Email Address</Label>
-                  <Input 
-                    id="email" 
-                    type="email" 
-                    value={email} 
-                    onChange={(e) => setEmail(e.target.value)} 
-                    required 
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
                     placeholder="dealer@example.com"
                     className="h-12 bg-slate-800 border-slate-700 text-white focus:border-blue-500 focus:ring-blue-900"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="mobile" className="text-slate-300">Mobile Number</Label>
-                  <Input 
-                    id="mobile" 
-                    type="tel" 
-                    value={mobile} 
-                    onChange={(e) => setMobile(e.target.value)} 
-                    required 
+                  <Input
+                    id="mobile"
+                    type="tel"
+                    value={mobile}
+                    onChange={(e) => setMobile(e.target.value)}
+                    required
                     placeholder="+91 98765 43210"
                     className="h-12 bg-slate-800 border-slate-700 text-white focus:border-blue-500 focus:ring-blue-900"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="gst" className="text-slate-300">GST Number</Label>
-                  <Input 
-                    id="gst" 
-                    value={gst} 
-                    onChange={(e) => setGst(e.target.value)} 
-                    required 
+                  <Input
+                    id="gst"
+                    value={gst}
+                    onChange={(e) => setGst(e.target.value)}
+                    required
                     placeholder="22AAAAA0000A1Z5"
+                    className="h-12 bg-slate-800 border-slate-700 text-white focus:border-blue-500 focus:ring-blue-900"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="gemUserId" className="text-slate-300">GeM User ID </Label>
+                  <Input
+                    id="gemUserId"
+                    value={gemUserId}
+                    onChange={(e) => setGemUserId(e.target.value)}
+                    placeholder="Enter GeM User ID"
                     className="h-12 bg-slate-800 border-slate-700 text-white focus:border-blue-500 focus:ring-blue-900"
                   />
                 </div>
                 <div className="space-y-2 md:col-span-2">
                   <Label htmlFor="address" className="text-slate-300">Complete Address</Label>
-                  <Textarea 
-                    id="address" 
-                    value={address} 
-                    onChange={(e) => setAddress(e.target.value)} 
-                    required 
+                  <Textarea
+                    id="address"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    required
                     placeholder="Enter full registered address"
                     className="min-h-[100px] bg-slate-800 border-slate-700 text-white focus:border-blue-500 focus:ring-blue-900 resize-none"
                   />
@@ -298,11 +316,11 @@ const RequestOEMAuthorization = () => {
                   <div className="grid grid-cols-1 gap-6">
                     <div className="space-y-2">
                       <Label htmlFor="turnover" className="text-slate-300">Dealer Turnover (Current Financial Year)</Label>
-                      <Input 
-                        id="turnover" 
-                        value={turnover} 
-                        onChange={(e) => setTurnover(e.target.value)} 
-                        required 
+                      <Input
+                        id="turnover"
+                        value={turnover}
+                        onChange={(e) => setTurnover(e.target.value)}
+                        required
                         placeholder="e.g. 50 Lakhs"
                         className="h-12 bg-slate-800 border-slate-700 text-white"
                       />
@@ -312,44 +330,44 @@ const RequestOEMAuthorization = () => {
                   <div className="space-y-6">
                     <div className="space-y-2">
                       <Label htmlFor="biddingNumber" className="text-slate-300">Bidding Number / Tender ID</Label>
-                      <Input 
-                        id="biddingNumber" 
-                        value={biddingNumber} 
-                        onChange={(e) => setBiddingNumber(e.target.value)} 
-                        required 
+                      <Input
+                        id="biddingNumber"
+                        value={biddingNumber}
+                        onChange={(e) => setBiddingNumber(e.target.value)}
+                        required
                         placeholder="Enter bidding number"
                         className="h-12 bg-slate-800 border-slate-700 text-white"
                       />
                     </div>
-                    
+
                     <div className="space-y-4">
-                       <Label className="text-base font-semibold text-slate-300 block mb-2">Dealer Turnover (Last 3 Years)</Label>
-                       <div className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700 space-y-4">
-                          {turnoverYears.map((data, index) => (
-                             <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-                                <div className="space-y-2">
-                                   <Label htmlFor={`year-${index}`} className="text-xs text-slate-400 uppercase tracking-wider font-bold">Financial Year {index + 1}</Label>
-                                   <Input 
-                                      id={`year-${index}`}
-                                      value={data.year}
-                                      onChange={(e) => handleTurnoverChange(index, "year", e.target.value)}
-                                      placeholder="e.g. 2023-2024"
-                                      className="bg-slate-900 border-slate-600 text-white"
-                                   />
-                                </div>
-                                <div className="space-y-2">
-                                   <Label htmlFor={`amount-${index}`} className="text-xs text-slate-400 uppercase tracking-wider font-bold">Turnover Amount</Label>
-                                   <Input 
-                                      id={`amount-${index}`}
-                                      value={data.amount}
-                                      onChange={(e) => handleTurnoverChange(index, "amount", e.target.value)}
-                                      placeholder="e.g. 15000000 (Numeric preferred)"
-                                      className="bg-slate-900 border-slate-600 text-white"
-                                   />
-                                </div>
-                             </div>
-                          ))}
-                       </div>
+                      <Label className="text-base font-semibold text-slate-300 block mb-2">Dealer Turnover (Last 3 Years)</Label>
+                      <div className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700 space-y-4">
+                        {turnoverYears.map((data, index) => (
+                          <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                            <div className="space-y-2">
+                              <Label htmlFor={`year-${index}`} className="text-xs text-slate-400 uppercase tracking-wider font-bold">Financial Year {index + 1}</Label>
+                              <Input
+                                id={`year-${index}`}
+                                value={data.year}
+                                onChange={(e) => handleTurnoverChange(index, "year", e.target.value)}
+                                placeholder="e.g. 2023-2024"
+                                className="bg-slate-900 border-slate-600 text-white"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor={`amount-${index}`} className="text-xs text-slate-400 uppercase tracking-wider font-bold">Turnover Amount</Label>
+                              <Input
+                                id={`amount-${index}`}
+                                value={data.amount}
+                                onChange={(e) => handleTurnoverChange(index, "amount", e.target.value)}
+                                placeholder="e.g. 15000000 (Numeric preferred)"
+                                className="bg-slate-900 border-slate-600 text-white"
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -358,7 +376,7 @@ const RequestOEMAuthorization = () => {
               {/* Product Selection Section */}
               <div className="space-y-4 pt-6 border-t border-slate-800">
                 <Label className="text-lg font-semibold text-white">Required Products</Label>
-                
+
                 <div className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700 space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
                     <div className="space-y-2 md:col-span-1">
@@ -379,20 +397,20 @@ const RequestOEMAuthorization = () => {
                     </div>
                     <div className="space-y-2 md:col-span-1">
                       <Label htmlFor="quantity" className="text-slate-300">Quantity</Label>
-                      <Input 
-                        id="quantity" 
-                        type="number" 
+                      <Input
+                        id="quantity"
+                        type="number"
                         min="1"
-                        value={quantity} 
-                        onChange={(e) => setQuantity(e.target.value)} 
+                        value={quantity}
+                        onChange={(e) => setQuantity(e.target.value)}
                         placeholder="Qty"
                         className="h-12 bg-slate-900 border-slate-600 text-white"
                       />
                     </div>
                     <div className="md:col-span-1">
-                      <Button 
-                        type="button" 
-                        onClick={addItem} 
+                      <Button
+                        type="button"
+                        onClick={addItem}
                         className="w-full h-12 bg-blue-600 hover:bg-blue-500 text-white font-bold"
                       >
                         <Plus className="mr-2 h-4 w-4" /> Add Product
@@ -411,10 +429,10 @@ const RequestOEMAuthorization = () => {
                               <span className="font-medium text-white">{item.category}</span>
                               <span className="text-xs text-slate-400">Qty: {item.quantity}</span>
                             </div>
-                            <Button 
-                              type="button" 
-                              variant="ghost" 
-                              size="icon" 
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
                               onClick={() => removeItem(index)}
                               className="text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-full h-8 w-8"
                             >
@@ -428,16 +446,16 @@ const RequestOEMAuthorization = () => {
                 </div>
               </div>
 
-              <Button 
-                type="submit" 
-                size="lg" 
+              <Button
+                type="submit"
+                size="lg"
                 disabled={isSubmitting}
                 className="w-full h-14 text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-xl shadow-blue-900/20 mt-6 border border-blue-500/50"
               >
                 {isSubmitting ? (
-                    <span className="flex items-center gap-2"><Loader2 className="animate-spin" /> Processing Request...</span>
+                  <span className="flex items-center gap-2"><Loader2 className="animate-spin" /> Processing Request...</span>
                 ) : (
-                    "Submit Authorization Request"
+                  "Submit Authorization Request"
                 )}
               </Button>
             </form>

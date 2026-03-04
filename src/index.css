@@ -8,35 +8,35 @@
     --background: 221 39% 11%;
     /* Primary Text: #F3F4F6 */
     --foreground: 220 14% 96%;
-    
+
     /* Surface / Cards: #242F3E */
     --card: 215 26% 19%;
     --card-foreground: 220 14% 96%;
-    
+
     /* Popovers: #242F3E */
     --popover: 215 26% 19%;
     --popover-foreground: 220 14% 96%;
-    
+
     /* Primary Accent: #3B82F6 */
     --primary: 217 91% 60%;
     /* White text for primary buttons */
     --primary-foreground: 0 0% 100%;
     /* Accent Hover: #2563EB */
     --primary-hover: 221 83% 53%;
-    
+
     /* Secondary Background Sections: #1F2937 */
     --secondary: 215 28% 17%;
     --secondary-foreground: 220 14% 96%;
-    
+
     /* Muted Text / Sections */
     --muted: 215 28% 17%;
     /* Secondary Text: #9CA3AF */
     --muted-foreground: 218 11% 65%;
-    
+
     /* Accent (same as secondary for subtle highlights) */
     --accent: 215 28% 17%;
     --accent-foreground: 220 14% 96%;
-    
+
     /* Destructive */
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
@@ -46,8 +46,9 @@
     --input: 220 23% 18%;
     /* Ring matches Primary Accent */
     --ring: 217 91% 60%;
-    
-    --radius: 0.625rem; /* 10px rounded for cards */
+
+    --radius: 0.625rem;
+    /* 10px rounded for cards */
   }
 
   .dark {
@@ -78,15 +79,22 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground font-sans antialiased selection:bg-primary/30 selection:text-primary-foreground;
     /* Increase line-height slightly for readability on dark */
     line-height: 1.6;
   }
-  h1, h2, h3, h4, h5, h6 {
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-semibold tracking-tight;
   }
-  
+
   /* Smooth Scroll */
   html {
     scroll-behavior: smooth;
@@ -96,9 +104,11 @@
   ::-webkit-scrollbar {
     width: 8px;
   }
+
   ::-webkit-scrollbar-track {
     background: transparent;
   }
+
   ::-webkit-scrollbar-thumb {
     @apply bg-secondary rounded-full hover:bg-muted-foreground/30 transition-colors;
   }
@@ -108,7 +118,7 @@
   .mask-linear-gradient {
     mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
   }
-  
+
   /* Glass card updated for dark institutional theme */
   .glass-card {
     @apply bg-card/90 backdrop-blur-xl border border-white/[0.08] shadow-elevation;
@@ -118,6 +128,7 @@
   .glow-primary {
     box-shadow: 0 0 15px rgba(59, 130, 246, 0.15);
   }
+
   .glow-primary-focus:focus-visible {
     box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--primary)), 0 0 15px rgba(59, 130, 246, 0.25);
   }
@@ -126,6 +137,7 @@
   .shadow-elevation {
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05);
   }
+
   .hover-elevate {
     @apply transition-transform duration-300 hover:-translate-y-[2px] hover:shadow-elevation;
   }

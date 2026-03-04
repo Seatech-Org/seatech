@@ -191,25 +191,15 @@ const Navbar = () => {
       `}</style>
 
       <nav
-        className={`sticky top-0 left-0 right-0 z-50 transition-all duration-300 nav-glass-border ${
-          scrolled
-            ? "h-[68px] bg-[#0d1320]/95 backdrop-blur-2xl"
-            : "h-[88px] bg-[#111827]/98 backdrop-blur-md"
-        }`}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled
+          ? "h-[68px]"
+          : "h-[88px]"
+          }`}
         style={{
-          backgroundImage: scrolled
-            ? "none"
-            : "linear-gradient(180deg, rgba(30,58,138,0.06) 0%, transparent 100%)",
+          background: "transparent"
         }}
       >
-        {/* Top accent line */}
-        <div
-          className="absolute top-0 left-0 right-0 h-[2px]"
-          style={{
-            background:
-              "linear-gradient(90deg, transparent 0%, rgba(59,130,246,0.6) 20%, rgba(96,165,250,0.9) 50%, rgba(6,182,212,0.6) 80%, transparent 100%)",
-          }}
-        />
+        {/* Top accent line (removed) */}
 
         <div className="container mx-auto px-4 h-full">
           <div className="flex items-center justify-between h-full">
@@ -224,42 +214,37 @@ const Navbar = () => {
                 <img
                   src={logoSrc}
                   alt="Seatech"
-                  className={`w-auto object-contain transition-all duration-300 ${
-                    scrolled ? "h-9 md:h-10" : "h-12 md:h-14"
-                  }`}
+                  className={`w-auto object-contain transition-all duration-300 ${scrolled ? "h-9 md:h-10" : "h-12 md:h-14"
+                    }`}
                 />
               </motion.div>
             </Link>
 
             {/* ── DESKTOP NAV ── */}
-            <div className="hidden lg:flex items-center gap-1">
-              {navLinks.map((link) => {
-                const isActive = location.pathname === link.path;
-                return (
-                  <Link
-                    key={link.path}
-                    to={link.path}
-                    className={`nav-link-underline relative px-4 py-2 rounded-full transition-colors duration-200 group ${
-                      isActive ? "active-dot" : ""
-                    }`}
-                    style={{
-                      background: isActive
-                        ? "rgba(59,130,246,0.08)"
-                        : undefined,
-                    }}
-                  >
-                    <span
-                      className={`text-[14px] font-semibold tracking-wide transition-colors duration-200 ${
-                        isActive
+            <div className="hidden lg:flex items-center">
+              {/* Main Nav Pill Container */}
+              <div className="flex items-center gap-1 bg-white/[0.03] border border-white/[0.08] backdrop-blur-xl rounded-full p-1.5 shadow-[0_4px_24px_rgba(0,0,0,0.2)]">
+                {navLinks.map((link) => {
+                  const isActive = location.pathname === link.path;
+                  return (
+                    <Link
+                      key={link.path}
+                      to={link.path}
+                      className={`relative px-4 py-2 rounded-full transition-all duration-300 group ${isActive ? "bg-blue-500/10 shadow-[0_0_12px_rgba(59,130,246,0.15)]" : "hover:bg-white/[0.06]"
+                        }`}
+                    >
+                      <span
+                        className={`text-[13px] font-bold tracking-wide transition-colors duration-200 ${isActive
                           ? "text-blue-400"
                           : "text-slate-300 group-hover:text-white"
-                      }`}
-                    >
-                      {link.name}
-                    </span>
-                  </Link>
-                );
-              })}
+                          }`}
+                      >
+                        {link.name}
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
 
             {/* ── ACTIONS ── */}
@@ -307,11 +292,10 @@ const Navbar = () => {
                       <motion.button
                         whileHover={{ scale: 1.08 }}
                         whileTap={{ scale: 0.93 }}
-                        className={`icon-btn flex items-center justify-center w-9 h-9 rounded-full border transition-all duration-200 ${
-                          isProfileOpen
-                            ? "border-blue-500 bg-blue-500/15 text-blue-400 shadow-[0_0_16px_rgba(59,130,246,0.25)]"
-                            : "border-white/[0.09] bg-white/[0.04] text-slate-400 hover:text-white hover:border-blue-500/50"
-                        }`}
+                        className={`icon-btn flex items-center justify-center w-9 h-9 rounded-full border transition-all duration-200 ${isProfileOpen
+                          ? "border-blue-500 bg-blue-500/15 text-blue-400 shadow-[0_0_16px_rgba(59,130,246,0.25)]"
+                          : "border-white/[0.09] bg-white/[0.04] text-slate-400 hover:text-white hover:border-blue-500/50"
+                          }`}
                         onClick={() => setIsProfileOpen(!isProfileOpen)}
                       >
                         <User className="h-[14px] w-[14px]" />
@@ -499,19 +483,17 @@ const Navbar = () => {
                             <SheetClose asChild>
                               <Button
                                 variant="ghost"
-                                className={`w-full justify-between text-[14px] font-medium h-11 rounded-xl group transition-all ${
-                                  isActive
-                                    ? "text-blue-400 bg-blue-500/[0.08] border border-blue-500/20"
-                                    : "text-slate-400 hover:text-white hover:bg-white/[0.05]"
-                                }`}
+                                className={`w-full justify-between text-[14px] font-medium h-11 rounded-xl group transition-all ${isActive
+                                  ? "text-blue-400 bg-blue-500/[0.08] border border-blue-500/20"
+                                  : "text-slate-400 hover:text-white hover:bg-white/[0.05]"
+                                  }`}
                               >
                                 {link.name}
                                 <ChevronRight
-                                  className={`h-4 w-4 transition-all ${
-                                    isActive
-                                      ? "opacity-100 text-blue-400"
-                                      : "opacity-0 -translate-x-1 group-hover:opacity-60 group-hover:translate-x-0"
-                                  }`}
+                                  className={`h-4 w-4 transition-all ${isActive
+                                    ? "opacity-100 text-blue-400"
+                                    : "opacity-0 -translate-x-1 group-hover:opacity-60 group-hover:translate-x-0"
+                                    }`}
                                 />
                               </Button>
                             </SheetClose>
