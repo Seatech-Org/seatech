@@ -17,7 +17,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { motion, AnimatePresence } from "framer-motion";
 import { CLIENTS } from "../data/clients";
-import { Helmet } from "react-helmet-async";
+import { SEO } from "@/components/SEO";
 import { Star, Quote } from "lucide-react";
 import CredibilityCard from "@/components/CredibilityCard";
 
@@ -74,10 +74,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground selection:bg-primary/30 selection:text-primary-foreground overflow-x-hidden">
-      <Helmet>
-        <title>Seatech</title>
-        <meta name="description" content="Discover Seatech's extensive range of government-approved furniture, auditorium chairs, and office infrastructure solutions. Quality and reliability for your workspace." />
-      </Helmet>
+      <SEO
+        title="Home"
+        description="Seatech is a premier B2B manufacturer and Government e-Marketplace (GeM) authorized supplier of high-quality hospital, institutional, educational, and office furniture."
+        keywords="Seatech furniture, GeM supplier, hospital furniture, educational furniture, office infrastructure, B2B wholesale furniture India"
+      />
       <Navbar />
 
       {/* FLOATING CONTACT BUTTONS */}

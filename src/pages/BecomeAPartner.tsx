@@ -13,6 +13,7 @@ import { useState, useEffect } from "react";
 import { User, FileText, CheckCircle, Loader2, Handshake, MapPin } from "lucide-react";
 import { sendFormEmail } from "@/utils/email";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SEO } from "@/components/SEO";
 
 const formSchema = z.object({
   // Partnership Details
@@ -146,6 +147,11 @@ const BecomeAPartner = () => {
 
   return (
     <div className="min-h-screen bg-slate-950 font-sans selection:bg-blue-500/30 selection:text-blue-100">
+      <SEO
+        title="Become a Partner"
+        description="Partner with Seatech to distribute premium institutional furniture and infrastructure solutions. Exclusive OEM partnerships available."
+      />
+
       <Navbar />
 
       {/* Hero Header */}

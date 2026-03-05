@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import { SEO } from "@/components/SEO";
 
 const GovernmentProcurement = () => {
   const steps = [
@@ -48,10 +48,10 @@ const GovernmentProcurement = () => {
 
   return (
     <div className="min-h-screen bg-slate-950 font-sans selection:bg-blue-500/30 selection:text-blue-100">
-      <Helmet>
-        <title>Government Procurement | Seatech</title>
-        <meta name="description" content="Official procurement guide for government departments, PSUs, and educational institutions through GeM." />
-      </Helmet>
+      <SEO
+        title="Government Procurement (GeM)"
+        description="Seatech is a trusted GeM authorized OEM. Learn about our specialized procurement process for government departments across India."
+      />
 
       <Navbar />
 

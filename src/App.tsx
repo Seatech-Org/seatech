@@ -25,6 +25,7 @@ const Clients = lazy(() => import("./pages/Clients"));
 const RequestOEMAuthorization = lazy(() => import("./pages/RequestOEMAuthorization"));
 const GovernmentProcurement = lazy(() => import("./pages/GovernmentProcurement"));
 const BecomeAPartner = lazy(() => import("./pages/BecomeAPartner"));
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -59,8 +60,8 @@ const App = () => (
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/location" element={<Location />} />
                 <Route path="/auth" element={<Auth />} />
-                <Route path="/admin" element={<Admin />} />
-                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><Admin /></ProtectedRoute>} />
+                <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
                 <Route path="/about" element={<AboutUs />} />
                 <Route path="/clients" element={<Clients />} />
                 <Route path="/cart" element={<CartPage />} />

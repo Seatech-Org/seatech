@@ -47,7 +47,7 @@ const CredibilityCard = ({ onClose }: CredibilityCardProps) => {
                     animate={{ y: 0, opacity: 1, scale: 1 }}
                     exit={{ y: -20, opacity: 0, scale: 0.95 }}
                     transition={{ type: "spring", stiffness: 280, damping: 24 }}
-                    className="relative mb-8 w-[98vw] max-w-[1400px] mx-auto rounded-2xl"
+                    className="relative mb-8 w-[calc(100vw-2rem)] md:w-[98vw] max-w-[1400px] mx-auto rounded-2xl"
                 >
                     {/* Animated pulsing border glow */}
                     <motion.div
@@ -134,9 +134,9 @@ const CredibilityCard = ({ onClose }: CredibilityCardProps) => {
                                 <div className="hidden md:block w-px self-stretch bg-white/[0.06]" />
 
                                 {/* ─── RIGHT: Images ─── */}
-                                <div className="flex-1 w-full min-w-0 mt-2 md:mt-0">
+                                <div className="flex-1 w-full min-w-0 mt-2 md:mt-0 overflow-hidden relative">
                                     {/* Thumbnail strip */}
-                                    <div className="flex gap-2 sm:gap-4 items-end flex-wrap sm:flex-nowrap justify-center md:justify-start">
+                                    <div className="flex gap-2.5 sm:gap-4 items-start overflow-x-auto pb-4 pt-4 px-2 md:px-1 justify-start md:justify-center scrollbar-hide">
                                         {PRODUCTS.map((product, i) => (
                                             <motion.button
                                                 key={i}
@@ -169,6 +169,8 @@ const CredibilityCard = ({ onClose }: CredibilityCardProps) => {
                                                 </span>
                                             </motion.button>
                                         ))}
+                                        {/* Mobile scroll spacer */}
+                                        <div className="w-1 sm:w-0 flex-shrink-0" />
                                     </div>
 
                                     {/* Navigation dots + arrows */}

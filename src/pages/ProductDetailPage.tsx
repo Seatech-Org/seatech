@@ -19,7 +19,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import AuthDialog from "@/components/AuthDialog";
 import { ProductCard } from "@/components/ProductCard";
-import { Helmet } from "react-helmet-async";
+import { SEO } from "@/components/SEO";
 import { useProducts } from "@/services/product-service";
 import logoSrc from "../assets/logo.png";
 
@@ -106,15 +106,38 @@ const ProductDetailPage = () => {
 
   const specificationGroups = groupSpecifications(product.specifications);
 
+  const jsonLd = JSON.stringify({
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    "name": product.name,
+    "image": product.images?.map((img: any) => img.main) || [],
+    "description": `Buy ${product.name} (${product.model}) from ${product.brand}. High-quality ${product.category} for institutional and corporate needs.`,
+    "sku": product.id,
+    "mpn": product.model,
+    "brand": {
+      "@type": "Brand",
+      "name": product.brand
+    },
+    "category": product.category,
+    "offers": {
+      "@type": "Offer",
+      "url": `https://seatech-gov.com/products/${product.id}`,
+      "priceCurrency": "INR",
+      // Given that B2B prices are "On Request", Schema.org typically expects a numeric price if available.
+      "availability": "https://schema.org/InStock",
+      "itemCondition": "https://schema.org/NewCondition"
+    }
+  });
+
   return (
     <div className="bg-background min-h-screen font-sans selection:bg-primary/30 selection:text-primary-foreground">
-      <Helmet>
-        <title>{`${product.name} | ${product.brand} | Seatech`}</title>
-        <meta name="description" content={`Buy ${product.name} (${product.model}) from ${product.brand}. High-quality ${product.category} for institutional and corporate needs.`} />
-        <meta property="og:title" content={`${product.name} | Seatech`} />
-        <meta property="og:image" content={product.images?.[0]?.main} />
-        <meta property="og:type" content="product" />
-      </Helmet>
+      <SEO
+        title={`${product.name} | ${product.brand}`}
+        description={`Buy ${product.name} (${product.model}) from ${product.brand}. High-quality ${product.category} for institutional and corporate needs.`}
+        type="product"
+        image={product.images?.[0]?.main}
+        jsonLd={jsonLd}
+      />
 
       <Navbar />
 

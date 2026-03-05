@@ -12,6 +12,7 @@ import Footer from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import AuthDialog from "@/components/AuthDialog";
 import { sendFormEmail } from "@/utils/email";
+import { SEO } from "@/components/SEO";
 
 // Get unique categories
 const categories = Array.from(new Set(products.map((p) => p.category)));
@@ -189,6 +190,10 @@ const RequestOEMAuthorization = () => {
 
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col font-sans selection:bg-blue-500/30 selection:text-blue-100">
+      <SEO
+        title="Request OEM Authorization"
+        description="Request official OEM authorization from Seatech for government tenders, GeM portal bidding, and bulk institutional procurement."
+      />
       <Navbar />
       <AuthDialog
         isOpen={isAuthDialogOpen}
