@@ -83,7 +83,7 @@ const Index = () => {
       {/* FLOATING CONTACT BUTTONS */}
       <div className="fixed bottom-8 right-8 z-50 flex flex-col gap-4 items-end">
         <motion.a
-          href="tel:+919876543210"
+          href="tel:+918840601077"
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           whileHover={{ scale: 1.05 }}
@@ -94,7 +94,7 @@ const Index = () => {
           <Phone className="h-6 w-6 fill-current" />
         </motion.a>
         <motion.a
-          href="https://wa.me/919452203666"
+          href="https://wa.me/918840601077"
           target="_blank"
           rel="noopener noreferrer"
           initial={{ scale: 0 }}

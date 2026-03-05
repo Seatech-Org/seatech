@@ -18,10 +18,8 @@ import { sendFormEmail } from "@/utils/email";
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   companyName: z.string().optional(),
-  organization: z.string().min(2, "Organization is required"),
   phone: z.string().regex(/^[0-9]{10}$/, "Enter a valid 10-digit mobile number"),
   email: z.string().email("Invalid email address"),
-  subject: z.string().min(3, "Please specify the interested category"),
   message: z.string().min(10, "Please provide more detail about your requirement"),
 });
 
@@ -48,10 +46,8 @@ const Contact = () => {
     defaultValues: {
       name: "",
       companyName: "",
-      organization: "",
       phone: "",
       email: "",
-      subject: "",
       message: "",
     },
   });

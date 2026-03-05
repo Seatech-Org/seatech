@@ -8,6 +8,7 @@ const PRODUCTS = [
     { src: "/credpage/Slotted Angle Rack.jpeg", name: "Slotted Angle Rack" },
     { src: "/credpage/Steel bookcases.jpeg", name: "Steel Bookcases" },
     { src: "/credpage/Study table.jpeg", name: "Study Table" },
+    { src: "/credpage/Double Drawer Table.jpeg", name: "Double Drawer Table" },
 ];
 
 interface CredibilityCardProps {
@@ -46,7 +47,7 @@ const CredibilityCard = ({ onClose }: CredibilityCardProps) => {
                     animate={{ y: 0, opacity: 1, scale: 1 }}
                     exit={{ y: -20, opacity: 0, scale: 0.95 }}
                     transition={{ type: "spring", stiffness: 280, damping: 24 }}
-                    className="relative mb-8 w-[96vw] max-w-6xl mx-auto rounded-2xl"
+                    className="relative mb-8 w-[98vw] max-w-[1400px] mx-auto rounded-2xl"
                 >
                     {/* Animated pulsing border glow */}
                     <motion.div
