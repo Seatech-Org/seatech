@@ -4,7 +4,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { CLIENTS } from "../data/clients";
 import { Helmet } from "react-helmet-async";
-import { Building2, GraduationCap, Gavel, Briefcase, Filter, Heart, Trophy, Users2, Globe } from "lucide-react";
+import { Building2, GraduationCap, Gavel, Briefcase, Filter, Heart } from "lucide-react";
 
 const Clients = () => {
   const [activeFilter, setActiveFilter] = useState("All");
@@ -17,12 +17,7 @@ const Clients = () => {
     { name: "Corporate", icon: Building2 },
   ];
 
-  const stats = [
-    { label: "Institutions Served", value: "150+", icon: Building2 },
-    { label: "Regional States", value: "12+", icon: Globe },
-    { label: "Product Categories", value: "25+", icon: Trophy },
-    { label: "Satisfied Users", value: "50K+", icon: Users2 },
-  ];
+
 
   const filteredClients = activeFilter === "All"
     ? CLIENTS
@@ -81,18 +76,7 @@ const Clients = () => {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-24 container mx-auto px-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          {stats.map((stat, i) => (
-            <div key={i} className="flex flex-col items-center text-center p-8 rounded-[2.5rem] bg-slate-900/50 border border-white/5 shadow-xl">
-              <stat.icon className="w-8 h-8 text-blue-500 mb-4 opacity-50" />
-              <p className="text-4xl md:text-5xl font-black text-white mb-2 tracking-tighter">{stat.value}</p>
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">{stat.label}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+
 
       {/* Clients Grid */}
       <section className="py-20 container mx-auto px-4 min-h-[600px]">

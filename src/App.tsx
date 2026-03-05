@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CartProvider } from "./contexts/CartContext";
+import ScrollToTop from "./components/ScrollToTop";
 import logoSrc from "./assets/logo.png";
 import { HelmetProvider } from "react-helmet-async";
 
@@ -11,7 +12,7 @@ import { HelmetProvider } from "react-helmet-async";
 const Index = lazy(() => import("./pages/Index"));
 const Products = lazy(() => import("./pages/Products"));
 const ProductDetailPage = lazy(() => import("./pages/ProductDetailPage"));
-const DealerApplication = lazy(() => import("./pages/DealerApplication"));
+const QuoteRequest = lazy(() => import("./pages/QuoteRequest"));
 const Contact = lazy(() => import("./pages/Contact"));
 const Location = lazy(() => import("./pages/Location"));
 const Auth = lazy(() => import("./pages/Auth"));
@@ -45,12 +46,13 @@ const App = () => (
         <CartProvider>
           <Sonner />
           <BrowserRouter>
+            <ScrollToTop />
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/products" element={<Products />} />
                 <Route path="/products/:productId" element={<ProductDetailPage />} />
-                <Route path="/dealer-application" element={<DealerApplication />} />
+                <Route path="/quote-request" element={<QuoteRequest />} />
                 <Route path="/become-partner" element={<BecomeAPartner />} />
                 <Route path="/request-oem" element={<RequestOEMAuthorization />} />
                 <Route path="/government-procurement" element={<GovernmentProcurement />} />

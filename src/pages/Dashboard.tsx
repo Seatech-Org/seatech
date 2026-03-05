@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, adminClient } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -40,11 +40,11 @@ const Dashboard = () => {
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
   const [userEmail, setUserEmail] = useState("");
-  
+
   // Edit State
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  
+
   // Form State
   const [editForm, setEditForm] = useState<UserProfile>({
     contact_person: "",
@@ -59,7 +59,7 @@ const Dashboard = () => {
   const fetchUserData = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       if (!user) {
         navigate("/auth");
         return;
@@ -72,7 +72,7 @@ const Dashboard = () => {
         .select('*')
         .eq('id', user.id)
         .maybeSingle();
-        
+
       if (profileData) {
         const p = profileData as any;
         setProfile(p);
@@ -83,23 +83,23 @@ const Dashboard = () => {
         });
       }
 
-      // 2. Fetch Quotes (Orders)
-      const { data: quotesData } = await (supabase as any)
+      // 2. Fetch Quotes (Orders) - use admin to bypass RLS
+      const { data: quotesData } = await (adminClient as any)
         .from('quotes')
         .select('*')
         .eq('user_id', user.id)
         .neq('status', 'draft') // Show only submitted orders
         .order('created_at', { ascending: false });
-        
+
       if (quotesData) {
         setQuotes(quotesData as any);
       }
 
-      // 3. Fetch Dealer Applications
-      const { data: appsData } = await (supabase as any)
+      // 3. Fetch Dealer Applications - use admin to bypass RLS
+      const { data: appsData } = await (adminClient as any)
         .from('dealer_applications')
         .select('*')
-        .eq('email', user.email) 
+        .eq('email', user.email)
         .order('created_at', { ascending: false });
 
       if (appsData) {
@@ -147,7 +147,7 @@ const Dashboard = () => {
   };
 
   const getStatusColor = (status: string) => {
-    switch(status.toLowerCase()) {
+    switch (status.toLowerCase()) {
       case 'approved': return 'bg-green-500 hover:bg-green-600';
       case 'rejected': return 'bg-red-500 hover:bg-red-600';
       case 'pending': return 'bg-amber-500 hover:bg-amber-600';
@@ -166,20 +166,20 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-slate-950 font-sans selection:bg-blue-500/30 selection:text-blue-100">
       <Navbar />
-      
+
       <div className="bg-slate-950 pt-32 pb-12 relative overflow-hidden">
-         <div className="absolute inset-0 opacity-30 bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
-         <div className="container mx-auto px-4 relative z-10">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-              <div>
-                <h1 className="text-3xl font-bold text-white mb-2">My Dashboard</h1>
-                <p className="text-slate-400">Manage your profile and track your requests</p>
-              </div>
-              <Button onClick={handleSignOut} variant="outline" className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white bg-slate-900/50">
-                <LogOut className="mr-2 h-4 w-4" /> Sign Out
-              </Button>
+        <div className="absolute inset-0 opacity-30 bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-white mb-2">My Dashboard</h1>
+              <p className="text-slate-400">Manage your profile and track your requests</p>
             </div>
-         </div>
+            <Button onClick={handleSignOut} variant="outline" className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white bg-slate-900/50">
+              <LogOut className="mr-2 h-4 w-4" /> Sign Out
+            </Button>
+          </div>
+        </div>
       </div>
 
       <div className="container mx-auto px-4 py-8 -mt-8 relative z-20">
@@ -244,7 +244,9 @@ const Dashboard = () => {
                       {applications.slice(0, 2).map(app => (
                         <div key={app.id} className="flex items-center justify-between border-b border-slate-800 last:border-0 pb-2 last:pb-0">
                           <div>
-                            <p className="font-medium text-sm text-white">OEM Request</p>
+                            <p className="font-medium text-sm text-white">
+                              {app.dealer_name === "Not Provided" ? "Partner Request" : "OEM Request"}
+                            </p>
                             <p className="text-xs text-slate-500">{new Date(app.created_at).toLocaleDateString()}</p>
                           </div>
                           <Badge className={getStatusColor(app.status)}>{app.status}</Badge>
@@ -279,7 +281,7 @@ const Dashboard = () => {
                             #{quote.total_items}
                           </div>
                           <div>
-                            <p className="font-bold text-white">Quote #{quote.id.slice(0,8)}</p>
+                            <p className="font-bold text-white">Quote #{quote.id.slice(0, 8)}</p>
                             <p className="text-xs text-slate-400 flex items-center gap-2">
                               <Clock className="h-3 w-3" /> {new Date(quote.created_at).toLocaleDateString()}
                             </p>
@@ -325,29 +327,29 @@ const Dashboard = () => {
                   <div className="space-y-6">
                     <div className="space-y-2">
                       <Label htmlFor="contact_person" className="text-slate-300">Full Name</Label>
-                      <Input 
-                        id="contact_person" 
+                      <Input
+                        id="contact_person"
                         disabled={!isEditing}
                         value={editForm.contact_person}
-                        onChange={(e) => setEditForm({...editForm, contact_person: e.target.value})}
+                        onChange={(e) => setEditForm({ ...editForm, contact_person: e.target.value })}
                         className={!isEditing ? "bg-slate-800/50 border-slate-800 text-slate-300" : "bg-slate-800 border-slate-700 text-white"}
                       />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="phone" className="text-slate-300">Mobile Number</Label>
-                      <Input 
-                        id="phone" 
+                      <Input
+                        id="phone"
                         disabled={!isEditing}
                         value={editForm.phone}
-                        onChange={(e) => setEditForm({...editForm, phone: e.target.value})}
+                        onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
                         className={!isEditing ? "bg-slate-800/50 border-slate-800 text-slate-300" : "bg-slate-800 border-slate-700 text-white"}
                       />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="email" className="text-slate-300">Email Address</Label>
-                      <Input 
-                        id="email" 
-                        disabled={true} 
+                      <Input
+                        id="email"
+                        disabled={true}
                         value={editForm.email}
                         className="bg-slate-800/30 text-slate-500 border-slate-800 cursor-not-allowed"
                       />

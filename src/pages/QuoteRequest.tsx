@@ -8,8 +8,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, adminClient } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Building2, User, FileText, Receipt, Trash2, CheckCircle, Loader2 } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { sendFormEmail } from "@/utils/email";
@@ -32,6 +33,7 @@ const formSchema = z.object({
 const DealerApplication = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { cartItems, clearCart } = useCart();
+  const navigate = useNavigate();
 
   // Display text for the UI summary
   const [quoteListDisplay, setQuoteListDisplay] = useState<string>("");
@@ -89,15 +91,12 @@ const DealerApplication = () => {
 
   // 2. Load Quote Items for Display
   useEffect(() => {
-    // Only use cartItems (fetched from DB by CartContext)
-    // We ignore localStorage bin now as we want single source of truth
     let displayText = "";
 
     if (cartItems.length > 0) {
       const cartText = cartItems.map(item => `• ${item.quantity} x ${item.name}`).join('\n');
       displayText += cartText;
     } else {
-      // Fallback only if cart is empty but bin exists (unlikely in new flow)
       const rawBin = localStorage.getItem('quoteBin');
       if (rawBin) {
         const quoteBin: string[] = JSON.parse(rawBin);
@@ -105,9 +104,7 @@ const DealerApplication = () => {
       }
     }
 
-    if (displayText) {
-      setQuoteListDisplay(displayText);
-    }
+    setQuoteListDisplay(displayText);
   }, [cartItems]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -150,7 +147,7 @@ const DealerApplication = () => {
 
       if (quoteId) {
         // Update existing draft
-        const { error: updateError } = await (supabase as any)
+        const { error: updateError } = await (adminClient as any)
           .from('quotes')
           .update({
             status: 'pending',
@@ -171,7 +168,7 @@ const DealerApplication = () => {
           additional_remarks: values.additionalRemarks
         };
 
-        const { data: newQuote, error: insertError } = await (supabase as any)
+        const { data: newQuote, error: insertError } = await (adminClient as any)
           .from('quotes')
           .insert(quotePayload)
           .select()
@@ -189,7 +186,7 @@ const DealerApplication = () => {
             product_name: item.name,
             quantity: item.quantity
           }));
-          const { error: itemsError } = await (supabase as any)
+          const { error: itemsError } = await (adminClient as any)
             .from('quote_items')
             .insert(dbItems);
           if (itemsError) throw itemsError;
@@ -210,9 +207,12 @@ const DealerApplication = () => {
 
       // D. Cleanup
       localStorage.removeItem('quoteBin');
-      clearCart(); // This will refresh context, and since draft is gone, it returns empty
+      clearCart(true); // Only clear local context, don't delete DB items we just submitted!
       setQuoteListDisplay("");
       form.reset();
+
+      // Navigate away so stale cart data doesn't reload
+      setTimeout(() => navigate('/'), 1500);
 
     } catch (error: any) {
       console.error("Submission error:", error);

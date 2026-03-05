@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, adminClient } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import {
@@ -17,6 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { LogOut, CheckCircle, XCircle, Clock, ShoppingBag, User, FileText, Eye, Box, Plus, Pencil, Trash2 } from "lucide-react";
 import { fetchProducts, Product } from "@/services/product-service";
+import { sendFormEmail } from "@/utils/email";
 
 interface DealerApplication {
   id: string;
@@ -26,6 +27,8 @@ interface DealerApplication {
   director_name: string;
   director_mobile: string;
   gst_number: string;
+  product_requirements?: string;
+  remarks?: string;
   status: "pending" | "approved" | "rejected";
   created_at: string;
 }
@@ -54,7 +57,8 @@ interface Quote {
 const Admin = () => {
   const navigate = useNavigate();
 
-  const [applications, setApplications] = useState<DealerApplication[]>([]);
+  const [oemRequests, setOemRequests] = useState<DealerApplication[]>([]);
+  const [partnerRequests, setPartnerRequests] = useState<DealerApplication[]>([]);
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
 
@@ -64,6 +68,7 @@ const Admin = () => {
 
   const [isAdmin, setIsAdmin] = useState(false);
   const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
+  const [selectedApp, setSelectedApp] = useState<DealerApplication | null>(null);
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
@@ -188,13 +193,17 @@ const Admin = () => {
   const fetchApplications = async () => {
     setIsLoadingApps(true);
     try {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await (adminClient as any)
         .from("dealer_applications")
         .select("*")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setApplications(data || []);
+
+      const allApps: DealerApplication[] = data || [];
+      setPartnerRequests(allApps.filter(a => a.dealer_name === "Not Provided"));
+      setOemRequests(allApps.filter(a => a.dealer_name !== "Not Provided"));
+
     } catch (error: any) {
       toast.error("Failed to load applications");
     } finally {
@@ -205,21 +214,41 @@ const Admin = () => {
   const fetchQuotes = async () => {
     setIsLoadingQuotes(true);
     try {
-      // Fetch quotes and related items + profile
-      // Note: We need to ensure the foreign key relation exists for this join to work perfectly.
-      // If 'profiles' join fails, we might need a fallback.
-      const { data, error } = await (supabase as any)
+      const { data, error } = await (adminClient as any)
         .from("quotes")
-        .select(`
-          *,
-          quote_items (product_name, quantity),
-          profiles (contact_person, company_name, email, phone)
-        `)
-        .neq('status', 'draft') // Only show submitted quotes
+        .select('*')
+        .neq('status', 'draft')
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setQuotes(data || []);
+
+      const rawQuotes = data || [];
+      console.log("rawQuotes from supabase:", rawQuotes);
+
+      // Manually fetch relations to bypass Supabase join errors
+      const enrichedQuotes = await Promise.all(rawQuotes.map(async (q: any) => {
+        // Fetch items
+        const { data: items } = await (adminClient as any)
+          .from("quote_items")
+          .select("product_name, quantity")
+          .eq("quote_id", q.id);
+
+        // Fetch profile
+        const { data: profile } = await (adminClient as any)
+          .from("profiles")
+          .select("contact_person, company_name, email, phone")
+          .eq("id", q.user_id)
+          .maybeSingle();
+
+        return {
+          ...q,
+          quote_items: items || [],
+          profiles: profile || null
+        };
+      }));
+
+      console.log("enrichedQuotes built:", enrichedQuotes);
+      setQuotes(enrichedQuotes);
     } catch (error: any) {
       console.error("Quote fetch error:", error);
       toast.error("Failed to load quotes");
@@ -240,22 +269,61 @@ const Admin = () => {
     }
   };
 
-  const updateAppStatus = async (id: string, newStatus: string) => {
+  const updateAppStatus = async (app: DealerApplication, newStatus: string) => {
     try {
-      await (supabase as any).from("dealer_applications").update({ status: newStatus }).eq("id", id);
+      const { error } = await (adminClient as any).from("dealer_applications").update({ status: newStatus }).eq("id", app.id);
+      if (error) throw error;
+
+      // Send Email Notification to applicant
+      const statusText = newStatus === 'approved' ? 'Approved' : 'Rejected';
+      const isPartner = app.dealer_name === "Not Provided";
+      const subject = `${isPartner ? 'Partnership' : 'OEM Authorization'} Request ${statusText}`;
+      const msg = `Hello ${app.director_name},\n\nYour recent ${isPartner ? 'partnership' : 'OEM authorization'} request has been ${statusText} by our admin team.\n\nIf approved, our team will reach out to you shortly with the next steps.\nIf you have any questions, please contact our support.`;
+
+      await sendFormEmail(`Status Update: ${subject}`, {
+        Message: msg,
+        ApplicantName: app.director_name,
+        Email: app.email,
+        OriginalRequestDate: new Date(app.created_at).toLocaleString()
+      });
+
       toast.success(`Application ${newStatus}`);
       fetchApplications();
     } catch (error) {
+      console.error("App status update error:", error);
       toast.error("Update failed");
     }
   };
 
-  const updateQuoteStatus = async (id: string, newStatus: string) => {
+  const updateQuoteStatus = async (quote: Quote, newStatus: string) => {
     try {
-      await (supabase as any).from("quotes").update({ status: newStatus }).eq("id", id);
-      toast.success(`Quote marked as ${newStatus}`);
+      const { error } = await (adminClient as any)
+        .from("quotes")
+        .update({ status: newStatus })
+        .eq("id", quote.id);
+
+      if (error) throw error;
+
+      // Send email notification
+      const email = quote.profiles?.email;
+      const customerName = quote.profiles?.contact_person || "Customer";
+      if (email) {
+        const statusText = newStatus === 'approved' ? 'Approved' : 'Rejected';
+        const itemsList = quote.quote_items?.map(i => `${i.quantity}x ${i.product_name}`).join(', ') || 'N/A';
+        await sendFormEmail(`Quote Request ${statusText}`, {
+          Message: `Hello ${customerName},\n\nYour quote request (Ref: #${quote.id.slice(0, 8)}) has been ${statusText} by our team.\n\nItems: ${itemsList}\n\nIf approved, our sales team will contact you shortly with the formal L1 quotation.\nIf you have questions, please reach out to our support team.`,
+          CustomerName: customerName,
+          Email: email,
+          Company: quote.profiles?.company_name || 'N/A',
+          QuoteRef: quote.id.slice(0, 8),
+          SubmittedOn: new Date(quote.created_at).toLocaleString()
+        });
+      }
+
+      toast.success(`Quote ${newStatus === 'approved' ? 'approved' : 'rejected'} successfully`);
       fetchQuotes();
     } catch (error) {
+      console.error("Quote status update error:", error);
       toast.error("Update failed");
     }
   };
@@ -316,7 +384,10 @@ const Admin = () => {
               <Box className="h-4 w-4 mr-2" /> Products
             </TabsTrigger>
             <TabsTrigger value="applications" className="h-12 px-6 rounded-lg data-[state=active]:bg-slate-800 data-[state=active]:text-white text-slate-400 text-base whitespace-nowrap">
-              <FileText className="h-4 w-4 mr-2" /> Dealer Applications
+              <FileText className="h-4 w-4 mr-2" /> OEM Authorization Requests
+            </TabsTrigger>
+            <TabsTrigger value="partners" className="h-12 px-6 rounded-lg data-[state=active]:bg-slate-800 data-[state=active]:text-white text-slate-400 text-base whitespace-nowrap">
+              <User className="h-4 w-4 mr-2" /> Join as Partner Requests
             </TabsTrigger>
           </TabsList>
 
@@ -357,72 +428,88 @@ const Admin = () => {
                             <TableCell className="text-slate-300">
                               {quote.profiles?.company_name || "-"}
                             </TableCell>
-                            <TableCell className="text-white font-bold">{quote.total_items}</TableCell>
+                            <TableCell className="text-white font-bold">{quote.quote_items?.length || 0}</TableCell>
                             <TableCell className="text-slate-500 text-sm">
                               {new Date(quote.created_at).toLocaleDateString()}
                             </TableCell>
                             <TableCell>{getStatusBadge(quote.status)}</TableCell>
-                            <TableCell className="text-right">
-                              <Dialog>
-                                <DialogTrigger asChild>
-                                  <Button size="sm" variant="outline" className="border-blue-900/30 text-blue-400 hover:bg-blue-900/20 hover:border-blue-800" onClick={() => setSelectedQuote(quote)}>
-                                    <Eye className="h-4 w-4 mr-2" /> View
-                                  </Button>
-                                </DialogTrigger>
-                                <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
-                                  <DialogHeader>
-                                    <DialogTitle className="text-xl">Quote Details #{selectedQuote?.id.slice(0, 8)}</DialogTitle>
-                                  </DialogHeader>
-                                  <div className="space-y-6 pt-4">
-                                    <div className="grid grid-cols-2 gap-4 bg-slate-800/50 p-4 rounded-xl border border-slate-800">
-                                      <div>
-                                        <p className="text-xs text-slate-500 uppercase font-bold">Customer</p>
-                                        <p className="text-white font-medium">{selectedQuote?.profiles?.contact_person}</p>
-                                        <p className="text-slate-400 text-sm">{selectedQuote?.profiles?.email}</p>
-                                        <p className="text-slate-400 text-sm">{selectedQuote?.profiles?.phone}</p>
+                            <TableCell>
+                              <div className="flex gap-2 justify-end">
+                                <Dialog>
+                                  <DialogTrigger asChild>
+                                    <Button size="sm" variant="outline" className="border-blue-900/30 text-blue-400 hover:bg-blue-900/20 hover:border-blue-800" onClick={() => setSelectedQuote(quote)}>
+                                      <Eye className="h-4 w-4 mr-2" /> View
+                                    </Button>
+                                  </DialogTrigger>
+                                  <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
+                                    <DialogHeader>
+                                      <DialogTitle className="text-xl">Quote Details #{selectedQuote?.id.slice(0, 8)}</DialogTitle>
+                                    </DialogHeader>
+                                    <div className="space-y-6 pt-4">
+                                      <div className="grid grid-cols-2 gap-4 bg-slate-800/50 p-4 rounded-xl border border-slate-800">
+                                        <div>
+                                          <p className="text-xs text-slate-500 uppercase font-bold">Customer</p>
+                                          <p className="text-white font-medium">{selectedQuote?.profiles?.contact_person}</p>
+                                          <p className="text-slate-400 text-sm">{selectedQuote?.profiles?.email}</p>
+                                          <p className="text-slate-400 text-sm">{selectedQuote?.profiles?.phone}</p>
+                                        </div>
+                                        <div>
+                                          <p className="text-xs text-slate-500 uppercase font-bold">Company</p>
+                                          <p className="text-white font-medium">{selectedQuote?.profiles?.company_name || "N/A"}</p>
+                                        </div>
                                       </div>
-                                      <div>
-                                        <p className="text-xs text-slate-500 uppercase font-bold">Company</p>
-                                        <p className="text-white font-medium">{selectedQuote?.profiles?.company_name || "N/A"}</p>
-                                      </div>
-                                    </div>
 
-                                    <div>
-                                      <h4 className="text-sm font-bold text-slate-400 uppercase mb-3">Requested Items</h4>
-                                      <div className="border border-slate-800 rounded-xl overflow-hidden">
-                                        <Table>
-                                          <TableHeader className="bg-slate-950">
-                                            <TableRow className="border-slate-800 hover:bg-slate-950">
-                                              <TableHead className="text-slate-400">Product Name</TableHead>
-                                              <TableHead className="text-slate-400 text-right">Quantity</TableHead>
-                                            </TableRow>
-                                          </TableHeader>
-                                          <TableBody>
-                                            {selectedQuote?.quote_items.map((item, idx) => (
-                                              <TableRow key={idx} className="border-slate-800 hover:bg-slate-800/50">
-                                                <TableCell className="text-slate-200">{item.product_name}</TableCell>
-                                                <TableCell className="text-right text-white font-bold">{item.quantity}</TableCell>
+                                      <div>
+                                        <h4 className="text-sm font-bold text-slate-400 uppercase mb-3">Requested Items</h4>
+                                        <div className="border border-slate-800 rounded-xl overflow-hidden">
+                                          <Table>
+                                            <TableHeader className="bg-slate-950">
+                                              <TableRow className="border-slate-800 hover:bg-slate-950">
+                                                <TableHead className="text-slate-400">Product Name</TableHead>
+                                                <TableHead className="text-slate-400 text-right">Quantity</TableHead>
                                               </TableRow>
-                                            ))}
-                                          </TableBody>
-                                        </Table>
+                                            </TableHeader>
+                                            <TableBody>
+                                              {selectedQuote?.quote_items?.map((item, idx) => (
+                                                <TableRow key={idx} className="border-slate-800 hover:bg-slate-800/50">
+                                                  <TableCell className="text-slate-200">{item.product_name}</TableCell>
+                                                  <TableCell className="text-right text-white font-bold">{item.quantity}</TableCell>
+                                                </TableRow>
+                                              ))}
+                                            </TableBody>
+                                          </Table>
+                                        </div>
                                       </div>
-                                    </div>
 
-                                    {selectedQuote?.additional_remarks && (
-                                      <div className="bg-slate-800/30 p-4 rounded-xl border border-slate-800">
-                                        <p className="text-xs text-slate-500 uppercase font-bold mb-1">Remarks</p>
-                                        <p className="text-slate-300 text-sm italic">"{selectedQuote.additional_remarks}"</p>
-                                      </div>
-                                    )}
-
-                                    <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
-                                      <Button variant="outline" className="border-slate-700 text-slate-300 hover:bg-slate-800" onClick={() => document.getElementById('close-dialog')?.click()}>Close</Button>
-                                      <Button className="bg-green-600 hover:bg-green-500 text-white" onClick={() => updateQuoteStatus(selectedQuote!.id, 'processed')}>Mark Processed</Button>
+                                      {selectedQuote?.additional_remarks && (
+                                        <div className="bg-slate-800/30 p-4 rounded-xl border border-slate-800">
+                                          <p className="text-xs text-slate-500 uppercase font-bold mb-1">Remarks</p>
+                                          <p className="text-slate-300 text-sm italic">"{selectedQuote.additional_remarks}"</p>
+                                        </div>
+                                      )}
                                     </div>
-                                  </div>
-                                </DialogContent>
-                              </Dialog>
+                                  </DialogContent>
+                                </Dialog>
+
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="border-green-900/30 text-green-500 hover:bg-green-900/20 hover:text-green-400 hover:border-green-800"
+                                  onClick={() => updateQuoteStatus(quote, "approved")}
+                                  disabled={quote.status === "approved" || quote.status === "processed"}
+                                >
+                                  Approve
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="border-red-900/30 text-red-500 hover:bg-red-900/20 hover:text-red-400 hover:border-red-800"
+                                  onClick={() => updateQuoteStatus(quote, "rejected")}
+                                  disabled={quote.status === "rejected"}
+                                >
+                                  Reject
+                                </Button>
+                              </div>
                             </TableCell>
                           </TableRow>
                         ))}
@@ -564,14 +651,14 @@ const Admin = () => {
           <TabsContent value="applications">
             <Card className="border-slate-800 shadow-xl bg-slate-900 text-white">
               <CardHeader className="border-b border-slate-800 pb-6">
-                <CardTitle className="text-2xl text-white">Dealer Applications</CardTitle>
+                <CardTitle className="text-2xl text-white">OEM Authorization Requests</CardTitle>
                 <CardDescription className="text-slate-400">Manage OEM authorization requests.</CardDescription>
               </CardHeader>
               <CardContent className="p-0">
                 {isLoadingApps ? (
-                  <p className="text-center py-12 text-slate-500">Loading applications...</p>
-                ) : applications.length === 0 ? (
-                  <p className="text-center py-12 text-slate-500">No applications found</p>
+                  <p className="text-center py-12 text-slate-500">Loading requests...</p>
+                ) : oemRequests.length === 0 ? (
+                  <p className="text-center py-12 text-slate-500">No requests found</p>
                 ) : (
                   <div className="overflow-x-auto">
                     <Table>
@@ -587,7 +674,7 @@ const Admin = () => {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {applications.map((app) => (
+                        {oemRequests.map((app) => (
                           <TableRow key={app.id} className="border-slate-800 hover:bg-slate-800/50 transition-colors">
                             <TableCell className="font-medium text-white">{app.dealer_name}</TableCell>
                             <TableCell>
@@ -607,11 +694,55 @@ const Admin = () => {
                             <TableCell className="text-sm text-slate-500">{new Date(app.created_at).toLocaleDateString()}</TableCell>
                             <TableCell>
                               <div className="flex gap-2 justify-end">
+                                <Dialog>
+                                  <DialogTrigger asChild>
+                                    <Button size="sm" variant="outline" className="border-blue-900/30 text-blue-400 hover:bg-blue-900/20 hover:border-blue-800" onClick={() => setSelectedApp(app)}>
+                                      <Eye className="h-4 w-4 mr-2" /> View
+                                    </Button>
+                                  </DialogTrigger>
+                                  <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
+                                    <DialogHeader>
+                                      <DialogTitle className="text-xl">OEM Request Details</DialogTitle>
+                                    </DialogHeader>
+                                    <div className="space-y-4 pt-4">
+                                      <div className="grid grid-cols-2 gap-4">
+                                        <div className="bg-slate-800/50 p-3 rounded-lg border border-slate-700">
+                                          <p className="text-xs text-slate-500 uppercase">Dealer Name</p>
+                                          <p className="font-medium text-white">{selectedApp?.dealer_name}</p>
+                                        </div>
+                                        <div className="bg-slate-800/50 p-3 rounded-lg border border-slate-700">
+                                          <p className="text-xs text-slate-500 uppercase">Director</p>
+                                          <p className="font-medium text-white">{selectedApp?.director_name}</p>
+                                        </div>
+                                        <div className="bg-slate-800/50 p-3 rounded-lg border border-slate-700">
+                                          <p className="text-xs text-slate-500 uppercase">Contact</p>
+                                          <p className="text-sm text-slate-300">{selectedApp?.email}</p>
+                                          <p className="text-sm text-slate-300">{selectedApp?.mobile}</p>
+                                        </div>
+                                        <div className="bg-slate-800/50 p-3 rounded-lg border border-slate-700">
+                                          <p className="text-xs text-slate-500 uppercase">GST Number</p>
+                                          <p className="font-medium text-slate-300">{selectedApp?.gst_number}</p>
+                                        </div>
+                                      </div>
+
+                                      <div className="bg-slate-800/30 p-4 rounded-xl border border-slate-800 mt-4">
+                                        <p className="text-xs text-slate-500 uppercase font-bold mb-2">Requirements / Products</p>
+                                        <p className="text-slate-200 whitespace-pre-wrap">{selectedApp?.product_requirements || "None specified"}</p>
+                                      </div>
+
+                                      <div className="bg-slate-800/30 p-4 rounded-xl border border-slate-800">
+                                        <p className="text-xs text-slate-500 uppercase font-bold mb-2">Remarks</p>
+                                        <p className="text-slate-300 text-sm whitespace-pre-wrap">{selectedApp?.remarks || "No additional remarks."}</p>
+                                      </div>
+                                    </div>
+                                  </DialogContent>
+                                </Dialog>
+
                                 <Button
                                   size="sm"
                                   variant="outline"
                                   className="border-green-900/30 text-green-500 hover:bg-green-900/20 hover:text-green-400 hover:border-green-800"
-                                  onClick={() => updateAppStatus(app.id, "approved")}
+                                  onClick={() => updateAppStatus(app, "approved")}
                                   disabled={app.status === "approved"}
                                 >
                                   Approve
@@ -620,7 +751,119 @@ const Admin = () => {
                                   size="sm"
                                   variant="outline"
                                   className="border-red-900/30 text-red-500 hover:bg-red-900/20 hover:text-red-400 hover:border-red-800"
-                                  onClick={() => updateAppStatus(app.id, "rejected")}
+                                  onClick={() => updateAppStatus(app, "rejected")}
+                                  disabled={app.status === "rejected"}
+                                >
+                                  Reject
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* --- PARTNERS TAB --- */}
+          <TabsContent value="partners">
+            <Card className="border-slate-800 shadow-xl bg-slate-900 text-white">
+              <CardHeader className="border-b border-slate-800 pb-6">
+                <CardTitle className="text-2xl text-white">Join as Partner Requests</CardTitle>
+                <CardDescription className="text-slate-400">Manage inquiries for distributorship, retail, and OEM partnerships.</CardDescription>
+              </CardHeader>
+              <CardContent className="p-0">
+                {isLoadingApps ? (
+                  <p className="text-center py-12 text-slate-500">Loading requests...</p>
+                ) : partnerRequests.length === 0 ? (
+                  <p className="text-center py-12 text-slate-500">No partner requests found</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader className="bg-slate-950/50">
+                        <TableRow className="border-slate-800 hover:bg-slate-900">
+                          <TableHead className="text-slate-400 font-bold">Contact Person</TableHead>
+                          <TableHead className="text-slate-400 font-bold">Email</TableHead>
+                          <TableHead className="text-slate-400 font-bold">Phone</TableHead>
+                          <TableHead className="text-slate-400 font-bold">Partnership Type</TableHead>
+                          <TableHead className="text-slate-400 font-bold">Details</TableHead>
+                          <TableHead className="text-slate-400 font-bold">Status</TableHead>
+                          <TableHead className="text-slate-400 font-bold">Submitted</TableHead>
+                          <TableHead className="text-slate-400 font-bold text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {partnerRequests.map((app) => (
+                          <TableRow key={app.id} className="border-slate-800 hover:bg-slate-800/50 transition-colors">
+                            <TableCell className="font-medium text-white">{app.director_name}</TableCell>
+                            <TableCell className="text-slate-300 text-sm">{app.email}</TableCell>
+                            <TableCell className="text-slate-300 text-sm">{app.mobile}</TableCell>
+                            <TableCell className="font-medium text-blue-400 text-sm">{app.product_requirements}</TableCell>
+                            <TableCell>
+                              <div className="text-xs text-slate-400 max-w-[200px] truncate" title={app.remarks || ""}>
+                                {app.remarks || "-"}
+                              </div>
+                            </TableCell>
+                            <TableCell>{getStatusBadge(app.status)}</TableCell>
+                            <TableCell className="text-sm text-slate-500">{new Date(app.created_at).toLocaleDateString()}</TableCell>
+                            <TableCell>
+                              <div className="flex gap-2 justify-end">
+                                <Dialog>
+                                  <DialogTrigger asChild>
+                                    <Button size="sm" variant="outline" className="border-blue-900/30 text-blue-400 hover:bg-blue-900/20 hover:border-blue-800" onClick={() => setSelectedApp(app)}>
+                                      <Eye className="h-4 w-4 mr-2" /> View
+                                    </Button>
+                                  </DialogTrigger>
+                                  <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-xl">
+                                    <DialogHeader>
+                                      <DialogTitle className="text-xl">Partner Request Details</DialogTitle>
+                                    </DialogHeader>
+                                    <div className="space-y-4 pt-4">
+                                      <div className="grid grid-cols-2 gap-4">
+                                        <div className="col-span-2 bg-slate-800/50 p-3 rounded-lg border border-slate-700">
+                                          <p className="text-xs text-slate-500 uppercase">Contact Person</p>
+                                          <p className="font-medium text-white">{selectedApp?.director_name}</p>
+                                        </div>
+                                        <div className="bg-slate-800/50 p-3 rounded-lg border border-slate-700">
+                                          <p className="text-xs text-slate-500 uppercase">Email</p>
+                                          <p className="text-sm text-slate-300">{selectedApp?.email}</p>
+                                        </div>
+                                        <div className="bg-slate-800/50 p-3 rounded-lg border border-slate-700">
+                                          <p className="text-xs text-slate-500 uppercase">Phone</p>
+                                          <p className="text-sm text-slate-300">{selectedApp?.mobile}</p>
+                                        </div>
+                                      </div>
+
+                                      <div className="bg-slate-800/30 p-4 rounded-xl border border-slate-800 mt-2">
+                                        <p className="text-xs text-slate-500 uppercase font-bold mb-2">Partnership Type</p>
+                                        <p className="text-blue-400 font-bold">{selectedApp?.product_requirements}</p>
+                                      </div>
+
+                                      <div className="bg-slate-800/30 p-4 rounded-xl border border-slate-800">
+                                        <p className="text-xs text-slate-500 uppercase font-bold mb-2">Details & Remarks</p>
+                                        <p className="text-slate-300 text-sm whitespace-pre-wrap">{selectedApp?.remarks || "No additional remarks."}</p>
+                                      </div>
+                                    </div>
+                                  </DialogContent>
+                                </Dialog>
+
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="border-green-900/30 text-green-500 hover:bg-green-900/20 hover:text-green-400 hover:border-green-800"
+                                  onClick={() => updateAppStatus(app, "approved")}
+                                  disabled={app.status === "approved"}
+                                >
+                                  Process
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="border-red-900/30 text-red-500 hover:bg-red-900/20 hover:text-red-400 hover:border-red-800"
+                                  onClick={() => updateAppStatus(app, "rejected")}
                                   disabled={app.status === "rejected"}
                                 >
                                   Reject

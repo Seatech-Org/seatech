@@ -112,6 +112,12 @@
   ::-webkit-scrollbar-thumb {
     @apply bg-secondary rounded-full hover:bg-muted-foreground/30 transition-colors;
   }
+
+  /* Auto-capitalize standard text forms for consistency */
+  input:not([type="email"]):not([type="password"]):not([type="url"]):not([type="tel"]):not([type="number"]),
+  textarea {
+    text-transform: capitalize;
+  }
 }
 
 @layer utilities {

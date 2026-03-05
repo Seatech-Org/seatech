@@ -326,15 +326,19 @@ const Products = () => {
                     <div className="w-24 h-24 bg-background rounded-full flex items-center justify-center mx-auto mb-6 border border-white/[0.08]">
                       <FolderOpen className="h-10 w-10 text-muted-foreground" />
                     </div>
-                    <h3 className="text-3xl font-bold text-foreground mb-3">No matches found</h3>
+                    <h3 className="text-3xl font-bold text-foreground mb-3">
+                      {searchQuery ? "No matches found" : "Products Coming Soon"}
+                    </h3>
                     <p className="text-muted-foreground mb-10 max-w-md mx-auto text-lg leading-relaxed px-4">
-                      We couldn't find anything for "{searchQuery}" in this category. Try broader terms or reset filters.
+                      {searchQuery
+                        ? `We couldn't find anything for "${searchQuery}" in this category. Try broader terms or reset filters.`
+                        : `We are currently updating our catalog for the ${activeCategory} category. Please check back soon or explore our other collections.`}
                     </p>
                     <Button
                       onClick={handleBackToCategories}
                       className="rounded-full px-10 h-14 bg-primary text-primary-foreground hover:-translate-y-1 font-bold text-lg shadow-elevation transition-all"
                     >
-                      Clear All Filters
+                      {searchQuery ? "Clear All Filters" : "Explore Other Categories"}
                     </Button>
                   </motion.div>
                 )
