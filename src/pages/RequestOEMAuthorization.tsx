@@ -137,19 +137,23 @@ const RequestOEMAuthorization = () => {
 
       if (error) throw error;
 
+      const itemsForEmail = requestedItems.map(i => `• ${i.category} (Qty: ${i.quantity})`).join('\n');
+      const turnoverForEmail = requestType === "Bidding"
+        ? turnoverYears.map(t => `• ${t.year}: ${t.amount || 'N/A'}`).join('\n')
+        : turnover;
+
       // Also send notification email
       await sendFormEmail(`OEM Authorization Request (${requestType})`, {
-        dealerName,
-        directorName,
-        email,
-        mobile,
-        gst,
-        gemUserId,
-        address,
-        requestedItems,
-        turnover,
-        biddingNumber,
-        turnoverYears,
+        DealerName: dealerName,
+        DirectorName: directorName,
+        Email: email,
+        Mobile: mobile,
+        GST: gst,
+        GeMUserId: gemUserId || 'N/A',
+        Address: address,
+        RequestedItems: itemsForEmail,
+        Turnover: turnoverForEmail,
+        BiddingNumber: requestType === "Bidding" ? biddingNumber : 'N/A',
       });
 
       toast.success("OEM Authorization Request Submitted!", {

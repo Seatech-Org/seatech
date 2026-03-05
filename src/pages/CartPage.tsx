@@ -4,7 +4,7 @@ import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingBag, ArrowRight, ShieldCheck, Trash2, Plus, Minus, Receipt, Info } from "lucide-react";
+import { ShoppingBag, ArrowRight, Trash2, Plus, Minus, Receipt, Info } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Helmet } from "react-helmet-async";
@@ -17,7 +17,7 @@ const CartPage = () => {
     <div className="min-h-screen flex flex-col bg-slate-950 font-sans selection:bg-blue-500/30 selection:text-blue-100">
       <Helmet>
         <title>Project Inquiry Cart | Seatech</title>
-        <meta name="description" content="Review your selected infrastructure products and request a professional L1 quotation for your institution." />
+        <meta name="description" content="Review your selected infrastructure products and request a professional quotation for your institution." />
       </Helmet>
 
       <Navbar />
@@ -92,9 +92,7 @@ const CartPage = () => {
                             </Link>
                             <p className="text-sm text-slate-500 font-mono mb-4">{item.id}</p>
 
-                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-wide">
-                              <ShieldCheck className="h-3 w-3" /> L1 Price Guaranteed
-                            </div>
+
                           </div>
 
                           <div className="flex flex-col items-center md:items-end gap-6">
@@ -165,7 +163,7 @@ const CartPage = () => {
                       <Button
                         size="lg"
                         className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold h-16 text-lg shadow-xl shadow-blue-900/30 rounded-2xl group transition-all"
-                        onClick={() => navigate('/dealer-application')}
+                        onClick={() => navigate('/quote-request')}
                       >
                         Request Quote
                         <ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-1 transition-transform" />

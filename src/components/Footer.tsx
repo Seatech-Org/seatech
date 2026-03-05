@@ -52,26 +52,26 @@ const Footer = () => {
                 <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                   <Mail className="h-4 w-4 text-primary" />
                 </div>
-                <span>support@seatech.gov.in</span>
+                <span>support@seatech.info</span>
               </li>
               <li className="flex items-start gap-4">
                 <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                   <Phone className="h-4 w-4 text-primary" />
                 </div>
-                <span>+91 11-2345-6789</span>
+                <span>1800 8895 801</span>
               </li>
               <li className="flex items-start gap-4">
                 <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                   <MapPin className="h-4 w-4 text-primary" />
                 </div>
-                <span className="leading-relaxed">Plot No. 45, Industrial Area,<br />Phase 2, New Delhi - 110020</span>
+                <span className="leading-relaxed">529A/1517, Pant Nagar, Khurram Nagar,Lucknow, Uttar Pradesh, India - 226022</span>
               </li>
             </ul>
           </div>
         </div>
 
         <div className="mt-20 pt-8 border-t border-white/[0.08] flex flex-col md:flex-row justify-between items-center gap-6 text-sm">
-          <p>© {new Date().getFullYear()} Seatech Government Solutions. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Seatech Associates PL. All rights reserved.</p>
           <div className="flex gap-8">
             <a href="#" className="hover:text-foreground transition-colors">Privacy Policy</a>
             <a href="#" className="hover:text-foreground transition-colors">Terms of Service</a>
