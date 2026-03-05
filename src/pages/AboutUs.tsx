@@ -5,6 +5,7 @@ import { Award, Hammer, Users, Building, PenTool, CheckCircle2 } from "lucide-re
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
+import { SEO } from "@/components/SEO";
 
 // Note: Replace these with actual images from your assets if available, or keep placeholders.
 import showroomImg from "../assets/heropage/Modern Executive Conference Room.jpg"; // Placeholder
@@ -12,6 +13,10 @@ import showroomImg from "../assets/heropage/Modern Executive Conference Room.jpg
 const AboutUs = () => {
   return (
     <div className="min-h-screen bg-slate-950 font-sans selection:bg-blue-500/30 selection:text-blue-100">
+      <SEO
+        title="About Seatech"
+        description="Learn about Seatech's legacy as a premier B2B manufacturer and GeM-authorized supplier. Quality infrastructure for government and corporate sectors."
+      />
       <Navbar />
 
       {/* --- HERO SECTION --- */}

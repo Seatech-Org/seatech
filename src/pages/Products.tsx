@@ -23,7 +23,7 @@ import { products as localProducts } from "@/data/products";
 import { motion, AnimatePresence } from "framer-motion";
 import { ProductCard } from "@/components/ProductCard";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Helmet } from "react-helmet-async";
+import { SEO } from "@/components/SEO";
 
 const TOP_LEVEL_CATEGORIES = [
   { name: "Furniture", icon: Sofa, desc: "Premium infrastructure and seating solutions." }
@@ -103,10 +103,10 @@ const Products = () => {
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground selection:bg-primary/30 selection:text-primary-foreground">
-      <Helmet>
-        <title>{searchQuery ? `Search results for "${searchQuery}"` : activeCategory === "All" ? "Our Collections" : activeCategory} | Seatech</title>
-        <meta name="description" content={`Browse our ${activeCategory === "All" ? "entire collection" : activeCategory} of premium furniture and infrastructure solutions.`} />
-      </Helmet>
+      <SEO
+        title={searchQuery ? `Search results for "${searchQuery}"` : activeCategory === "All" ? "Our Collections" : activeCategory}
+        description={`Browse our ${activeCategory === "All" ? "entire collection" : activeCategory} of premium furniture and infrastructure solutions.`}
+      />
       <Navbar />
 
       {/* --- HEADER --- */}

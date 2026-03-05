@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { ShoppingBag, ArrowRight, Trash2, Plus, Minus, Receipt, Info } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Helmet } from "react-helmet-async";
+import { SEO } from "@/components/SEO";
 
 const CartPage = () => {
   const { cartItems, removeFromCart, updateQuantity, itemCount, isLoading } = useCart();
@@ -15,10 +15,10 @@ const CartPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-950 font-sans selection:bg-blue-500/30 selection:text-blue-100">
-      <Helmet>
-        <title>Project Inquiry Cart | Seatech</title>
-        <meta name="description" content="Review your selected infrastructure products and request a professional quotation for your institution." />
-      </Helmet>
+      <SEO
+        title="Project Inquiry Cart"
+        description="Review your selected infrastructure products and request a professional quotation for your institution."
+      />
 
       <Navbar />
 

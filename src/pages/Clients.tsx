@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { CLIENTS } from "../data/clients";
-import { Helmet } from "react-helmet-async";
+import { SEO } from "@/components/SEO";
 import { Building2, GraduationCap, Gavel, Briefcase, Filter, Heart } from "lucide-react";
 
 const Clients = () => {
@@ -28,10 +28,10 @@ const Clients = () => {
 
   return (
     <div className="min-h-screen bg-slate-950 font-sans selection:bg-blue-500/30 selection:text-blue-100">
-      <Helmet>
-        <title>Our Clients | Seatech Trusted Partners</title>
-        <meta name="description" content="View the list of prestigious universities, government departments, and corporate entities that trust Seatech for their infrastructure needs." />
-      </Helmet>
+      <SEO
+        title="Our Valued Clients"
+        description="Explore Seatech's extensive client portfolio, featuring top government institutions, universities, and corporate leaders across India."
+      />
 
       <Navbar />
 

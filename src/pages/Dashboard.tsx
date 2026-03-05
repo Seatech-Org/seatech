@@ -9,7 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, FileText, ShoppingBag, Clock, LogOut, Save, Loader2, Pencil } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { User, FileText, ShoppingBag, Clock, LogOut, Save, Loader2, Pencil, Eye } from "lucide-react";
 import { toast } from "sonner";
 
 interface UserProfile {
@@ -24,6 +26,10 @@ interface Quote {
   total_items: number;
   created_at: string;
   additional_remarks: string;
+  quote_items?: {
+    product_name: string;
+    quantity: number;
+  }[];
 }
 
 interface Application {
@@ -40,6 +46,7 @@ const Dashboard = () => {
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
   const [userEmail, setUserEmail] = useState("");
+  const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
 
   // Edit State
   const [isEditing, setIsEditing] = useState(false);
@@ -86,7 +93,13 @@ const Dashboard = () => {
       // 2. Fetch Quotes (Orders) - use admin to bypass RLS
       const { data: quotesData } = await (adminClient as any)
         .from('quotes')
-        .select('*')
+        .select(`
+          *,
+          quote_items (
+            product_name,
+            quantity
+          )
+        `)
         .eq('user_id', user.id)
         .neq('status', 'draft') // Show only submitted orders
         .order('created_at', { ascending: false });
@@ -291,7 +304,54 @@ const Dashboard = () => {
                           <Badge className={`${getStatusColor(quote.status || 'pending')} px-3 py-1`}>
                             {quote.status || 'Pending'}
                           </Badge>
-                          <Button variant="ghost" size="sm" disabled className="text-slate-500">View Details</Button>
+
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="border-blue-500/30 text-blue-400 hover:bg-blue-900/40 hover:text-blue-300"
+                                onClick={() => setSelectedQuote(quote)}
+                              >
+                                <Eye className="h-4 w-4 mr-2" /> View Details
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-xl">
+                              <DialogHeader>
+                                <DialogTitle className="text-xl">Quote Request #{selectedQuote?.id?.slice(0, 8)}</DialogTitle>
+                              </DialogHeader>
+                              <div className="space-y-6 pt-4">
+                                <div>
+                                  <h4 className="text-sm font-bold text-slate-400 uppercase mb-3">Requested Items</h4>
+                                  <div className="border border-slate-800 rounded-xl overflow-hidden">
+                                    <Table>
+                                      <TableHeader className="bg-slate-950">
+                                        <TableRow className="border-slate-800 hover:bg-slate-950">
+                                          <TableHead className="text-slate-400">Product Name</TableHead>
+                                          <TableHead className="text-slate-400 text-right">Quantity</TableHead>
+                                        </TableRow>
+                                      </TableHeader>
+                                      <TableBody>
+                                        {selectedQuote?.quote_items?.map((item: any, idx: number) => (
+                                          <TableRow key={idx} className="border-slate-800 hover:bg-slate-800/50">
+                                            <TableCell className="text-slate-200">{item.product_name}</TableCell>
+                                            <TableCell className="text-right text-white font-bold">{item.quantity}</TableCell>
+                                          </TableRow>
+                                        ))}
+                                      </TableBody>
+                                    </Table>
+                                  </div>
+                                </div>
+
+                                {selectedQuote?.additional_remarks && (
+                                  <div className="bg-slate-800/30 p-4 rounded-xl border border-slate-800">
+                                    <p className="text-xs text-slate-500 uppercase font-bold mb-1">My Remarks</p>
+                                    <p className="text-slate-300 text-sm italic">"{selectedQuote.additional_remarks}"</p>
+                                  </div>
+                                )}
+                              </div>
+                            </DialogContent>
+                          </Dialog>
                         </div>
                       </div>
                     ))}

@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { Mail, Phone, MapPin, Send, MessageCircle, ChevronDown, Headset, BadgeCheck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
-import { Helmet } from "react-helmet-async";
+import { SEO } from "@/components/SEO";
 import { sendFormEmail } from "@/utils/email";
 
 const formSchema = z.object({
@@ -111,10 +111,11 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen bg-slate-950 font-sans selection:bg-blue-500/30 selection:text-blue-100">
-      <Helmet>
-        <title>Contact Seatech | Institutional & GeM Procurement Support</title>
-        <meta name="description" content="Direct contact for government departments and corporate institutions. Get expert assistance with GeM tenders, bulk orders, and technical specifications." />
-      </Helmet>
+      <SEO
+        title="Contact Us"
+        description="Direct contact for government departments and corporate institutions. Get expert assistance with GeM tenders, bulk orders, and technical specifications."
+        keywords="Contact Seatech, GeM support, bulk furniture quotes, institutional procurement India"
+      />
 
       <Navbar />
 

@@ -17,7 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { LogOut, CheckCircle, XCircle, Clock, ShoppingBag, User, FileText, Eye, Box, Plus, Pencil, Trash2 } from "lucide-react";
 import { fetchProducts, Product } from "@/services/product-service";
-import { sendFormEmail } from "@/utils/email";
+import { sendCustomerEmail } from "@/utils/email";
 
 interface DealerApplication {
   id: string;
@@ -278,14 +278,12 @@ const Admin = () => {
       const statusText = newStatus === 'approved' ? 'Approved' : 'Rejected';
       const isPartner = app.dealer_name === "Not Provided";
       const subject = `${isPartner ? 'Partnership' : 'OEM Authorization'} Request ${statusText}`;
-      const msg = `Hello ${app.director_name},\n\nYour recent ${isPartner ? 'partnership' : 'OEM authorization'} request has been ${statusText} by our admin team.\n\nIf approved, our team will reach out to you shortly with the next steps.\nIf you have any questions, please contact our support.`;
+      const msg = `Your recent ${isPartner ? 'partnership' : 'OEM authorization'} request has been ${statusText} by our admin team.\n\nIf approved, our team will reach out to you shortly with the next steps.\nIf you have any questions, please contact our support.`;
 
-      await sendFormEmail(`Status Update: ${subject}`, {
-        Message: msg,
-        ApplicantName: app.director_name,
-        Email: app.email,
-        OriginalRequestDate: new Date(app.created_at).toLocaleString()
-      });
+      // Send the email directly to the applicant
+      if (app.email) {
+        await sendCustomerEmail(app.email, app.director_name, subject, msg);
+      }
 
       toast.success(`Application ${newStatus}`);
       fetchApplications();
@@ -310,14 +308,10 @@ const Admin = () => {
       if (email) {
         const statusText = newStatus === 'approved' ? 'Approved' : 'Rejected';
         const itemsList = quote.quote_items?.map(i => `${i.quantity}x ${i.product_name}`).join(', ') || 'N/A';
-        await sendFormEmail(`Quote Request ${statusText}`, {
-          Message: `Hello ${customerName},\n\nYour quote request (Ref: #${quote.id.slice(0, 8)}) has been ${statusText} by our team.\n\nItems: ${itemsList}\n\nIf approved, our sales team will contact you shortly with the formal L1 quotation.\nIf you have questions, please reach out to our support team.`,
-          CustomerName: customerName,
-          Email: email,
-          Company: quote.profiles?.company_name || 'N/A',
-          QuoteRef: quote.id.slice(0, 8),
-          SubmittedOn: new Date(quote.created_at).toLocaleString()
-        });
+        const msg = `Your quote request (Ref: #${quote.id.slice(0, 8)}) has been ${statusText} by our team.\n\nItems: ${itemsList}\n\nIf approved, our sales team will contact you shortly with the formal L1 quotation.\nIf you have questions, please reach out to our support team.`;
+
+        // Send email directly to the customer
+        await sendCustomerEmail(email, customerName, `Quote Request ${statusText}`, msg);
       }
 
       toast.success(`Quote ${newStatus === 'approved' ? 'approved' : 'rejected'} successfully`);
