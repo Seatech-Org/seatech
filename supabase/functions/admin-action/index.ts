@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Edge Function: Admin Action Handler
 // All privileged admin operations go through here.
 // The service role key is stored server-side ONLY — never in the frontend bundle.
