@@ -75,9 +75,75 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background font-sans text-foreground selection:bg-primary/30 selection:text-primary-foreground overflow-x-hidden">
       <SEO
-        title="Home"
-        description="Seatech is a premier B2B manufacturer and Government e-Marketplace (GeM) authorized supplier of high-quality hospital, institutional, educational, and office furniture."
-        keywords="Seatech furniture, GeM supplier, hospital furniture, educational furniture, office infrastructure, B2B wholesale furniture India"
+        title="GeM Authorized Furniture Manufacturer & B2B Supplier India"
+        description="Seatech is India's premier GeM-authorized OEM furniture manufacturer & supplier for hospitals, universities, government offices and corporates. L1 pricing, bulk orders, nationwide delivery."
+        keywords="Seatech, Seatech furniture, GeM authorized supplier India, OEM furniture manufacturer India, government furniture supplier, hospital furniture, school furniture, auditorium seating, office furniture, institutional furniture B2B wholesale"
+        jsonLd={JSON.stringify({
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "Organization",
+              "@id": "https://seatech-gov.com/#organization",
+              "name": "Seatech",
+              "legalName": "Seatech Associates PL",
+              "url": "https://seatech-gov.com",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://seatech-gov.com/logo2.svg",
+                "width": 200,
+                "height": 60
+              },
+              "description": "India's premier GeM-authorized OEM furniture manufacturer supplying hospitals, universities, government offices and corporates.",
+              "foundingDate": "2010",
+              "areaServed": "India",
+              "telephone": "+91-8840601077",
+              "email": "info@seatech-gov.com",
+              "sameAs": [
+                "https://seatech-gov.com"
+              ],
+              "knowsAbout": ["Government Furniture", "Institutional Furniture", "GeM Procurement", "OEM Manufacturing", "Hospital Furniture", "Educational Furniture"]
+            },
+            {
+              "@type": "LocalBusiness",
+              "@id": "https://seatech-gov.com/#localbusiness",
+              "name": "Seatech",
+              "image": "https://seatech-gov.com/og-image.jpg",
+              "url": "https://seatech-gov.com",
+              "telephone": "+91-8840601077",
+              "priceRange": "$$",
+              "address": {
+                "@type": "PostalAddress",
+                "addressCountry": "IN",
+                "addressRegion": "Uttar Pradesh"
+              },
+              "openingHoursSpecification": {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+                "opens": "09:00",
+                "closes": "18:00"
+              },
+              "hasOfferCatalog": {
+                "@type": "OfferCatalog",
+                "name": "Seatech Furniture Catalog",
+                "itemListElement": [
+                  { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Hospital Furniture Supply" } },
+                  { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Educational Furniture Supply" } },
+                  { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Auditorium Seating" } },
+                  { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Office Furniture" } },
+                  { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Government Procurement (GeM)" } }
+                ]
+              }
+            },
+            {
+              "@type": "WebSite",
+              "@id": "https://seatech-gov.com/#website",
+              "url": "https://seatech-gov.com",
+              "name": "Seatech",
+              "description": "GeM-authorized OEM furniture manufacturer and supplier for government and institutions.",
+              "publisher": { "@id": "https://seatech-gov.com/#organization" }
+            }
+          ]
+        })}
       />
       <Navbar />
 

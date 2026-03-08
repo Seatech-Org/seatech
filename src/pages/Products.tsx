@@ -104,8 +104,9 @@ const Products = () => {
   return (
     <div className="min-h-screen bg-background font-sans text-foreground selection:bg-primary/30 selection:text-primary-foreground">
       <SEO
-        title={searchQuery ? `Search results for "${searchQuery}"` : activeCategory === "All" ? "Our Collections" : activeCategory}
-        description={`Browse our ${activeCategory === "All" ? "entire collection" : activeCategory} of premium furniture and infrastructure solutions.`}
+        title={searchQuery ? `Search: "${searchQuery}" | Seatech Products` : activeCategory === "All" ? "Furniture Catalog | Seatech" : `${activeCategory} | Seatech`}
+        description={searchQuery ? `Search results for "${searchQuery}" in Seatech's furniture catalog — hospital, office, auditorium, school and institutional furniture.` : `Browse Seatech's ${activeCategory === "All" ? "complete" : activeCategory} furniture catalog. Premium B2B institutional, hospital, educational and office furniture at wholesale prices.`}
+        keywords="Seatech furniture catalog, hospital furniture India, office furniture bulk, auditorium chairs, school furniture wholesale, institutional furniture GeM"
       />
       <Navbar />
 

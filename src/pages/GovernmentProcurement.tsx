@@ -49,8 +49,9 @@ const GovernmentProcurement = () => {
   return (
     <div className="min-h-screen bg-slate-950 font-sans selection:bg-blue-500/30 selection:text-blue-100">
       <SEO
-        title="Government Procurement (GeM)"
-        description="Seatech is a trusted GeM authorized OEM. Learn about our specialized procurement process for government departments across India."
+        title="Government Procurement via GeM | Seatech OEM"
+        description="Seatech is a GeM-authorized OEM supplier for government furniture procurement across India. L1 pricing, ISO certified, fast delivery for PSUs, universities & government departments."
+        keywords="Seatech GeM procurement, government furniture India, GeM OEM supplier, L1 pricing furniture, institutional procurement portal, PSU furniture supplier, government e-marketplace"
       />
 
       <Navbar />

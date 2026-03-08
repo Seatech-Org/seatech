@@ -14,8 +14,9 @@ const AboutUs = () => {
   return (
     <div className="min-h-screen bg-slate-950 font-sans selection:bg-blue-500/30 selection:text-blue-100">
       <SEO
-        title="About Seatech"
-        description="Learn about Seatech's legacy as a premier B2B manufacturer and GeM-authorized supplier. Quality infrastructure for government and corporate sectors."
+        title="About Seatech | OEM Furniture Manufacturer Since 2010"
+        description="Learn about Seatech Associates PL — India's GeM-verified OEM furniture manufacturer. In-house factory, ISO certified, supplying hospitals, universities & government offices across India."
+        keywords="About Seatech, Seatech Associates PL, furniture manufacturer India, GeM verified OEM, institutional furniture company, Lucknow furniture manufacturer"
       />
       <Navbar />
 
