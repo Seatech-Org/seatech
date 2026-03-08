@@ -1,0 +1,483 @@
+# Seatech — Complete Project Documentation
+
+> Everything built from start to finish. Every component, page, database table, service, and security measure.
+
+---
+
+## 🏗️ Tech Stack
+
+| Layer | Technology |
+|---|---|
+| **Framework** | React 18 + TypeScript (Vite) |
+| **Routing** | React Router v6 |
+| **Styling** | Tailwind CSS + Custom CSS variables (dark theme) |
+| **Animations** | Framer Motion |
+| **UI Components** | shadcn/ui (Radix UI primitives) |
+| **Database** | Supabase (PostgreSQL) |
+| **Auth** | Supabase Auth (email/password) |
+| **Data Fetching** | TanStack React Query |
+| **Form Handling** | React Hook Form + Zod validation |
+| **Email (Inbound)** | Web3Forms API |
+| **Email (Outbound)** | EmailJS |
+| **SEO** | react-helmet-async |
+| **Notifications** | Sonner (toast system) |
+| **Deployment** | Vercel (CI/CD via GitHub) |
+| **Version Control** | GitHub (`Seatech-Org/seatech`) |
+
+---
+
+## 📁 Project Structure
+
+```
+seatech/
+├── index.html              ← SEO meta tags, OG, Twitter Card, canonical URL
+├── public/
+│   ├── sitemap.xml         ← All pages listed for Google crawling
+│   ├── robots.txt          ← Bot rules + sitemap reference
+│   ├── logo.svg / logo2.svg / logo3.svg
+│   └── categories/         ← Category images
+├── src/
+│   ├── App.tsx             ← Router + Providers + Lazy loading
+│   ├── main.tsx            ← React entry point
+│   ├── index.css           ← Design tokens, dark theme CSS variables
+│   ├── pages/              ← 16 pages
+│   ├── components/         ← 11 shared components + 16 shadcn UI components
+│   ├── contexts/           ← CartContext
+│   ├── services/           ← product-service.ts (Supabase + local fallback)
+│   ├── utils/              ← email.ts (Web3Forms + EmailJS)
+│   ├── data/               ← Local product catalog + client list
+│   ├── integrations/       ← Supabase client + TypeScript types
+│   ├── hooks/              ← Custom React hooks
+│   └── assets/             ← Hero images, logo
+├── supabase/
+│   ├── migrations/         ← 8 SQL migration files
+│   └── functions/          ← Edge functions
+├── vercel.json             ← Vercel SPA routing config
+└── .env                    ← Secrets (gitignored)
+```
+
+---
+
+## 🌐 Pages (16 Total)
+
+### 1. [Index.tsx](file:///Users/huzaifa/DevZoro/seatech/src/pages/Index.tsx) — Homepage (`/`)
+- Animated hero section with **cycling background images** (4 hero images, 5s interval)
+- **Credibility card** (closeable badge showing trust indicators)
+- **Trusted Partners** section — animated vertical scrolling logo carousel (all clients)
+- **Ecosystem section** — 3 cards: Government Buying, Direct Buying, Strategic Selling
+- **Why Seatech?** section — rotating testimonials synced to hero image timer
+- **Call to Action** section with Get Started + Learn More buttons
+- Floating **WhatsApp** button (with animated ping ring) + **Phone** button (fixed bottom-right)
+- Full **JSON-LD structured data** (Organization + LocalBusiness + WebSite schemas)
+
+### 2. [Products.tsx](file:///Users/huzaifa/DevZoro/seatech/src/pages/Products.tsx) — Product Catalog (`/products`)
+- **3-level category navigation**: All → Furniture → Sub-categories → Products
+- Category icons auto-assigned based on product name keywords
+- **Sticky search bar** within the product view
+- **URL-synced state**: category and search stored in query params (`?category=X&search=Y`)
+- **Loading skeletons** while fetching
+- **Empty state** with contextual messaging
+- Responsive grid: 1→2→3→4 columns
+
+### 3. [ProductDetailPage.tsx](file:///Users/huzaifa/DevZoro/seatech/src/pages/ProductDetailPage.tsx) — Product Detail (`/products/:productId`)
+- Full product specs displayed in categorized table
+- Image gallery with thumbnail selection
+- Quantity selector with min order enforcement
+- **Add to Quote** and **Add to Cart** buttons
+- Seller badge with verified status
+- Breadcrumb navigation back to category
+
+### 4. [Admin.tsx](file:///Users/huzaifa/DevZoro/seatech/src/pages/Admin.tsx) — Admin Dashboard (`/admin`) 🔒 Admin only
+- **4 tabs**: Quote Requests, Dealer Applications, OEM Requests, User Management
+- **Quote management**: view all quotes, approve/reject with status dropdown
+- **Status change** triggers EmailJS notification to customer
+- **Dealer application** review with full business details
+- **OEM authorization** request management
+- **User role management**: promote/demote users between `admin` and `user`
+- Uses `adminClient` (service role Supabase client) to bypass RLS for admin operations
+- Real-time data via React Query with `refetchInterval`
+
+### 5. [Dashboard.tsx](file:///Users/huzaifa/DevZoro/seatech/src/pages/Dashboard.tsx) — User Dashboard (`/dashboard`) 🔒 Auth required
+- Shows logged-in user's **quote history**
+- Quote status badges (pending / approved / rejected)
+- Quote item breakdown
+- **Dealer application status** tracker
+- Profile information display
+- Logout button
+
+### 6. [Auth.tsx](file:///Users/huzaifa/DevZoro/seatech/src/pages/Auth.tsx) — Authentication (`/auth`)
+- **Tabbed interface**: Sign In / Sign Up
+- Email + password forms with Zod validation
+- Sign up creates a Supabase user + inserts into `profiles` table
+- Error handling with toast notifications
+- Redirects to `/dashboard` on success
+
+### 7. [Contact.tsx](file:///Users/huzaifa/DevZoro/seatech/src/pages/Contact.tsx) — Contact Page (`/contact`)
+- **Contact info cards**: Email, Phone (toll-free), Corporate Office, Factory address
+- **Inquiry form** (name, company, phone, email, requirements) 
+- Form submission sends email via **Web3Forms**
+- **Interactive FAQ accordion** (3 most common questions)
+- GeM verified OEM trust badge
+- **Embedded Google Maps** iframe (factory location, Lucknow)
+
+### 8. [QuoteRequest.tsx](file:///Users/huzaifa/DevZoro/seatech/src/pages/QuoteRequest.tsx) — Quote Request (`/quote-request`)
+- Multi-product quote form
+- Sends form data via Web3Forms + saves to `quotes` table in Supabase
+- Linked to cart (pre-fills if items in cart)
+
+### 9. [BecomeAPartner.tsx](file:///Users/huzaifa/DevZoro/seatech/src/pages/BecomeAPartner.tsx) — Dealer Application (`/become-partner`)
+- Multi-step form for dealer registration:
+  - Business details (dealer name, address, GST)
+  - Director/Owner details
+  - 3-year turnover history
+  - Product requirements
+- Saves to `dealer_applications` table in Supabase
+- Also sends notification via Web3Forms
+- **Customer type modal** to route between dealer/government buyer
+
+### 10. [RequestOEMAuthorization.tsx](file:///Users/huzaifa/DevZoro/seatech/src/pages/RequestOEMAuthorization.tsx) — OEM Request (`/request-oem`)
+- Form to request OEM Authorization Letter (MAF) for GeM bidding
+- Includes: company name, GeM Seller ID, product category, intended tender details
+- Saves to `dealer_applications` table with OEM-specific flags
+- Email notification to Seatech via Web3Forms
+
+### 11. [GovernmentProcurement.tsx](file:///Users/huzaifa/DevZoro/seatech/src/pages/GovernmentProcurement.tsx) — GeM Guide (`/government-procurement`)
+- 4-step procurement guide: GeM Portal Search → L1 Price Discovery → Direct Purchase/Bidding → Fulfillment
+- Compliance section: ISO certifications, BIS standards, Make in India status
+- CTA to contact procurement expert
+
+### 12. [AboutUs.tsx](file:///Users/huzaifa/DevZoro/seatech/src/pages/AboutUs.tsx) — About (`/about`)
+- Company history and manufacturing story
+- Showroom/factory image with floating "25+ categories" badge
+- **Infrastructure section**: Advanced Machinery, In-House Production, Skilled Workforce cards
+- Product range banner with CTA
+- Partner + Contact CTAs
+
+### 13. [Clients.tsx](file:///Users/huzaifa/DevZoro/seatech/src/pages/Clients.tsx) — Clients (`/clients`)
+- Grid display of all verified client logos
+- Client categories: Universities, Government Bodies, Corporates, Healthcare
+
+### 14. [CartPage.tsx](file:///Users/huzaifa/DevZoro/seatech/src/pages/CartPage.tsx) — Cart (`/cart`)
+- Cart item list with quantity editing
+- Remove items
+- Subtotal calculation
+- "Request Quote" CTA that pre-fills the quote form
+
+### 15. [Location.tsx](file:///Users/huzaifa/DevZoro/seatech/src/pages/Location.tsx) — Location (`/location`)
+- Corporate office + factory addresses
+- Embedded Google Maps
+
+### 16. [NotFound.tsx](file:///Users/huzaifa/DevZoro/seatech/src/pages/NotFound.tsx) — 404 Page (`/*`)
+- Minimal branded 404 with back-to-home link
+
+---
+
+## 🧩 Shared Components (11)
+
+| Component | Purpose |
+|---|---|
+| [Navbar.tsx](file:///Users/huzaifa/DevZoro/seatech/src/components/Navbar.tsx) | Responsive nav with mobile hamburger, auth state awareness, cart badge count |
+| [Footer.tsx](file:///Users/huzaifa/DevZoro/seatech/src/components/Footer.tsx) | Links, contact info, social links, copyright |
+| [SEO.tsx](file:///Users/huzaifa/DevZoro/seatech/src/components/SEO.tsx) | Dynamic `<head>` tags via react-helmet-async — title, description, keywords, OG, Twitter, JSON-LD |
+| [ProtectedRoute.tsx](file:///Users/huzaifa/DevZoro/seatech/src/components/ProtectedRoute.tsx) | Route guard — checks Supabase session + DB role, redirects unauthenticated users |
+| [ProductCard.tsx](file:///Users/huzaifa/DevZoro/seatech/src/components/ProductCard.tsx) | Product grid card with image, price, min qty, Add to Cart/Quote buttons |
+| [CredibilityCard.tsx](file:///Users/huzaifa/DevZoro/seatech/src/components/CredibilityCard.tsx) | Closeable hero badge with trust indicators (GeM verified, ISO certified, etc.) |
+| [CustomerTypeModal.tsx](file:///Users/huzaifa/DevZoro/seatech/src/components/CustomerTypeModal.tsx) | Modal to classify visitor as Government/Dealer before routing to correct flow |
+| [ConversionTools.tsx](file:///Users/huzaifa/DevZoro/seatech/src/components/ConversionTools.tsx) | Unit conversion helpers for B2B buyers |
+| [AuthDialog.tsx](file:///Users/huzaifa/DevZoro/seatech/src/components/AuthDialog.tsx) | Inline sign-in dialog (for prompting auth mid-flow) |
+| [NavLink.tsx](file:///Users/huzaifa/DevZoro/seatech/src/components/NavLink.tsx) | Styled router link with active state |
+| [ScrollToTop.tsx](file:///Users/huzaifa/DevZoro/seatech/src/components/ScrollToTop.tsx) | Resets scroll position on every route change |
+
+### shadcn/UI Components (16)
+`Button`, `Badge`, `Card`, `Dialog`, [Form](file:///Users/huzaifa/DevZoro/seatech/src/utils/email.ts#1-40), `Input`, `Label`, `Select`, `Sheet`, `Skeleton`, `Sonner`, `Table`, `Tabs`, `Textarea`, `Tooltip`, `OptimizedImage`
+
+---
+
+## 🗄️ Database Schema (Supabase / PostgreSQL)
+
+### Tables (5)
+
+#### `profiles`
+Stores extended user info linked to Supabase Auth users.
+| Column | Type | Notes |
+|---|---|---|
+| id | UUID | FK → auth.users |
+| company_name | TEXT | |
+| contact_person | TEXT | |
+| email | TEXT | |
+| phone | TEXT | |
+| address | TEXT | |
+| gst_number | TEXT | |
+| role | TEXT | `admin` or `user` |
+| created_at | TIMESTAMPTZ | |
+
+#### `dealer_applications`
+Stores partner/dealer and OEM authorization requests.
+| Column | Type | Notes |
+|---|---|---|
+| id | UUID | Primary key |
+| dealer_name | TEXT | |
+| address | TEXT | |
+| mobile | TEXT | |
+| email | TEXT | |
+| director_name | TEXT | |
+| director_mobile | TEXT | |
+| director_email | TEXT | |
+| gst_number | TEXT | |
+| turnover_year1/2/3 | NUMERIC | 3-year financials  |
+| product_requirements | TEXT | |
+| remarks | TEXT | |
+| status | TEXT | `pending` / `approved` / `rejected` |
+| created_at | TIMESTAMPTZ | |
+| updated_at | TIMESTAMPTZ | |
+
+#### `quotes`
+Stores bulk quote requests submitted by users.
+| Column | Type | Notes |
+|---|---|---|
+| id | UUID | |
+| user_id | UUID | FK → auth.users (nullable for guest) |
+| status | TEXT | `pending` / `approved` / `rejected` |
+| total_items | INT | |
+| additional_remarks | TEXT | |
+| created_at | TIMESTAMPTZ | |
+
+#### `quote_items`
+Individual line items within a quote.
+| Column | Type | Notes |
+|---|---|---|
+| id | UUID | |
+| quote_id | UUID | FK → quotes |
+| product_id | TEXT | |
+| product_name | TEXT | |
+| quantity | INT | |
+| created_at | TIMESTAMPTZ | |
+
+#### `user_roles`
+Separate roles table (in addition to profile.role) for RLS policy checks.
+| Column | Type | Notes |
+|---|---|---|
+| id | UUID | |
+| user_id | UUID | FK → auth.users |
+| role | ENUM | `admin` or `user` |
+| created_at | TIMESTAMPTZ | |
+
+---
+
+### Migrations (8 files)
+
+| File | What it does |
+|---|---|
+| [20240211_initial_schema.sql](file:///Users/huzaifa/DevZoro/seatech/supabase/migrations/20240211_initial_schema.sql) | Base schema setup |
+| [20260212_fix_products_schema.sql](file:///Users/huzaifa/DevZoro/seatech/supabase/migrations/20260212_fix_products_schema.sql) | Product table fixes |
+| [20260214_add_updated_at_to_profiles.sql](file:///Users/huzaifa/DevZoro/seatech/supabase/migrations/20260214_add_updated_at_to_profiles.sql) | Adds `updated_at` trigger to profiles |
+| [20260214_create_quotes_schema.sql](file:///Users/huzaifa/DevZoro/seatech/supabase/migrations/20260214_create_quotes_schema.sql) | Creates `quotes` + `quote_items` tables |
+| [20260214_fix_quotes_fk_constraint.sql](file:///Users/huzaifa/DevZoro/seatech/supabase/migrations/20260214_fix_quotes_fk_constraint.sql) | Fixes foreign key on quotes.user_id |
+| [20260216_create_dealer_applications.sql](file:///Users/huzaifa/DevZoro/seatech/supabase/migrations/20260216_create_dealer_applications.sql) | Creates dealer applications table |
+| [20260216_create_profiles.sql](file:///Users/huzaifa/DevZoro/seatech/supabase/migrations/20260216_create_profiles.sql) | Creates profiles table with auth trigger |
+| [20260216_create_user_roles.sql](file:///Users/huzaifa/DevZoro/seatech/supabase/migrations/20260216_create_user_roles.sql) | Creates user_roles ENUM + table |
+| [20260308_fix_dealer_applications_rls.sql](file:///Users/huzaifa/DevZoro/seatech/supabase/migrations/20260308_fix_dealer_applications_rls.sql) | ✅ Enables RLS + recreates clean policies |
+
+---
+
+### Row Level Security (RLS) Policies
+
+| Table | Policy | Who |
+|---|---|---|
+| `dealer_applications` | SELECT | Admins only |
+| `dealer_applications` | INSERT | Anyone (anon/public) |
+| `dealer_applications` | ALL | Admins only |
+| `quotes` | SELECT/INSERT | Owner (`user_id = auth.uid()`) |
+| `profiles` | SELECT/UPDATE | Self only |
+| `user_roles` | SELECT | Self only |
+
+---
+
+## 🔐 Authentication & Authorization
+
+### Auth Flow
+1. User signs up → Supabase Auth creates `auth.users` entry
+2. Database trigger auto-creates a `profiles` row
+3. Admin manually promotes user in `user_roles` table
+4. Login → Supabase returns a JWT session token stored in browser
+
+### ProtectedRoute System
+- Wraps `/admin` and `/dashboard` routes
+- Checks `supabase.auth.getSession()` on mount
+- For admin routes: additionally queries `profiles.role` from DB
+- Shows animated "Verifying Access..." loader while checking
+- Redirects to `/auth` if unauthenticated
+- Redirects to `/dashboard` if authenticated but wrong role
+- Listens to `onAuthStateChange` to handle logout in other tabs
+
+### Two Supabase Clients
+| Client | Key Used | Purpose |
+|---|---|---|
+| `supabase` (public) | `VITE_SUPABASE_PUBLISHABLE_KEY` (anon) | All user-facing queries — respects RLS |
+| `adminClient` | `VITE_SUPABASE_SERVICE_ROLE_KEY` | Admin operations only — bypasses RLS |
+
+---
+
+## 📧 Email System (Two Layers)
+
+### 1. Web3Forms (Inbound — Form → You)
+Used on: **Contact**, **Quote Request**, **Become a Partner**, **OEM Authorization**
+
+Sends a notification email to Seatech's inbox whenever any form is submitted.
+- No backend required
+- Configured via `VITE_WEB3FORMS_ACCESS_KEY` in [.env](file:///Users/huzaifa/DevZoro/seatech/.env)
+
+### 2. EmailJS (Outbound — You → Customer)
+Used in the **Admin panel** when a quote status changes.
+
+Sends a transactional email directly to the customer's email address when admin approves/rejects a quote.
+- Configured via `VITE_EMAILJS_SERVICE_ID`, `VITE_EMAILJS_TEMPLATE_ID`, `VITE_EMAILJS_PUBLIC_KEY`
+
+---
+
+## 🛒 Cart System
+
+- Global state via **React Context** ([CartContext.tsx](file:///Users/huzaifa/DevZoro/seatech/src/contexts/CartContext.tsx))
+- Cart persists in component memory (not localStorage)
+- Navbar shows **live badge count** of items
+- `CartPage` shows all items with quantity edit + remove
+- Cart can be converted to a Quote Request
+
+---
+
+## 📦 Product Service
+
+[src/services/product-service.ts](file:///Users/huzaifa/DevZoro/seatech/src/services/product-service.ts) — dual-source strategy:
+1. **Primary**: Fetches from Supabase `products` table (with inventory join + specs join)
+2. **Fallback**: Uses local [src/data/products.ts](file:///Users/huzaifa/DevZoro/seatech/src/data/products.ts) if Supabase is empty or unreachable
+3. Exposed as a **React Query hook** ([useProducts(filters)](file:///Users/huzaifa/DevZoro/seatech/src/services/product-service.ts#88-95)) — automatically caches, revalidates, handles loading states
+
+---
+
+## 🔍 SEO Implementation
+
+### [index.html](file:///Users/huzaifa/DevZoro/seatech/index.html) (Static meta tags)
+- Full `<title>` with brand + keywords
+- `<meta name="description">` — keyword-rich 160-char description
+- `<meta name="keywords">` — 10+ targeted terms including "Seatech"
+- `<meta name="robots">` — `index, follow, max-image-preview:large`
+- Canonical URL
+- Open Graph (og:title, og:description, og:image, og:type, og:locale)
+- Twitter Card (summary_large_image)
+- Geo tags (`geo.region: IN`, `geo.country: India`)
+- Preconnect hints for Google Fonts
+
+### [SEO.tsx](file:///Users/huzaifa/DevZoro/seatech/src/components/SEO.tsx) (Dynamic per-page meta via react-helmet-async)
+Used on every page — overrides [index.html](file:///Users/huzaifa/DevZoro/seatech/index.html) tags with page-specific content:
+- Prevents duplicate "| Seatech" if title already contains brand name
+- Injects JSON-LD structured data on homepage
+
+### JSON-LD Structured Data (Homepage)
+Three schema.org types injected:
+- **Organization** — name, logo, contact, services, founded date
+- **LocalBusiness** — address, hours, offer catalog with 5 services
+- **WebSite** — URL, name, publisher link
+
+### [public/sitemap.xml](file:///Users/huzaifa/DevZoro/seatech/public/sitemap.xml)
+Lists all 10 public pages with:
+- `<loc>` (full URL)
+- `<lastmod>` (date)
+- `<changefreq>` (weekly/monthly/yearly)
+- `<priority>` (1.0 for homepage, down to 0.6 for minor pages)
+
+### [public/robots.txt](file:///Users/huzaifa/DevZoro/seatech/public/robots.txt)
+- Allows all bots to crawl public pages
+- Blocks `/admin`, `/dashboard`, `/auth`, `/cart`
+- Points to [sitemap.xml](file:///Users/huzaifa/DevZoro/seatech/public/sitemap.xml)
+
+---
+
+## 🚀 Deployment
+
+### Vercel
+- Connected to `github.com/Seatech-Org/seatech`
+- **Auto-deploys** on every `git push` to `main`
+- Domain: `seatech-gov.com`
+- [vercel.json](file:///Users/huzaifa/DevZoro/seatech/vercel.json) configured for SPA routing (all routes → [index.html](file:///Users/huzaifa/DevZoro/seatech/index.html))
+
+### Environment Variables (in Vercel + local [.env](file:///Users/huzaifa/DevZoro/seatech/.env))
+| Variable | Purpose |
+|---|---|
+| `VITE_SUPABASE_URL` | Supabase project URL |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Anon (public) Supabase key |
+| `VITE_SUPABASE_SERVICE_ROLE_KEY` | Admin Supabase key (server-side only) |
+| `VITE_WEB3FORMS_ACCESS_KEY` | Web3Forms API key for inbound emails |
+| `VITE_EMAILJS_SERVICE_ID` | EmailJS service ID |
+| `VITE_EMAILJS_TEMPLATE_ID` | EmailJS template ID |
+| `VITE_EMAILJS_PUBLIC_KEY` | EmailJS public key |
+
+---
+
+## 🛡️ Security
+
+### What Was Done
+
+#### 1. [.env](file:///Users/huzaifa/DevZoro/seatech/.env) in [.gitignore](file:///Users/huzaifa/DevZoro/seatech/.gitignore)
+The [.env](file:///Users/huzaifa/DevZoro/seatech/.env) file is listed in [.gitignore](file:///Users/huzaifa/DevZoro/seatech/.gitignore) — secrets are never auto-committed.
+
+#### 2. Git History Purge (March 2026)
+A **service role JWT** was found hardcoded in [check-db.mjs](file:///Users/huzaifa/DevZoro/seatech/check-db.mjs) and [check-rls.mjs](file:///Users/huzaifa/DevZoro/seatech/check-rls.mjs) (debug scripts committed to GitHub).
+
+**Remediation:**
+- Used `git filter-repo` to rewrite all 13 commits in history
+- Replaced the leaked JWT with `***REDACTED***` across entire history
+- Force-pushed the purged history to GitHub (`git push --force`)
+- Removed hardcoded keys from both files; replaced with `process.env` reads
+- Verified: `0 occurrences` of the leaked key remain
+
+#### 3. RLS on `dealer_applications` (March 2026)
+The table had no RLS enabled despite having policies defined in the migration.
+- Ran `ALTER TABLE public.dealer_applications ENABLE ROW LEVEL SECURITY;` directly in Supabase SQL Editor
+- Cleaned up duplicate policies left from multiple runs
+- Final state: exactly 3 clean policies in place
+
+#### 4. Robots.txt — Blocks Admin Routes
+`/admin`, `/dashboard`, `/auth`, `/cart` are blocked from search engine indexing.
+
+#### 5. Role-Based Access Control
+- Admin panel is double-protected: [ProtectedRoute](file:///Users/huzaifa/DevZoro/seatech/src/components/ProtectedRoute.tsx#13-125) (client-side) + Supabase RLS + service role client (server-side)
+- Normal users hitting `/admin` get a toast error and redirect — they never see admin data
+
+---
+
+## 📊 Data Layer
+
+### Local Data (Fallback)
+- [src/data/products.ts](file:///Users/huzaifa/DevZoro/seatech/src/data/products.ts) — static product catalog used as demo/fallback
+- [src/data/clients.ts](file:///Users/huzaifa/DevZoro/seatech/src/data/clients.ts) — list of client names + logos for homepage carousel
+
+### Supabase Functions (Edge Functions)
+Located in `supabase/functions/` — 3 edge functions defined (for server-side operations when needed)
+
+---
+
+## ⚡ Performance Optimizations
+
+| Optimization | How |
+|---|---|
+| **Code splitting** | All 16 pages are lazy-loaded with `React.lazy()` |
+| **Loading fallback** | Animated logo spinner shown while page chunks load |
+| **React Query caching** | Product data cached and shared across components |
+| **Image optimization** | `OptimizedImage` component with lazy loading |
+| **Preconnect hints** | `<link rel="preconnect">` for Google Fonts in `index.html` |
+| **Scroll restoration** | `ScrollToTop` component resets position on navigation |
+
+---
+
+## 🎨 Design System
+
+- **Dark theme** by default — CSS custom properties (`--background`, `--foreground`, `--primary`, etc.)
+- **Primary color**: Blue (`hsl(217, 91%, 60%)`)
+- **Border radius**: Rounded corners throughout (`rounded-[10px]`, `rounded-full`)
+- **Glass effects**: `backdrop-blur` + `border-white/[0.08]` borders for subtle depth
+- **Animations**: Framer Motion for page transitions, hover states, entrance animations
+- **Typography**: System sans-serif with tight tracking on headings
+
+---
+
+*Last updated: March 2026*

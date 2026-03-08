@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase, adminClient } from "@/integrations/supabase/client";
+import { supabase, callAdminAction } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import {
@@ -193,17 +193,10 @@ const Admin = () => {
   const fetchApplications = async () => {
     setIsLoadingApps(true);
     try {
-      const { data, error } = await (adminClient as any)
-        .from("dealer_applications")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-
+      const { data } = await callAdminAction('GET', { action: 'list-applications' });
       const allApps: DealerApplication[] = data || [];
-      setPartnerRequests(allApps.filter(a => a.dealer_name === "Not Provided"));
-      setOemRequests(allApps.filter(a => a.dealer_name !== "Not Provided"));
-
+      setPartnerRequests(allApps.filter((a: DealerApplication) => a.dealer_name === "Not Provided"));
+      setOemRequests(allApps.filter((a: DealerApplication) => a.dealer_name !== "Not Provided"));
     } catch (error: any) {
       toast.error("Failed to load applications");
     } finally {
@@ -214,41 +207,8 @@ const Admin = () => {
   const fetchQuotes = async () => {
     setIsLoadingQuotes(true);
     try {
-      const { data, error } = await (adminClient as any)
-        .from("quotes")
-        .select('*')
-        .neq('status', 'draft')
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-
-      const rawQuotes = data || [];
-      console.log("rawQuotes from supabase:", rawQuotes);
-
-      // Manually fetch relations to bypass Supabase join errors
-      const enrichedQuotes = await Promise.all(rawQuotes.map(async (q: any) => {
-        // Fetch items
-        const { data: items } = await (adminClient as any)
-          .from("quote_items")
-          .select("product_name, quantity")
-          .eq("quote_id", q.id);
-
-        // Fetch profile
-        const { data: profile } = await (adminClient as any)
-          .from("profiles")
-          .select("contact_person, company_name, email, phone")
-          .eq("id", q.user_id)
-          .maybeSingle();
-
-        return {
-          ...q,
-          quote_items: items || [],
-          profiles: profile || null
-        };
-      }));
-
-      console.log("enrichedQuotes built:", enrichedQuotes);
-      setQuotes(enrichedQuotes);
+      const { data } = await callAdminAction('GET', { action: 'list-quotes' });
+      setQuotes(data || []);
     } catch (error: any) {
       console.error("Quote fetch error:", error);
       toast.error("Failed to load quotes");
@@ -271,8 +231,7 @@ const Admin = () => {
 
   const updateAppStatus = async (app: DealerApplication, newStatus: string) => {
     try {
-      const { error } = await (adminClient as any).from("dealer_applications").update({ status: newStatus }).eq("id", app.id);
-      if (error) throw error;
+      await callAdminAction('POST', {}, { action: 'update-app-status', id: app.id, status: newStatus });
 
       // Send Email Notification to applicant
       const statusText = newStatus === 'approved' ? 'Approved' : 'Rejected';
@@ -295,12 +254,7 @@ const Admin = () => {
 
   const updateQuoteStatus = async (quote: Quote, newStatus: string) => {
     try {
-      const { error } = await (adminClient as any)
-        .from("quotes")
-        .update({ status: newStatus })
-        .eq("id", quote.id);
-
-      if (error) throw error;
+      await callAdminAction('POST', {}, { action: 'update-quote-status', id: quote.id, status: newStatus });
 
       // Send email notification
       const email = quote.profiles?.email;

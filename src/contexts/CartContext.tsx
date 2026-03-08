@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Product, products } from '@/data/products';
-import { supabase, adminClient } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 interface CartItem extends Product {
@@ -51,7 +51,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     console.log("Cart Context: Fetching cart for user", userId);
     try {
       // 1. Get the LATEST active draft quote
-      const { data: quote, error } = await (adminClient as any)
+      const { data: quote, error } = await (supabase as any)
         .from('quotes')
         .select('id')
         .eq('user_id', userId)
@@ -65,7 +65,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
       if (quote) {
         // 2. Get quote items
-        const { data: items, error: itemsError } = await (adminClient as any)
+        const { data: items, error: itemsError } = await (supabase as any)
           .from('quote_items')
           .select('*')
           .eq('quote_id', quote.id);
@@ -114,7 +114,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const getOrCreateQuoteId = async (): Promise<string | null> => {
     if (!user) return null;
 
-    const { data: existingQuote } = await (adminClient as any)
+    const { data: existingQuote } = await (supabase as any)
       .from('quotes')
       .select('id')
       .eq('user_id', user.id)
@@ -125,7 +125,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
     if (existingQuote) return existingQuote.id;
 
-    const { data: newQuote, error } = await (adminClient as any)
+    const { data: newQuote, error } = await (supabase as any)
       .from('quotes')
       .insert({ user_id: user.id, status: 'draft', total_items: 0 })
       .select('id')
@@ -152,7 +152,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
       if (existingItem) {
         const newQty = existingItem.quantity + quantity;
-        const { error } = await (adminClient as any)
+        const { error } = await (supabase as any)
           .from('quote_items')
           .update({ quantity: newQty })
           .eq('quote_id', quoteId)
@@ -160,7 +160,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
         if (error) throw error;
       } else {
-        const { error } = await (adminClient as any)
+        const { error } = await (supabase as any)
           .from('quote_items')
           .insert({
             quote_id: quoteId,
@@ -186,7 +186,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     console.log("Cart Context: Removing product ID", productId);
     try {
       // Find ALL possible draft quotes for this user to be safe
-      const { data: quotes } = await (adminClient as any)
+      const { data: quotes } = await (supabase as any)
         .from('quotes')
         .select('id')
         .eq('user_id', user.id)
@@ -201,7 +201,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       console.log("Cart Context: Executing delete on quote IDs:", quoteIds);
 
       // Perform a bulk delete across any draft quotes the user might have
-      const { error } = await (adminClient as any)
+      const { error } = await (supabase as any)
         .from('quote_items')
         .delete()
         .in('quote_id', quoteIds)
@@ -227,7 +227,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }
 
     try {
-      const { data: quote } = await (adminClient as any)
+      const { data: quote } = await (supabase as any)
         .from('quotes')
         .select('id')
         .eq('user_id', user.id)
@@ -238,7 +238,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
       if (!quote) return;
 
-      const { error } = await (adminClient as any)
+      const { error } = await (supabase as any)
         .from('quote_items')
         .update({ quantity: quantity })
         .eq('quote_id', quote.id)
@@ -261,7 +261,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
     if (!user) return;
     try {
-      const { data: quotes } = await (adminClient as any)
+      const { data: quotes } = await (supabase as any)
         .from('quotes')
         .select('id')
         .eq('user_id', user.id)
@@ -273,7 +273,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       }
       const quoteIds = quotes.map((q: any) => q.id);
 
-      const { error } = await (adminClient as any)
+      const { error } = await (supabase as any)
         .from('quote_items')
         .delete()
         .in('quote_id', quoteIds);

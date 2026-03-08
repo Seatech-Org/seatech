@@ -8,7 +8,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { supabase, adminClient } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Building2, User, FileText, Receipt, Trash2, CheckCircle, Loader2 } from "lucide-react";
@@ -147,7 +147,7 @@ const DealerApplication = () => {
 
       if (quoteId) {
         // Update existing draft
-        const { error: updateError } = await (adminClient as any)
+        const { error: updateError } = await (supabase as any)
           .from('quotes')
           .update({
             status: 'pending',
@@ -168,7 +168,7 @@ const DealerApplication = () => {
           additional_remarks: values.additionalRemarks
         };
 
-        const { data: newQuote, error: insertError } = await (adminClient as any)
+        const { data: newQuote, error: insertError } = await (supabase as any)
           .from('quotes')
           .insert(quotePayload)
           .select()
@@ -186,7 +186,7 @@ const DealerApplication = () => {
             product_name: item.name,
             quantity: item.quantity
           }));
-          const { error: itemsError } = await (adminClient as any)
+          const { error: itemsError } = await (supabase as any)
             .from('quote_items')
             .insert(dbItems);
           if (itemsError) throw itemsError;

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase, adminClient } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -91,7 +91,7 @@ const Dashboard = () => {
       }
 
       // 2. Fetch Quotes (Orders) - use admin to bypass RLS
-      const { data: quotesData } = await (adminClient as any)
+      const { data: quotesData } = await (supabase as any)
         .from('quotes')
         .select(`
           *,
@@ -109,7 +109,7 @@ const Dashboard = () => {
       }
 
       // 3. Fetch Dealer Applications - use admin to bypass RLS
-      const { data: appsData } = await (adminClient as any)
+      const { data: appsData } = await (supabase as any)
         .from('dealer_applications')
         .select('*')
         .eq('email', user.email)
