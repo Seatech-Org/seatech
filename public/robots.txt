@@ -11,4 +11,4 @@ Disallow: /auth
 Disallow: /cart
 
 # Sitemap location
-Sitemap: https://seatech-gov.com/sitemap.xml
+Sitemap: https://seatech.info/sitemap.xml

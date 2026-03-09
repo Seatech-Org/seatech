@@ -3,7 +3,7 @@
 
   <!-- Homepage - highest priority -->
   <url>
-    <loc>https://seatech-gov.com/</loc>
+    <loc>https://seatech.info/</loc>
     <lastmod>2026-03-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
@@ -11,7 +11,7 @@
 
   <!-- Products -->
   <url>
-    <loc>https://seatech-gov.com/products</loc>
+    <loc>https://seatech.info/products</loc>
     <lastmod>2026-03-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -19,7 +19,7 @@
 
   <!-- About Us -->
   <url>
-    <loc>https://seatech-gov.com/about</loc>
+    <loc>https://seatech.info/about</loc>
     <lastmod>2026-03-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -27,7 +27,7 @@
 
   <!-- Contact -->
   <url>
-    <loc>https://seatech-gov.com/contact</loc>
+    <loc>https://seatech.info/contact</loc>
     <lastmod>2026-03-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -35,7 +35,7 @@
 
   <!-- Government Procurement -->
   <url>
-    <loc>https://seatech-gov.com/government-procurement</loc>
+    <loc>https://seatech.info/government-procurement</loc>
     <lastmod>2026-03-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -43,7 +43,7 @@
 
   <!-- Clients -->
   <url>
-    <loc>https://seatech-gov.com/clients</loc>
+    <loc>https://seatech.info/clients</loc>
     <lastmod>2026-03-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -51,7 +51,7 @@
 
   <!-- Location -->
   <url>
-    <loc>https://seatech-gov.com/location</loc>
+    <loc>https://seatech.info/location</loc>
     <lastmod>2026-03-08</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.6</priority>
@@ -59,7 +59,7 @@
 
   <!-- Become a Partner -->
   <url>
-    <loc>https://seatech-gov.com/become-partner</loc>
+    <loc>https://seatech.info/become-partner</loc>
     <lastmod>2026-03-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -67,7 +67,7 @@
 
   <!-- Quote Request -->
   <url>
-    <loc>https://seatech-gov.com/quote-request</loc>
+    <loc>https://seatech.info/quote-request</loc>
     <lastmod>2026-03-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -75,7 +75,7 @@
 
   <!-- OEM Authorization Request -->
   <url>
-    <loc>https://seatech-gov.com/request-oem-authorization</loc>
+    <loc>https://seatech.info/request-oem-authorization</loc>
     <lastmod>2026-03-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>

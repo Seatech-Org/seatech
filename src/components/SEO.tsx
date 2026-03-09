@@ -16,12 +16,12 @@ export function SEO({
     description,
     keywords = "Seatech, OEM Hardware, B2B Furniture, Government Procurement, GeM supplier, institutional furniture India",
     type = 'website',
-    image = "https://seatech-gov.com/og-image.jpg",
+    image = "https://seatech.info/og-image.jpg",
     url,
     jsonLd
 }: SEOProps) {
     const location = useLocation();
-    const currentUrl = url || `https://seatech-gov.com${location.pathname}`;
+    const currentUrl = url || `https://seatech.info${location.pathname}`;
     const siteName = "Seatech";
 
     // Avoid duplicate branding – if the title already contains "Seatech", use it as-is

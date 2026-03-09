@@ -83,13 +83,13 @@ const Index = () => {
           "@graph": [
             {
               "@type": "Organization",
-              "@id": "https://seatech-gov.com/#organization",
+              "@id": "https://seatech.info/#organization",
               "name": "Seatech",
               "legalName": "Seatech Associates PL",
-              "url": "https://seatech-gov.com",
+              "url": "https://seatech.info",
               "logo": {
                 "@type": "ImageObject",
-                "url": "https://seatech-gov.com/logo2.svg",
+                "url": "https://seatech.info/logo2.svg",
                 "width": 200,
                 "height": 60
               },
@@ -97,18 +97,18 @@ const Index = () => {
               "foundingDate": "2010",
               "areaServed": "India",
               "telephone": "+91-8840601077",
-              "email": "info@seatech-gov.com",
+              "email": "info@seatech.info",
               "sameAs": [
-                "https://seatech-gov.com"
+                "https://seatech.info"
               ],
               "knowsAbout": ["Government Furniture", "Institutional Furniture", "GeM Procurement", "OEM Manufacturing", "Hospital Furniture", "Educational Furniture"]
             },
             {
               "@type": "LocalBusiness",
-              "@id": "https://seatech-gov.com/#localbusiness",
+              "@id": "https://seatech.info/#localbusiness",
               "name": "Seatech",
-              "image": "https://seatech-gov.com/og-image.jpg",
-              "url": "https://seatech-gov.com",
+              "image": "https://seatech.info/og-image.jpg",
+              "url": "https://seatech.info",
               "telephone": "+91-8840601077",
               "priceRange": "$$",
               "address": {
@@ -136,11 +136,11 @@ const Index = () => {
             },
             {
               "@type": "WebSite",
-              "@id": "https://seatech-gov.com/#website",
-              "url": "https://seatech-gov.com",
+              "@id": "https://seatech.info/#website",
+              "url": "https://seatech.info",
               "name": "Seatech",
               "description": "GeM-authorized OEM furniture manufacturer and supplier for government and institutions.",
-              "publisher": { "@id": "https://seatech-gov.com/#organization" }
+              "publisher": { "@id": "https://seatech.info/#organization" }
             }
           ]
         })}

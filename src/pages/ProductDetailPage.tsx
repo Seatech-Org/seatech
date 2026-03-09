@@ -121,7 +121,7 @@ const ProductDetailPage = () => {
     "category": product.category,
     "offers": {
       "@type": "Offer",
-      "url": `https://seatech-gov.com/products/${product.id}`,
+      "url": `https://seatech.info/products/${product.id}`,
       "priceCurrency": "INR",
       // Given that B2B prices are "On Request", Schema.org typically expects a numeric price if available.
       "availability": "https://schema.org/InStock",
