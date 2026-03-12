@@ -36,13 +36,14 @@ const Auth = () => {
     if (searchParams.get("mode") === "signup") {
       setIsSignUp(true);
     }
-
+    
     // Redirect if already logged in
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         navigate("/dashboard"); 
       }
     });
+
   }, [navigate, searchParams]);
 
   const handleGoogleLogin = async () => {

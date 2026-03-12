@@ -1,14 +1,4 @@
-# Seatech - robots.txt
-# Allow all major search engine crawlers
-
 User-agent: *
 Allow: /
 
-# Block admin and private pages from being indexed
-Disallow: /admin
-Disallow: /dashboard
-Disallow: /auth
-Disallow: /cart
-
-# Sitemap location
 Sitemap: https://seatech.info/sitemap.xml

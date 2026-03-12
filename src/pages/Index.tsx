@@ -220,7 +220,7 @@ const Index = () => {
               </div>
             </motion.div>
 
-            <motion.h1
+            <motion.h2
               layout
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -229,7 +229,7 @@ const Index = () => {
             >
               Smart
               <span className="text-primary"> Buying.</span>
-            </motion.h1>
+            </motion.h2>
 
             <motion.p
               layout
@@ -433,7 +433,7 @@ const Index = () => {
           <div className="grid lg:grid-cols-2 gap-12 md:gap-20 items-center">
             <div>
               <Badge variant="outline" className="mb-6 border-primary/30 bg-primary/10 text-primary px-4 py-1.5 text-sm font-semibold tracking-wide uppercase">Why Seatech?</Badge>
-              <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-8 tracking-tight leading-tight">Delivering Infrastructure <br />With <span className="text-primary">Excellence.</span></h2>
+              <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-8 tracking-tight leading-tight">Delivering Infrastructure <br />With <span className="text-primary">Excellence.</span></h1>
               <p className="text-lg text-muted-foreground mb-10 leading-relaxed max-w-xl">
                 We bring transparency, efficiency, and scale to a traditionally fragmented industry. Our platform is built on trust and technology, serving institutions across India.
               </p>
