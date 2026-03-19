@@ -14,7 +14,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { LogOut, CheckCircle, XCircle, Clock, ShoppingBag, User, FileText, Eye, Box, Plus, Pencil, Trash2 } from "lucide-react";
 import { fetchProducts, Product } from "@/services/product-service";
 import { sendCustomerEmail } from "@/utils/email";
@@ -31,6 +34,8 @@ interface DealerApplication {
   remarks?: string;
   status: "pending" | "approved" | "rejected";
   created_at: string;
+  turnover_proof_url?: string;
+  auth_code?: string;
 }
 
 interface QuoteItem {
@@ -59,6 +64,13 @@ const Admin = () => {
 
   const [oemRequests, setOemRequests] = useState<DealerApplication[]>([]);
   const [partnerRequests, setPartnerRequests] = useState<DealerApplication[]>([]);
+
+  // App Approval Dialog State
+  const [approveDialogOpen, setApproveDialogOpen] = useState(false);
+  const [selectedAppForApproval, setSelectedAppForApproval] = useState<DealerApplication | null>(null);
+  const [authCodeInput, setAuthCodeInput] = useState("");
+  const [adminRemarkInput, setAdminRemarkInput] = useState("");
+  const [isApproving, setIsApproving] = useState(false);
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
 
@@ -229,15 +241,29 @@ const Admin = () => {
     }
   };
 
-  const updateAppStatus = async (app: DealerApplication, newStatus: string) => {
+  const updateAppStatus = async (app: DealerApplication, newStatus: string, authCode?: string, adminRemark?: string) => {
     try {
-      await callAdminAction('POST', {}, { action: 'update-app-status', id: app.id, status: newStatus });
+      const payload: any = { action: 'update-app-status', id: app.id, status: newStatus };
+      if (authCode) payload.auth_code = authCode;
+
+      await callAdminAction('POST', {}, payload);
 
       // Send Email Notification to applicant
       const statusText = newStatus === 'approved' ? 'Approved' : 'Rejected';
       const isPartner = app.dealer_name === "Not Provided";
       const subject = `${isPartner ? 'Partnership' : 'OEM Authorization'} Request ${statusText}`;
-      const msg = `Your recent ${isPartner ? 'partnership' : 'OEM authorization'} request has been ${statusText} by our admin team.\n\nIf approved, our team will reach out to you shortly with the next steps.\nIf you have any questions, please contact our support.`;
+      
+      let msg = `Your recent ${isPartner ? 'partnership' : 'OEM authorization'} request has been ${statusText} by our admin team.\n\n`;
+      
+      if (newStatus === 'approved' && authCode) {
+        msg += `Congratulations! Your official OEM Auth Code is: ${authCode}\n\n`;
+      }
+
+      if (newStatus === 'approved' && adminRemark) {
+        msg += `Message from Seatech Admin:\n${adminRemark}\n\n`;
+      }
+      
+      msg += `If approved, our team will reach out to you shortly with the next steps.\nIf you have any questions, please contact our support.`;
 
       // Send the email directly to the applicant
       if (app.email) {
@@ -250,6 +276,22 @@ const Admin = () => {
       console.error("App status update error:", error);
       toast.error("Update failed");
     }
+  };
+
+  const handleApprovePrompt = (app: DealerApplication) => {
+    setSelectedAppForApproval(app);
+    setAuthCodeInput("");
+    setAdminRemarkInput("");
+    setApproveDialogOpen(true);
+  };
+
+  const confirmApprove = async () => {
+    if (!selectedAppForApproval) return;
+    setIsApproving(true);
+    await updateAppStatus(selectedAppForApproval, "approved", authCodeInput.trim() || undefined, adminRemarkInput.trim() || undefined);
+    setIsApproving(false);
+    setApproveDialogOpen(false);
+    setSelectedAppForApproval(null);
   };
 
   const updateQuoteStatus = async (quote: Quote, newStatus: string) => {
@@ -678,10 +720,31 @@ const Admin = () => {
                                         <p className="text-slate-200 whitespace-pre-wrap">{selectedApp?.product_requirements || "None specified"}</p>
                                       </div>
 
-                                      <div className="bg-slate-800/30 p-4 rounded-xl border border-slate-800">
-                                        <p className="text-xs text-slate-500 uppercase font-bold mb-2">Remarks</p>
-                                        <p className="text-slate-300 text-sm whitespace-pre-wrap">{selectedApp?.remarks || "No additional remarks."}</p>
+                                      <div className="grid grid-cols-2 gap-4 mt-4">
+                                        <div className="bg-slate-800/30 p-4 rounded-xl border border-slate-800">
+                                          <p className="text-xs text-slate-500 uppercase font-bold mb-2">Remarks</p>
+                                          <p className="text-slate-300 text-sm whitespace-pre-wrap">{selectedApp?.remarks || "No additional remarks."}</p>
+                                        </div>
+
+                                        {selectedApp?.turnover_proof_url && (
+                                          <div className="bg-slate-800/30 p-4 rounded-xl border border-slate-800">
+                                            <p className="text-xs text-slate-500 uppercase font-bold mb-1">Attached Documents</p>
+                                            <a href={selectedApp.turnover_proof_url} target="_blank" rel="noreferrer" className="text-blue-400 text-sm font-semibold hover:underline flex items-center gap-2 mt-2">
+                                              <FileText className="h-4 w-4" /> View Turnover Proof
+                                            </a>
+                                          </div>
+                                        )}
                                       </div>
+
+                                      {selectedApp?.auth_code && (
+                                        <div className="bg-emerald-900/20 p-4 rounded-xl border border-emerald-800/30 mt-4 flex items-center justify-between">
+                                          <div>
+                                            <p className="text-xs text-emerald-500/70 uppercase font-bold mb-1">Assigned OEM Auth Code</p>
+                                            <p className="text-emerald-400 font-mono text-lg font-bold tracking-wider">{selectedApp.auth_code}</p>
+                                          </div>
+                                          <CheckCircle className="h-6 w-6 text-emerald-500/50" />
+                                        </div>
+                                      )}
                                     </div>
                                   </DialogContent>
                                 </Dialog>
@@ -690,7 +753,7 @@ const Admin = () => {
                                   size="sm"
                                   variant="outline"
                                   className="border-green-900/30 text-green-500 hover:bg-green-900/20 hover:text-green-400 hover:border-green-800"
-                                  onClick={() => updateAppStatus(app, "approved")}
+                                  onClick={() => handleApprovePrompt(app)}
                                   disabled={app.status === "approved"}
                                 >
                                   Approve
@@ -802,7 +865,7 @@ const Admin = () => {
                                   size="sm"
                                   variant="outline"
                                   className="border-green-900/30 text-green-500 hover:bg-green-900/20 hover:text-green-400 hover:border-green-800"
-                                  onClick={() => updateAppStatus(app, "approved")}
+                                  onClick={() => handleApprovePrompt(app)}
                                   disabled={app.status === "approved"}
                                 >
                                   Process
@@ -829,6 +892,69 @@ const Admin = () => {
           </TabsContent>
         </Tabs>
       </main>
+
+      {/* Admin Approval Dialog */}
+      <Dialog open={approveDialogOpen} onOpenChange={setApproveDialogOpen}>
+        <DialogContent className="bg-slate-900 border border-slate-800 text-white sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-emerald-400 flex items-center gap-2">
+              <CheckCircle className="h-5 w-5" />
+              Approve Application
+            </DialogTitle>
+            <DialogDescription className="text-slate-400">
+              You are about to approve <span className="font-bold text-white">{selectedAppForApproval?.director_name}</span>. Provide any optional details below.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-6 py-4">
+            {selectedAppForApproval?.dealer_name !== "Not Provided" && (
+              <div className="grid gap-2">
+                <Label htmlFor="authCode" className="text-slate-300 font-semibold">OEM Auth Code (Optional)</Label>
+                <Input
+                  id="authCode"
+                  value={authCodeInput}
+                  onChange={(e) => setAuthCodeInput(e.target.value)}
+                  placeholder="e.g. ST-2024-XYZ"
+                  className="bg-slate-950 border-slate-700 text-white focus:ring-emerald-500 focus:border-emerald-500 font-mono"
+                />
+                <p className="text-xs text-slate-500">This code will immediately be emailed to the applicant.</p>
+              </div>
+            )}
+
+            <div className="grid gap-2">
+              <Label htmlFor="adminRemark" className="text-slate-300 font-semibold">Admin Remarks for Email (Optional)</Label>
+              <Textarea
+                id="adminRemark"
+                value={adminRemarkInput}
+                onChange={(e) => setAdminRemarkInput(e.target.value)}
+                placeholder="e.g. Welcome aboard! Here is the partner portal link..."
+                className="min-h-[100px] bg-slate-950 border-slate-700 text-white focus:ring-emerald-500 focus:border-emerald-500 resize-none"
+              />
+              <p className="text-xs text-slate-500">These remarks will be securely injected into their approval email.</p>
+            </div>
+          </div>
+
+          <DialogFooter className="sm:justify-end gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setApproveDialogOpen(false)}
+              className="text-slate-300 hover:text-white hover:bg-slate-800"
+              disabled={isApproving}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={confirmApprove}
+              className="bg-emerald-600 hover:bg-emerald-500 text-white"
+              disabled={isApproving}
+            >
+              {isApproving ? "Approving..." : "Confirm & Send Email"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

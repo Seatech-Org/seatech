@@ -106,8 +106,15 @@ serve(async (req: Request) => {
             }
 
             if (postAction === 'update-app-status') {
+                const { action: pAction, id, status, auth_code } = body;
                 if (!id || !status) return json({ error: 'Missing id or status' }, 400);
-                const { error } = await adminSB.from('dealer_applications').update({ status }).eq('id', id);
+                
+                const updatePayload: any = { status };
+                if (auth_code !== undefined && auth_code !== null) {
+                    updatePayload.auth_code = auth_code;
+                }
+
+                const { error } = await adminSB.from('dealer_applications').update(updatePayload).eq('id', id);
                 if (error) throw error;
                 return json({ success: true });
             }

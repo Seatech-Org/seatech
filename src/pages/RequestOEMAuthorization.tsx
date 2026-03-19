@@ -45,6 +45,7 @@ const RequestOEMAuthorization = () => {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [quantity, setQuantity] = useState("");
   const [requestedItems, setRequestedItems] = useState<RequestedItem[]>([]);
+  const [turnoverProofFile, setTurnoverProofFile] = useState<File | null>(null);
 
   // Specific Fields
   const [turnover, setTurnover] = useState(""); // For L1
@@ -92,8 +93,28 @@ const RequestOEMAuthorization = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!/^\d{10}$/.test(mobile.trim())) {
+      toast.error("Mobile Number must be exactly 10 digits.");
+      return;
+    }
+
+    if (!/^[0-9A-Z]{15}$/i.test(gst.trim())) {
+      toast.error("GST Number must be a clear 15-character format.");
+      return;
+    }
+
+    if (gemUserId && gemUserId.trim().length < 5) {
+      toast.error("GeM User ID must be at least 5 characters long.");
+      return;
+    }
+
     if (requestedItems.length === 0) {
       toast.error("Please add at least one product category.");
+      return;
+    }
+
+    if (!turnoverProofFile) {
+      toast.error("Please upload your Turnover Proof document.");
       return;
     }
 
@@ -108,6 +129,27 @@ const RequestOEMAuthorization = () => {
     setIsSubmitting(true);
 
     try {
+      // --- FILE UPLOAD TO SUPABASE STORAGE ---
+      let turnover_proof_url = "";
+      if (turnoverProofFile) {
+        const fileExt = turnoverProofFile.name.split('.').pop();
+        const fileName = `${dealerName.replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}.${fileExt}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('turnover_proofs')
+          .upload(fileName, turnoverProofFile);
+
+        if (uploadError) {
+          throw new Error("Failed to upload Turnover Proof. " + uploadError.message);
+        }
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('turnover_proofs')
+          .getPublicUrl(fileName);
+          
+        turnover_proof_url = publicUrl;
+      }
+
       const itemsString = requestedItems.map(i => `${i.category}: ${i.quantity}`).join('; ');
 
       let finalRemarks = "";
@@ -128,7 +170,8 @@ const RequestOEMAuthorization = () => {
         gst_number: gst,
         product_requirements: itemsString,
         status: 'pending',
-        remarks: finalRemarks
+        remarks: finalRemarks,
+        turnover_proof_url: turnover_proof_url
       };
 
       // Insert into Supabase
@@ -155,6 +198,7 @@ const RequestOEMAuthorization = () => {
         RequestedItems: itemsForEmail,
         Turnover: turnoverForEmail,
         BiddingNumber: requestType === "Bidding" ? biddingNumber : 'N/A',
+        TurnoverProofLink: turnover_proof_url || 'Not Provided',
       });
 
       toast.success("OEM Authorization Request Submitted!", {
@@ -169,6 +213,7 @@ const RequestOEMAuthorization = () => {
       setMobile("");
       setGst("");
       setGemUserId("");
+      setTurnoverProofFile(null);
       setRequestedItems([]);
       setTurnover("");
       setBiddingNumber("");
@@ -240,7 +285,7 @@ const RequestOEMAuthorization = () => {
               {/* Common Fields */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="dealerName" className="text-slate-300">Firm / Dealer Name</Label>
+                  <Label htmlFor="dealerName" className="text-slate-300">Firm / Dealer Name *</Label>
                   <Input
                     id="dealerName"
                     value={dealerName}
@@ -251,7 +296,7 @@ const RequestOEMAuthorization = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="directorName" className="text-slate-300">Director / Proprietor Name</Label>
+                  <Label htmlFor="directorName" className="text-slate-300">Director / Proprietor Name *</Label>
                   <Input
                     id="directorName"
                     value={directorName}
@@ -262,7 +307,7 @@ const RequestOEMAuthorization = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-slate-300">Email Address</Label>
+                  <Label htmlFor="email" className="text-slate-300">Email Address *</Label>
                   <Input
                     id="email"
                     type="email"
@@ -274,7 +319,7 @@ const RequestOEMAuthorization = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="mobile" className="text-slate-300">Mobile Number</Label>
+                  <Label htmlFor="mobile" className="text-slate-300">Mobile Number *</Label>
                   <Input
                     id="mobile"
                     type="tel"
@@ -286,7 +331,7 @@ const RequestOEMAuthorization = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="gst" className="text-slate-300">GST Number</Label>
+                  <Label htmlFor="gst" className="text-slate-300">GST Number *</Label>
                   <Input
                     id="gst"
                     value={gst}
@@ -297,17 +342,18 @@ const RequestOEMAuthorization = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="gemUserId" className="text-slate-300">GeM User ID </Label>
+                  <Label htmlFor="gemUserId" className="text-slate-300">GeM User ID *</Label>
                   <Input
                     id="gemUserId"
                     value={gemUserId}
                     onChange={(e) => setGemUserId(e.target.value)}
-                    placeholder="Enter GeM User ID"
+                    required
+                    placeholder="e.g. UXXX220006XX661X"
                     className="h-12 bg-slate-800 border-slate-700 text-white focus:border-blue-500 focus:ring-blue-900"
                   />
                 </div>
                 <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="address" className="text-slate-300">Complete Address</Label>
+                  <Label htmlFor="address" className="text-slate-300">Complete Address *</Label>
                   <Textarea
                     id="address"
                     value={address}
@@ -324,7 +370,7 @@ const RequestOEMAuthorization = () => {
                 {requestType === "L1" ? (
                   <div className="grid grid-cols-1 gap-6">
                     <div className="space-y-2">
-                      <Label htmlFor="turnover" className="text-slate-300">Dealer Turnover (Current Financial Year)</Label>
+                      <Label htmlFor="turnover" className="text-slate-300">Dealer Turnover (Current Financial Year) *</Label>
                       <Input
                         id="turnover"
                         value={turnover}
@@ -338,7 +384,7 @@ const RequestOEMAuthorization = () => {
                 ) : (
                   <div className="space-y-6">
                     <div className="space-y-2">
-                      <Label htmlFor="biddingNumber" className="text-slate-300">Bidding Number / Tender ID</Label>
+                      <Label htmlFor="biddingNumber" className="text-slate-300">Bidding Number / Tender ID *</Label>
                       <Input
                         id="biddingNumber"
                         value={biddingNumber}
@@ -355,9 +401,10 @@ const RequestOEMAuthorization = () => {
                         {turnoverYears.map((data, index) => (
                           <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
                             <div className="space-y-2">
-                              <Label htmlFor={`year-${index}`} className="text-xs text-slate-400 uppercase tracking-wider font-bold">Financial Year {index + 1}</Label>
+                              <Label htmlFor={`year-${index}`} className="text-xs text-slate-400 uppercase tracking-wider font-bold">Financial Year {index + 1} *</Label>
                               <Input
                                 id={`year-${index}`}
+                                required
                                 value={data.year}
                                 onChange={(e) => handleTurnoverChange(index, "year", e.target.value)}
                                 placeholder="e.g. 2023-2024"
@@ -365,9 +412,10 @@ const RequestOEMAuthorization = () => {
                               />
                             </div>
                             <div className="space-y-2">
-                              <Label htmlFor={`amount-${index}`} className="text-xs text-slate-400 uppercase tracking-wider font-bold">Turnover Amount</Label>
+                              <Label htmlFor={`amount-${index}`} className="text-xs text-slate-400 uppercase tracking-wider font-bold">Turnover Amount *</Label>
                               <Input
                                 id={`amount-${index}`}
+                                required
                                 value={data.amount}
                                 onChange={(e) => handleTurnoverChange(index, "amount", e.target.value)}
                                 placeholder="e.g. 15000000 (Numeric preferred)"
@@ -380,6 +428,22 @@ const RequestOEMAuthorization = () => {
                     </div>
                   </div>
                 )}
+              </div>
+
+              {/* File Upload Section */}
+              <div className="space-y-4 pt-6 border-t border-slate-800">
+                <Label htmlFor="turnoverProof" className="text-lg font-semibold text-white">Upload Turnover Proof *</Label>
+                <div className="space-y-2">
+                  <p className="text-sm text-slate-400">Please attach a soft copy of your company turnover proof (e.g., Audited Balance Sheet, CA Certificate).</p>
+                  <Input
+                    id="turnoverProof"
+                    type="file"
+                    accept=".pdf,image/*"
+                    required
+                    onChange={(e) => setTurnoverProofFile(e.target.files?.[0] || null)}
+                    className="h-12 bg-slate-800 border-slate-700 text-white focus:border-blue-500 focus:ring-blue-900 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer pt-2"
+                  />
+                </div>
               </div>
 
               {/* Product Selection Section */}

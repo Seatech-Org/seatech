@@ -88,6 +88,28 @@ const Dashboard = () => {
           email: p.email || user.email || "",
           phone: p.phone || "",
         });
+      } else {
+        // --- AUTO-CREATE PROFILE FOR OAUTH LOGINS ---
+        // If they logged in via Google, they might not have a profile yet!
+        const newProfile = {
+          id: user.id,
+          email: user.email,
+          contact_person: user.user_metadata?.full_name || "Google User",
+          updated_at: new Date().toISOString()
+        };
+        
+        const { error: insertError } = await (supabase as any)
+          .from('profiles')
+          .insert(newProfile);
+
+        if (!insertError) {
+          setProfile(newProfile as any);
+          setEditForm({
+            contact_person: newProfile.contact_person,
+            email: newProfile.email || "",
+            phone: "",
+          });
+        }
       }
 
       // 2. Fetch Quotes (Orders) - use admin to bypass RLS
